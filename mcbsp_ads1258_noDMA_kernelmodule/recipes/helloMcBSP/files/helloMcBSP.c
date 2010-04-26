@@ -50,7 +50,7 @@ const struct omap_mcbsp_spi_cfg ads1274_cfg_spi = {
 	OMAP_MCBSP_CLK_RISING,
 	OMAP_MCBSP_CLK_RISING,
 	OMAP_MCBSP_FS_ACTIVE_LOW,
-	16,
+	8,
 	OMAP_MCBSP_CLK_STP_MODE_DELAY,
 	OMAP_MCBSP_WORD_16
 };
