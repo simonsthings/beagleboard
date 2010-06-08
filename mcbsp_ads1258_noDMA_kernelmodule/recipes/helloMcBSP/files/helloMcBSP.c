@@ -45,14 +45,27 @@ struct omap_mcbsp_reg_cfg ads1274_cfg = {
 	0x0308 //syscon
 };
 
+static struct omap_mcbsp_reg_cfg mcbsp_regs = {
+        .spcr2 = FREE,
+        .spcr1 = RINTM(0),
+        .rcr2  = RFRLEN2(OMAP_MCBSP_WORD_8) |RWDLEN2(OMAP_MCBSP_WORD_8) | RDATDLY(1),
+        .rcr1  = RFRLEN1(OMAP_MCBSP_WORD_8) | RWDLEN1(OMAP_MCBSP_WORD_8),
+        .xcr2  = XFRLEN2(OMAP_MCBSP_WORD_8) | XWDLEN2(OMAP_MCBSP_WORD_8) | XDATDLY(1),
+        .xcr1  = XFRLEN1(OMAP_MCBSP_WORD_8) | XWDLEN1(OMAP_MCBSP_WORD_8),
+        .srgr1 = FWID(15) | CLKGDV(50),
+        .srgr2 = CLKSM | CLKSP  | FPER(255), //| FSGM
+        .pcr0  = FSXM | CLKXM | CLKRM | FSRM | FSXP | FSRP | CLKXP | CLKRP,
+        //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
+};
+
 const struct omap_mcbsp_spi_cfg ads1274_cfg_spi = {
 	OMAP_MCBSP_SPI_MASTER,
 	OMAP_MCBSP_CLK_RISING,
 	OMAP_MCBSP_CLK_RISING,
 	OMAP_MCBSP_FS_ACTIVE_LOW,
-	8,
-	OMAP_MCBSP_CLK_STP_MODE_DELAY,
-	OMAP_MCBSP_WORD_16
+	16,
+	OMAP_MCBSP_CLK_STP_MODE_NO_DELAY,
+	OMAP_MCBSP_WORD_32
 };
 
 int hello_init(void)
@@ -61,7 +74,7 @@ int hello_init(void)
 	int reqstatus = -4;
 	int value = 0;
 	int returnstatus = 0;
-	u16 mybuffer = 4657;
+	u32 mybuffer = 0xABCD;
 	
 
 	printk(KERN_ALERT "Hello McBSP world!\n");
@@ -76,13 +89,18 @@ int hello_init(void)
 	/* configure McBSP */
 	omap_mcbsp_set_spi_mode(mcbspID, &ads1274_cfg_spi);
 	printk(KERN_ALERT "Configured McBSP %d for SPI mode.\n", (mcbspID+1));
+	//omap_mcbsp_config(mcbspID, &mcbsp_regs);
+	//printk(KERN_ALERT "Configured McBSP %d registers..\n", (mcbspID+1));
 
 	/* start McBSP */
 	omap_mcbsp_start(mcbspID);
 	printk(KERN_ALERT "Started McBSP %d. \n", (mcbspID+1));
 
 	/* polled mcbsp i/o operations */
-	status = omap_mcbsp_pollwrite(mcbspID, mybuffer);
+	//status = omap_mcbsp_spi_master_xmit_word_poll(mcbspID, mybuffer);
+	//printk(KERN_ALERT "Writing to McBSP %d in SPI mode returned as status: %d \n", (mcbspID+1), status);
+	status = omap_mcbsp_pollwrite(mcbspID, mybuffer);  // needs changes in mcbsp.c --> kernel patch & recompile
+	////omap_mcbsp_xmit_word(mcbspID, mybuffer); // currently produces segfault, probably because nothing dma-like has been set up yet?
 	printk(KERN_ALERT "Writing to McBSP %d returned as status: %d \n", (mcbspID+1), status);
 	}
 	else printk(KERN_ALERT "Not attempting to continue because requesting failed.\n");
