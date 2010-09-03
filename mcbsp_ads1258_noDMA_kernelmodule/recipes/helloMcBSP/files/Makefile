@@ -8,11 +8,11 @@ KERNEL_VERSION := `2.6.29-r46`
 KERNEL_DIR := /opt/oe/angstrom-dev/work/beagleboard-angstrom-linux-gnueabi/linux-omap-2.6.29-r46/git
 KERNEL_CROSS := /opt/oe/angstrom-dev/cross/armv7a/bin/arm-angstrom-linux-gnueabi-
 
-ifeq ($(DEBUG),y)
-	EXTRA_CFLAGS += -O -g # -O is need to expand inlines
-else
-	EXTRA_CFLAGS += -O2
-endif
+#ifeq ($(DEBUG),y)
+	EXTRA_CFLAGS += -O -ggdb # -O is need to expand inlines
+#else
+#	EXTRA_CFLAGS += -O2
+#endif
 
 ifneq ($(KERNELRELEASE),)
 # call from kernel build system
