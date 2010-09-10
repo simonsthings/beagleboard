@@ -1,3 +1,5 @@
+#define DEBUG
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/gpio.h>
@@ -60,17 +62,18 @@ static struct omap_mcbsp_reg_cfg mcbsp_regs = {
 };
 
 static struct omap_mcbsp_reg_cfg simon_regs = {
-        .spcr2 = XINTM(0),
-        .spcr1 = RINTM(0),
+        .spcr2 = XINTM(3),
+        .spcr1 = RINTM(3),
         .rcr2  = 0,
         .rcr1  = RFRLEN1(0) | RWDLEN1(OMAP_MCBSP_WORD_32),  // frame is 1 word. word is 32 bits.
         .xcr2  = 0,
         .xcr1  = XFRLEN1(0) | XWDLEN1(OMAP_MCBSP_WORD_32),
         .srgr1 = FWID(31) | CLKGDV(50),
-        .srgr2 = 0 | /*CLKSM |*/ CLKSP  | FPER(255),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
+        .srgr2 = 0 | CLKSM | CLKSP  | FPER(4095),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
         .pcr0  = FSXM | CLKXM | CLKRM | FSRM | FSXP | FSRP | CLKXP | CLKRP,
         //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
-	//.xccr = XDISABLE,
+	//.xccr = EXTCLKGATE | XDMAEN | XDISABLE,
+	//.rccr = RDMAEN | RDISABLE,
 };
 
 static struct omap_mcbsp_reg_cfg spimode_regs = {
@@ -111,12 +114,13 @@ int hello_init(void)
 	int returnstatus = 0;
 	u32 mybuffer = 0x5CCC333A; // 01011100110011000011001100111010
 	u32 mybuffer2 = 0x53CA; // 0101 00111100 1010
+	dma_addr_t bufferbuffer[] = {0x432,0x6543}; 
 
 
 	printk(KERN_ALERT "Hello McBSP world!\n");
 
 	/* Setting IO type & requesting McBSP */
-	status = omap_mcbsp_set_io_type(mcbspID, OMAP_MCBSP_IRQ_IO);
+	status = omap_mcbsp_set_io_type(mcbspID, OMAP_MCBSP_POLL_IO);  // POLL because we don't want to use IRQ and DMA will be set up when needed.
 	
 	reqstatus = omap_mcbsp_request(mcbspID);
 	printk(KERN_ALERT "Setting IO type was %d. Requesting McBSP %d returned: %d \n", status, (mcbspID+1), reqstatus);
@@ -158,11 +162,18 @@ int hello_init(void)
 		printk(KERN_ALERT "Writing to McBSP %d (raw, polled mode) returned as status: %d \n", (mcbspID+1), status);
 		printk(KERN_ALERT "Now reading data from McBSP (raw & polled) %d... \n", (mcbspID+1));
 		status = omap_mcbsp_pollread(mcbspID, &mybuffer2);  // needs changes in mcbsp.c --> kernel patch & recompile
-		printk(KERN_ALERT "Reading from McBSP %d (raw, polled mode) returned as status: %d and as value %d \n", (mcbspID+1), status,mybuffer2);
+		printk(KERN_ALERT "Reading from McBSP %d (raw, polled mode) returned as status: %d and as value 0x%x \n", (mcbspID+1), status,mybuffer2);
 
 		/* Non-Polled operations (IRQ or DMA!) */
-		omap_mcbsp_xmit_word(mcbspID, mybuffer); // currently produces segfault, probably because nothing dma-like has been set up yet? No, the segfault was because i was not using OMAP_MCBSP_IRQ_IO in omap_mcbsp_set_io_type(). Still, it now either fails on start (when taking mcbsp out of reset, sprc2_XINTM=0) or on dma/irq transfer (sprc2_XINTM=1)
-		printk(KERN_ALERT "Writing to McBSP %d via IRQ or DMA! Return status: %d \n", (mcbspID+1), status);
+		/* IRQ */
+		//printk(KERN_ALERT "Now writing data to McBSP %d via IRQ! \n", (mcbspID+1));
+		//omap_mcbsp_xmit_word(mcbspID, mybuffer); // currently produces segfault, probably because nothing dma-like has been set up yet? Yes, the segfault was because i was not using OMAP_MCBSP_IRQ_IO in omap_mcbsp_set_io_type(). Still, it now either fails on start (when taking mcbsp out of reset, sprc2_XINTM=0) or on dma/irq transfer (sprc2_XINTM=1)
+		//printk(KERN_ALERT "Wrote to McBSP %d via IRQ! Return status: %d \n", (mcbspID+1), status);
+
+		/* DMA */
+		printk(KERN_ALERT "Now writing data to McBSP %d via DMA! \n", (mcbspID+1));
+		omap_mcbsp_xmit_buffer(mcbspID, bufferbuffer, 2); // currently produces segfault, probably because nothing dma-like has been set up yet? Yes, the segfault was because i was not using OMAP_MCBSP_IRQ_IO in omap_mcbsp_set_io_type(). Still, it now either fails on start (when taking mcbsp out of reset, sprc2_XINTM=0) or on dma/irq transfer (sprc2_XINTM=1)
+		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 	}
 	else printk(KERN_ALERT "Not attempting to continue because requesting failed.\n");
 
