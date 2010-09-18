@@ -114,21 +114,21 @@ int hello_init(void)
 	u32 mybuffer = 0x5CCC333A; // 01011100110011000011001100111010
 	u32 mybuffer2 = 0x53CA; // 0101 00111100 1010
 
-	int bufbufsize = 2;
+	int bufbufsize = 4;
 	//u16* bufbuf;// = {0x432,0x6543}; 
 	dma_addr_t bufbufdmaaddr;
 
-	u16* bufbuf = dma_alloc_coherent(NULL, bufbufsize * 4 /*each u32 value has 4 bytes*/, &bufbufdmaaddr, GFP_KERNEL);
+	u32* bufbuf = dma_alloc_coherent(NULL, bufbufsize * 4 /*each u32 value has 4 bytes*/, &bufbufdmaaddr, GFP_KERNEL);
 	if (bufbuf == NULL) 
 	{
 		pr_err("Unable to allocate DMA buffer\n");
 		return -ENOMEM;
 	}
 
-	bufbuf[0] = 0x4326;
-	bufbuf[1] = 0x6543;
-	//bufbuf[2] = 0x6543;
-	//bufbuf[3] = 0x6543;
+	bufbuf[0] = 0x53CA;  // 01010011 11001010  1.
+	bufbuf[1] = 0x5C3A;  // 01011100 00111010  3.
+	bufbuf[2] = 0x5E7A;  // 01011110 01111010  5.
+	bufbuf[3] = 0x518A;  // 01010001 10001010  7.
 	
 /*
 179 
@@ -212,7 +212,7 @@ int hello_init(void)
 
 		/* DMA */
 		printk(KERN_ALERT "Now writing data to McBSP %d via DMA! \n", (mcbspID+1));
-		omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
+		omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize*4 /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
 		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 	}
 	else printk(KERN_ALERT "Not attempting to continue because requesting failed.\n");
