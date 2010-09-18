@@ -68,9 +68,9 @@ static struct omap_mcbsp_reg_cfg simon_regs = {
         .spcr2 = XINTM(3),
         .spcr1 = RINTM(3),
         .rcr2  = 0,
-        .rcr1  = RFRLEN1(0) | RWDLEN1(OMAP_MCBSP_WORD_32),  // frame is 1 word. word is 32 bits.
+        .rcr1  = RFRLEN1(0) | RWDLEN1(OMAP_MCBSP_WORD_16),  // frame is 1 word. word is 32 bits.
         .xcr2  = 0,
-        .xcr1  = XFRLEN1(0) | XWDLEN1(OMAP_MCBSP_WORD_32),
+        .xcr1  = XFRLEN1(0) | XWDLEN1(OMAP_MCBSP_WORD_16),
         .srgr1 = FWID(15) | CLKGDV(50),
         .srgr2 = 0 | CLKSM | CLKSP  | FPER(2000),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
         .pcr0  = FSXM | CLKXM | CLKRM | FSRM | FSXP | FSRP | CLKXP | CLKRP,
@@ -114,11 +114,12 @@ int hello_init(void)
 	u32 mybuffer = 0x5CCC333A; // 01011100110011000011001100111010
 	u32 mybuffer2 = 0x53CA; // 0101 00111100 1010
 
-	int bufbufsize = 4;
-	//u16* bufbuf;// = {0x432,0x6543}; 
-	dma_addr_t bufbufdmaaddr;
+	int bufbufsize = 4; // number of array elements
+	int bytesPerVal = 2; // number of bytes per array element (32bit = 4 bytes, 16bit = 2 bytes)
+	u16* bufbuf;
 
-	u32* bufbuf = dma_alloc_coherent(NULL, bufbufsize * 4 /*each u32 value has 4 bytes*/, &bufbufdmaaddr, GFP_KERNEL);
+	dma_addr_t bufbufdmaaddr;
+	bufbuf = dma_alloc_coherent(NULL, bufbufsize * bytesPerVal /*each u32 value has 4 bytes*/, &bufbufdmaaddr, GFP_KERNEL);
 	if (bufbuf == NULL) 
 	{
 		pr_err("Unable to allocate DMA buffer\n");
@@ -212,7 +213,7 @@ int hello_init(void)
 
 		/* DMA */
 		printk(KERN_ALERT "Now writing data to McBSP %d via DMA! \n", (mcbspID+1));
-		omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize*4 /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
+		omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
 		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 	}
 	else printk(KERN_ALERT "Not attempting to continue because requesting failed.\n");
