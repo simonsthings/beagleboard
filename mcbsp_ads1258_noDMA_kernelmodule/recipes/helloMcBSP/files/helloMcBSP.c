@@ -72,7 +72,7 @@ static struct omap_mcbsp_reg_cfg simon_regs = {
         .xcr2  = 0,
         .xcr1  = XFRLEN1(1) | XWDLEN1(OMAP_MCBSP_WORD_16),
         .srgr1 = FWID(31) | CLKGDV(50),
-        .srgr2 = 0 | CLKSM | CLKSP  | FPER(2000),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
+        .srgr2 = 0 | CLKSM | CLKSP  | FPER(500),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
         .pcr0  = FSXM | CLKXM | CLKRM | FSRM | FSXP | FSRP | CLKXP | CLKRP,
         //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
 	.xccr = DXENDLY(1) | XDMAEN ,//| XDISABLE,
@@ -113,8 +113,9 @@ int hello_init(void)
 	int returnstatus = 0;
 	u32 mybuffer = 0x5CCC333A; // 01011100110011000011001100111010
 	u32 mybuffer2 = 0x53CA; // 0101 00111100 1010
+	int i;
 
-	int bufbufsize = 4; // number of array elements
+	int bufbufsize = 1024 * 50; // number of array elements
 	int bytesPerVal = 2; // number of bytes per array element (32bit = 4 bytes, 16bit = 2 bytes)
 	u16* bufbuf;
 
@@ -126,11 +127,15 @@ int hello_init(void)
 		return -ENOMEM;
 	}
 
-	bufbuf[0] = 0x53CA;  // 01010011 11001010  1.
-	bufbuf[1] = 0x5C3A;  // 01011100 00111010  3.
-	bufbuf[2] = 0x5E7A;  // 01011110 01111010  5.
-	bufbuf[3] = 0x518A;  // 01010001 10001010  7.
-	
+	bufbuf[0] = 0x53CA;  // 01010011 11001010  
+	bufbuf[1] = 0x5C3A;  // 01011100 00111010  
+	for (i = 2 ; i<bufbufsize-1; i++)
+	{
+		bufbuf[i] = 0x5E7A;  // 01011110 01111010  
+	}
+	// so that we can see that the last word really was transmitted, it should be different:
+	bufbuf[bufbufsize-1] = 0x518A;  // 01010001 10001010  
+
 /*
 179 
 180 **
