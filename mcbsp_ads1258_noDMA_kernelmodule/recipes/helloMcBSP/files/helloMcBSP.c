@@ -1,24 +1,27 @@
-#define DEBUG
+//#define DEBUG
 
-#include <linux/init.h>
+//#include <config/modversions.h>
+//#include <linux/init.h>
 #include <linux/module.h>
-#include <linux/gpio.h>
+#include <linux/dma-mapping.h>
+//#include <linux/gpio.h>
 
-#include <linux/sched.h>
-#include <linux/workqueue.h>
-#include <linux/interrupt.h>	/* We want an interrupt */
-#include <asm/io.h>
+//#include <linux/sched.h>
+//#include <linux/workqueue.h>
+//#include <linux/interrupt.h>	/* We want an interrupt */
+//#include <asm/io.h>
 
 #include <mach/mcbsp.h>
 
 MODULE_LICENSE("Dual BSD/GPL");
+MODULE_AUTHOR("Simon Vogt <simonsunimail@gmail.com>");
 
 int mcbspID = 0; /*McBSP1 => id 0*/
 module_param(mcbspID, int, 0);
 MODULE_PARM_DESC(mcbspID, "The McBSP to use. Starts at 0.");
 
 
-struct omap_mcbsp_reg_cfg ads1274_cfg = {
+static struct omap_mcbsp_reg_cfg ads1274_cfg = {
 	0x0000 | FREE, //spcr2
  	0x0000, //spcr1
 	0x0000, //rcr2 RPHASE (bit 15) | RFRLEN2 (14 - 8) | RWDLEN2 (7-5) |RREVERSE(4-3) | RSVD 2 | RDATDLY
@@ -72,8 +75,8 @@ static struct omap_mcbsp_reg_cfg simon_regs = {
         .srgr2 = 0 | CLKSM | CLKSP  | FPER(4095),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
         .pcr0  = FSXM | CLKXM | CLKRM | FSRM | FSXP | FSRP | CLKXP | CLKRP,
         //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
-	//.xccr = EXTCLKGATE | XDMAEN | XDISABLE,
-	//.rccr = RDMAEN | RDISABLE,
+	.xccr = DXENDLY(1) | XDMAEN ,//| XDISABLE,
+	.rccr = RFULL_CYCLE | RDMAEN | RDISABLE,
 };
 
 static struct omap_mcbsp_reg_cfg spimode_regs = {
@@ -90,7 +93,7 @@ static struct omap_mcbsp_reg_cfg spimode_regs = {
 	//.xccr = XDISABLE,
 };
 
-const struct omap_mcbsp_spi_cfg ads1274_cfg_spi = {
+static struct omap_mcbsp_spi_cfg ads1274_cfg_spi = {
 	OMAP_MCBSP_SPI_MASTER,
 	OMAP_MCBSP_CLK_RISING,
 	OMAP_MCBSP_CLK_RISING,
@@ -100,22 +103,60 @@ const struct omap_mcbsp_spi_cfg ads1274_cfg_spi = {
 	OMAP_MCBSP_WORD_32
 };
 
-int omap_mcbsp_read_simon(void __iomem *io_base, u16 reg)
-{
-	printk(KERN_ALERT "reading four bytes from address!\n");
-	return __raw_readl(io_base + reg);
-}
 
 int hello_init(void)
 {
 	int status = 3;
 	int reqstatus = -4;
-	int value = 0;
+	u16 value16 = 0;
+	u32 value32 = 0;
 	int returnstatus = 0;
 	u32 mybuffer = 0x5CCC333A; // 01011100110011000011001100111010
 	u32 mybuffer2 = 0x53CA; // 0101 00111100 1010
-	dma_addr_t bufferbuffer[] = {0x432,0x6543}; 
 
+	int bufbufsize = 2;
+	//u16* bufbuf;// = {0x432,0x6543}; 
+	dma_addr_t bufbufdmaaddr;
+
+	u16* bufbuf = dma_alloc_coherent(NULL, bufbufsize * 4 /*each u32 value has 4 bytes*/, &bufbufdmaaddr, GFP_KERNEL);
+	if (bufbuf == NULL) 
+	{
+		pr_err("Unable to allocate DMA buffer\n");
+		return -ENOMEM;
+	}
+
+	bufbuf[0] = 0x4326;
+	bufbuf[1] = 0x6543;
+	//bufbuf[2] = 0x6543;
+	//bufbuf[3] = 0x6543;
+	
+/*
+179 
+180 **
+181  * dma_alloc_coherent - allocate consistent memory for DMA
+182  * @dev: valid struct device pointer, or NULL for ISA and EISA-like devices
+183  * @size: required memory size
+184  * @handle: bus-specific DMA address
+185  *
+186  * Allocate some uncached, unbuffered memory for a device for
+187  * performing DMA.  This function allocates pages, and will
+188  * return the CPU-viewed address, and sets @handle to be the
+189  * device-viewed address.
+190  *
+191 extern void *dma_alloc_coherent(struct device *, size_t, dma_addr_t *, gfp_t);
+192 
+
+1043         host->dma.nc = dma_alloc_coherent(NULL,
+1044                                           sizeof(struct msmsdcc_nc_dmadata),
+1045                                           &host->dma.nc_busaddr,
+1046                                           GFP_KERNEL);
+1047         if (host->dma.nc == NULL) {
+1048                 pr_err("Unable to allocate DMA buffer\n");
+1049                 return -ENOMEM;
+1050         }
+
+
+*/
 
 	printk(KERN_ALERT "Hello McBSP world!\n");
 
@@ -136,19 +177,17 @@ int hello_init(void)
 		printk(KERN_ALERT "Configured McBSP %d registers for raw mode..\n", (mcbspID+1));
 
 		/* start McBSP */
-		omap_mcbsp_start(mcbspID);
+		omap_mcbsp_start(mcbspID);	// kernel 2.6.31 and below have only one argument here!
+		//omap_mcbsp_start(mcbspID,0,0); // kernel 2.6.32 and beyond require tx and rx arguments on omap_mcbsp_start() and omap_mcbsp_stop().
 		printk(KERN_ALERT "Started McBSP %d. \n", (mcbspID+1));
 
-		//value = reg32r(OMAP34XX_MCBSP1_BASE, OMAP_MCBSP_REG_SPCR2);
-		//printk(KERN_ALERT "Value of McBSP register SPCR2: %d \n", value);
-	
 		/* show McBSP register contents: */
 		//printk(KERN_ALERT "MCBSP1_SRGR2: 0x%04x\n", __raw_readl( (*(OMAP34XX_MCBSP1_BASE + OMAP_MCBSP_REG_SRGR2)) ));
 
 		/* polled SPI mode operations */
 		printk(KERN_ALERT "Now reading data from McBSP %d in SPI mode... \n", (mcbspID+1));
-		status = omap_mcbsp_spi_master_recv_word_poll(mcbspID, &value);
-		printk(KERN_ALERT "Reading from McBSP %d in SPI mode returned as status: %d and as value: 0x%04x \n", (mcbspID+1), status,value);
+		status = omap_mcbsp_spi_master_recv_word_poll(mcbspID, &value32);
+		printk(KERN_ALERT "Reading from McBSP %d in SPI mode returned as status: %d and as value: 0x%04x \n", (mcbspID+1), status,value32);
 		printk(KERN_ALERT "Now writing data to McBSP %d in SPI mode... \n", (mcbspID+1));
 		status = omap_mcbsp_spi_master_xmit_word_poll(mcbspID, mybuffer);
 		printk(KERN_ALERT "Writing to McBSP %d in SPI mode returned as status: %d \n", (mcbspID+1), status);
@@ -160,19 +199,20 @@ int hello_init(void)
 		printk(KERN_ALERT "Now writing 2nd data to McBSP (raw & polled) %d... \n", (mcbspID+1));
 		status = omap_mcbsp_pollwrite(mcbspID, mybuffer2);  // needs changes in mcbsp.c --> kernel patch & recompile
 		printk(KERN_ALERT "Writing to McBSP %d (raw, polled mode) returned as status: %d \n", (mcbspID+1), status);
+
 		printk(KERN_ALERT "Now reading data from McBSP (raw & polled) %d... \n", (mcbspID+1));
-		status = omap_mcbsp_pollread(mcbspID, &mybuffer2);  // needs changes in mcbsp.c --> kernel patch & recompile
-		printk(KERN_ALERT "Reading from McBSP %d (raw, polled mode) returned as status: %d and as value 0x%x \n", (mcbspID+1), status,mybuffer2);
+		status = omap_mcbsp_pollread(mcbspID, &value32);  // needs changes in mcbsp.c --> kernel patch & recompile
+		printk(KERN_ALERT "Reading from McBSP %d (raw, polled mode) returned as status: %d and as value 0x%x \n", (mcbspID+1), status,value32);
 
 		/* Non-Polled operations (IRQ or DMA!) */
 		/* IRQ */
-		//printk(KERN_ALERT "Now writing data to McBSP %d via IRQ! \n", (mcbspID+1));
-		//omap_mcbsp_xmit_word(mcbspID, mybuffer); // currently produces segfault, probably because nothing dma-like has been set up yet? Yes, the segfault was because i was not using OMAP_MCBSP_IRQ_IO in omap_mcbsp_set_io_type(). Still, it now either fails on start (when taking mcbsp out of reset, sprc2_XINTM=0) or on dma/irq transfer (sprc2_XINTM=1)
+		//printk(KERN_ALERT "Now writing data to McBSP %d via IRQ! \n", (mcbspID+1)); omap_mcbsp_set_io_type() must be set to OMAP_MCBSP_IRQ_IO or this will produce a NullPointer SegFault.
+		//omap_mcbsp_xmit_word(mcbspID, mybuffer); // omap_mcbsp_set_io_type() must be set to OMAP_MCBSP_IRQ_IO or this will produce a NullPointer SegFault. Also check XINTM() and RINTM() in McBSPx.SPC regs/configuration structure.
 		//printk(KERN_ALERT "Wrote to McBSP %d via IRQ! Return status: %d \n", (mcbspID+1), status);
 
 		/* DMA */
 		printk(KERN_ALERT "Now writing data to McBSP %d via DMA! \n", (mcbspID+1));
-		omap_mcbsp_xmit_buffer(mcbspID, bufferbuffer, 2); // currently produces segfault, probably because nothing dma-like has been set up yet? Yes, the segfault was because i was not using OMAP_MCBSP_IRQ_IO in omap_mcbsp_set_io_type(). Still, it now either fails on start (when taking mcbsp out of reset, sprc2_XINTM=0) or on dma/irq transfer (sprc2_XINTM=1)
+		omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
 		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 	}
 	else printk(KERN_ALERT "Not attempting to continue because requesting failed.\n");
@@ -183,7 +223,7 @@ int hello_init(void)
 }
 
 void hello_exit(void)
-{	
+{
 	printk(KERN_ALERT "Stopping McBSP %d...", (mcbspID+1));
 	omap_mcbsp_stop(mcbspID);
 	printk(KERN_ALERT "Freeing McBSP %d...", (mcbspID+1));
