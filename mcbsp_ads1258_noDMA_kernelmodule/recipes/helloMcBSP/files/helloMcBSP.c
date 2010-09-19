@@ -71,8 +71,8 @@ static struct omap_mcbsp_reg_cfg simon_regs = {
         .rcr1  = RFRLEN1(0) | RWDLEN1(OMAP_MCBSP_WORD_16),  // frame is 1 word. word is 32 bits.
         .xcr2  = 0,
         .xcr1  = XFRLEN1(1) | XWDLEN1(OMAP_MCBSP_WORD_16),
-        .srgr1 = FWID(31) | CLKGDV(50),
-        .srgr2 = 0 | CLKSM | CLKSP  | FPER(500),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
+        .srgr1 = FWID(31) | CLKGDV(0),
+        .srgr2 = 0 | CLKSM | CLKSP  | FPER(32),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
         .pcr0  = FSXM | CLKXM | CLKRM | FSRM | FSXP | FSRP | CLKXP | CLKRP,
         //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
 	.xccr = DXENDLY(1) | XDMAEN ,//| XDISABLE,
@@ -199,14 +199,14 @@ int hello_init(void)
 		printk(KERN_ALERT "Writing to McBSP %d in SPI mode returned as status: %d \n", (mcbspID+1), status);
 
 		/* polled mcbsp i/o operations */
-		printk(KERN_ALERT "Now writing data to McBSP (raw & polled) %d... \n", (mcbspID+1));
+		printk(KERN_ALERT "Now writing data to McBSP %d (raw & polled)... \n", (mcbspID+1));
 		status = omap_mcbsp_pollwrite(mcbspID, mybuffer);  // needs changes in mcbsp.c --> kernel patch & recompile
 		printk(KERN_ALERT "Writing to McBSP %d (raw, polled mode) returned as status: %d \n", (mcbspID+1), status);
-		printk(KERN_ALERT "Now writing 2nd data to McBSP (raw & polled) %d... \n", (mcbspID+1));
+		printk(KERN_ALERT "Now writing 2nd data to McBSP %d (raw & polled)... \n", (mcbspID+1));
 		status = omap_mcbsp_pollwrite(mcbspID, mybuffer2);  // needs changes in mcbsp.c --> kernel patch & recompile
 		printk(KERN_ALERT "Writing to McBSP %d (raw, polled mode) returned as status: %d \n", (mcbspID+1), status);
 
-		printk(KERN_ALERT "Now reading data from McBSP (raw & polled) %d... \n", (mcbspID+1));
+		printk(KERN_ALERT "Now reading data from McBSP %d (raw & polled)... \n", (mcbspID+1));
 		status = omap_mcbsp_pollread(mcbspID, &value32);  // needs changes in mcbsp.c --> kernel patch & recompile
 		printk(KERN_ALERT "Reading from McBSP %d (raw, polled mode) returned as status: %d and as value 0x%x \n", (mcbspID+1), status,value32);
 
@@ -218,8 +218,16 @@ int hello_init(void)
 
 		/* DMA */
 		printk(KERN_ALERT "Now writing data to McBSP %d via DMA! \n", (mcbspID+1));
-		omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
+		status = omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
 		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
+
+		//printk(KERN_ALERT "Now reading data from McBSP %d via DMA! \n", (mcbspID+1));
+		//status = omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
+		//printk(KERN_ALERT "Read from McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
+
+
+
+
 	}
 	else printk(KERN_ALERT "Not attempting to continue because requesting failed.\n");
 
