@@ -71,12 +71,12 @@ static struct omap_mcbsp_reg_cfg simon_regs = {
         .rcr1  = RFRLEN1(0) | RWDLEN1(OMAP_MCBSP_WORD_16),  // frame is 1 word. word is 32 bits.
         .xcr2  = 0,
         .xcr1  = XFRLEN1(1) | XWDLEN1(OMAP_MCBSP_WORD_16),
-        .srgr1 = FWID(31) | CLKGDV(0),
-        .srgr2 = 0 | CLKSM | CLKSP  | FPER(32),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
+        .srgr1 = FWID(31) | CLKGDV(50),
+        .srgr2 = 0 | CLKSM | CLKSP  | FPER(250),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
         .pcr0  = FSXM | CLKXM | CLKRM | FSRM | FSXP | FSRP | CLKXP | CLKRP,
         //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
 	.xccr = DXENDLY(1) | XDMAEN ,//| XDISABLE,
-	.rccr = RFULL_CYCLE | RDMAEN | RDISABLE,
+	.rccr = RFULL_CYCLE | RDMAEN,// | RDISABLE,
 };
 
 static struct omap_mcbsp_reg_cfg spimode_regs = {
@@ -115,7 +115,7 @@ int hello_init(void)
 	u32 mybuffer2 = 0x53CA; // 0101 00111100 1010
 	int i;
 
-	int bufbufsize = 1024 * 50; // number of array elements
+	int bufbufsize = 1 * 5; // number of array elements
 	int bytesPerVal = 2; // number of bytes per array element (32bit = 4 bytes, 16bit = 2 bytes)
 	u16* bufbuf;
 
@@ -221,12 +221,27 @@ int hello_init(void)
 		status = omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
 		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
-		//printk(KERN_ALERT "Now reading data from McBSP %d via DMA! \n", (mcbspID+1));
-		//status = omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
-		//printk(KERN_ALERT "Read from McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
+		printk(KERN_ALERT "The first 9 of %d values of the transferbuffer bufbuf after transmission are: \n",bufbufsize);
+		for (i = 0 ; i<min(bufbufsize,9); i++)
+		{
+			printk(KERN_ALERT " 0x%x,", bufbuf[i]);
+		}
+		printk(KERN_ALERT " end. \n");
 
 
+		printk(KERN_ALERT "Now reading data from McBSP %d via DMA! \n", (mcbspID+1));
+		status = omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
+		printk(KERN_ALERT "Read from McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
+		printk(KERN_ALERT "The first 9 of %d values of the transferbuffer bufbuf after reception are: \n",bufbufsize);
+		for (i = 0 ; i<min(bufbufsize,9); i++)
+		{
+			printk(KERN_ALERT " 0x%x,", bufbuf[i]);
+		}
+		printk(KERN_ALERT " end. \n");
+		
+
+		
 
 	}
 	else printk(KERN_ALERT "Not attempting to continue because requesting failed.\n");
