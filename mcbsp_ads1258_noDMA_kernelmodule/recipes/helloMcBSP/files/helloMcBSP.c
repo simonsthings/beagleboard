@@ -21,34 +21,6 @@ module_param(mcbspID, int, 0);
 MODULE_PARM_DESC(mcbspID, "The McBSP to use. Starts at 0.");
 
 
-static struct omap_mcbsp_reg_cfg ads1274_cfg = {
-	0x0000 | FREE, //spcr2
- 	0x0000, //spcr1
-	0x0000, //rcr2 RPHASE (bit 15) | RFRLEN2 (14 - 8) | RWDLEN2 (7-5) |RREVERSE(4-3) | RSVD 2 | RDATDLY
- 	0x0038, //rcr1  -- 24 bits 4 words
-	0x0000, //xcr2
-	0x0038, //xcr1
- 	GSYNC | FSGM | FPER(200), //srgr2 -- sample rate generater
-	FWID(10) | CLKGDV(8), //srgr1
- 	0x0000, //mcr2
-	0x0000, //mc1;
-	CLKXM | CLKRM | FSXM | FSRP | FSXP , //pcr0;
- 	0x0000, //rcerc;
-	0x0000, //rcerd;
-	0x0000, //xcerc;
- 	0x0000, //xcerd;
-	0x0000, // rcere;
-	0x0000, // rcerf;
- 	0x0000, // xcere;
-	0x0000, // xcerf;
-	0x0000, //rcerg;
- 	0x0000, // rcerh;
-	0x0000, // xcerg;
-	0x0000, //xcerh;
- 	0x0000, // xccr;
-	0x0000 //rccr;
-	//0x0308 //syscon
-};
 
 /*original from http://old.nabble.com/ADC--McBSP-advice-and-questions-about-writing-a-driver.-td26889185.html */
 static struct omap_mcbsp_reg_cfg mcbsp_regs = {
@@ -64,6 +36,7 @@ static struct omap_mcbsp_reg_cfg mcbsp_regs = {
         //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
 };
 
+/* ACTIVE SETTINGS:*/
 static struct omap_mcbsp_reg_cfg simon_regs = {
         .spcr2 = XINTM(3),
         .spcr1 = RINTM(3),
@@ -72,35 +45,11 @@ static struct omap_mcbsp_reg_cfg simon_regs = {
         .xcr2  = 0,
         .xcr1  = XFRLEN1(1) | XWDLEN1(OMAP_MCBSP_WORD_16),
         .srgr1 = FWID(31) | CLKGDV(50),
-        .srgr2 = 0 | CLKSM | CLKSP  | FPER(250),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
-        .pcr0  = FSXM | CLKXM | CLKRM | FSRM | FSXP | FSRP | CLKXP | CLKRP,
+        .srgr2 = GSYNC | 0/*CLKSM*/ | CLKSP  | FPER(250),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
+        .pcr0  = IDLE_EN | FSXM | 0/*FSRM*/ | CLKXM | CLKRM | FSXP | FSRP | CLKXP | CLKRP,
         //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
 	.xccr = DXENDLY(1) | XDMAEN ,//| XDISABLE,
 	.rccr = RFULL_CYCLE | RDMAEN,// | RDISABLE,
-};
-
-static struct omap_mcbsp_reg_cfg spimode_regs = {
-        .spcr2 = 0,
-        .spcr1 = RINTM(0),
-        .rcr2  = RFRLEN2(OMAP_MCBSP_WORD_16) | RWDLEN2(OMAP_MCBSP_WORD_16) | RDATDLY(1),
-        .rcr1  = RFRLEN1(OMAP_MCBSP_WORD_16) | RWDLEN1(OMAP_MCBSP_WORD_16),
-        .xcr2  = XFRLEN2(OMAP_MCBSP_WORD_16) | XWDLEN2(OMAP_MCBSP_WORD_16) | XDATDLY(1),
-        .xcr1  = XFRLEN1(OMAP_MCBSP_WORD_16) | XWDLEN1(OMAP_MCBSP_WORD_16),
-        .srgr1 = FWID(15) | CLKGDV(50),
-        .srgr2 = 0 | /*CLKSM |*/ CLKSP  | FPER(255),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
-        .pcr0  = FSXM | CLKXM | CLKRM | FSRM | FSXP | FSRP | CLKXP | CLKRP,
-        //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
-	//.xccr = XDISABLE,
-};
-
-static struct omap_mcbsp_spi_cfg ads1274_cfg_spi = {
-	OMAP_MCBSP_SPI_MASTER,
-	OMAP_MCBSP_CLK_RISING,
-	OMAP_MCBSP_CLK_RISING,
-	OMAP_MCBSP_FS_ACTIVE_LOW,
-	16,
-	OMAP_MCBSP_CLK_STP_MODE_DELAY,
-	OMAP_MCBSP_WORD_32
 };
 
 
@@ -115,7 +64,7 @@ int hello_init(void)
 	u32 mybuffer2 = 0x53CA; // 0101 00111100 1010
 	int i;
 
-	int bufbufsize = 1 * 5; // number of array elements
+	int bufbufsize = 1 * 8; // number of array elements
 	int bytesPerVal = 2; // number of bytes per array element (32bit = 4 bytes, 16bit = 2 bytes)
 	u16* bufbuf;
 
