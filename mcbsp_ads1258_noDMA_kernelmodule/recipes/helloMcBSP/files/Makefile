@@ -19,6 +19,7 @@ KERNEL_CROSS := /opt/oe/angstrom-dev/sysroots/i686-linux/usr/armv7a/bin/arm-angs
 ifneq ($(KERNELRELEASE),)
 # call from kernel build system
 obj-m := helloMcBSP.o
+obj-m += gpioSet.o
 else
 PWD := $(shell pwd)
 
