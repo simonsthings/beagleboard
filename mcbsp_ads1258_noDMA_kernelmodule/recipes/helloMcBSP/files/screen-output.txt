@@ -1,747 +1,94 @@
-
-Texas Instruments X-Loader 1.4.4ss (Mar 26 2010 - 09:02:52)
-Beagle Rev Ax/Bx
-Reading boot sector
-Loading u-boot.bin from mmc
-
-
-U-Boot 2008.10 (Apr 23 2010 - 16:17:49)
-
-OMAP3530-GP rev 2, CPU-OPP2 L3-165MHz
-OMAP3 Beagle board + LPDDR/NAND
-DRAM:  128 MB
-NAND:  256 MiB
-In:    serial
-Out:   serial
-Err:   serial
-Hit any key to stop autoboot:  0 
-reading uImage
-
-3110356 bytes read
-Booting from mmc ...
-## Booting kernel from Legacy Image at 82000000 ...
-   Image Name:   Angstrom/2.6.29/beagleboard
-   Image Type:   ARM Linux Kernel Image (uncompressed)
-   Data Size:    3110292 Bytes =  3 MB
-   Load Address: 80008000
-   Entry Point:  80008000
-   Verifying Checksum ... OK
-   Loading Kernel Image ... OK
-OK
-
-Starting kernel ...
-
-Uncompressing Linux..........................................................................................................................................
-[    0.000000] Linux version 2.6.29-omap1 (simon@alpha7) (gcc version 4.3.3 (GCC) ) #4 PREEMPT Mon Sep 27 17:49:55 CEST 2010
-[    0.000000] CPU: ARMv7 Processor [411fc082] revision 2 (ARMv7), cr=10c5387f
-[    0.000000] CPU: VIPT nonaliasing data cache, VIPT nonaliasing instruction cache
-[    0.000000] Machine: OMAP3 Beagle Board
-[    0.000000] Memory policy: ECC disabled, Data cache writeback
-[    0.000000] OMAP3430 ES2.1
-[    0.000000] SRAM: Mapped pa 0x40200000 to va 0xd7000000 size: 0x100000
-[    0.000000] Reserving 12582912 bytes SDRAM for VRAM
-[    0.000000] Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 32512
-[    0.000000] Kernel command line: console=ttyS2,115200n8 vram=12M omapfb.mode=dvi:1024x768MR-16@60 omapfb.debug=y omapdss.def_disp=dvi root=/dev/mmcblk0p2t
-[    0.000000] Clocking rate (Crystal/DPLL/ARM core): 26.0/332/500 MHz
-[    0.000000] GPMC revision 5.0
-[    0.000000] IRQ: Found an INTC at 0xd8200000 (revision 4.0) with 96 interrupts
-[    0.000000] Total of 96 interrupts on 1 active controller
-[    0.000000] OMAP34xx GPIO hardware version 2.5
-[    0.000000] PID hash table entries: 512 (order: 9, 2048 bytes)
-[    0.000000] OMAP clockevent source: GPTIMER12 at 32768 Hz
-[    0.000000] Console: colour dummy device 80x30
-[    0.000000] Dentry cache hash table entries: 16384 (order: 4, 65536 bytes)
-[    0.000000] Inode-cache hash table entries: 8192 (order: 3, 32768 bytes)
-[    0.000000] Memory: 128MB = 128MB total
-[    0.000000] Memory: 110832KB available (5848K code, 577K data, 204K init)
-[    0.000000] Calibrating delay loop... 493.67 BogoMIPS (lpj=1929216)
-[    0.000000] Mount-cache hash table entries: 512
-[    0.000000] CPU: Testing write buffer coherency: ok
-[    0.000000] net_namespace: 1036 bytes
-[    0.000000] regulator: core version 0.5
-[    0.000000] NET: Registered protocol family 16
-[    0.000000] GPIO-156 autorequested
-[    0.000000] GPIO-159 autorequested
-[    0.000000] Found NAND on CS0
-[    0.000000] Registering NAND on CS0
-[   11.559051] OMAP DMA hardware revision 4.0
-[   11.569824] bio: create slab <bio-0> at 0
-[   11.628021] OMAP DSS rev 2.0
-[   11.628112] OMAP DISPC rev 3.0
-[   11.628143] OMAP VENC rev 2
-[   11.628326] OMAP DSI rev 1.0
-[   11.629638] i2c_omap i2c_omap.1: bus 1 rev3.12 at 2600 kHz
-[   11.632537] twl4030: PIH (irq 7) chaining IRQs 368..375
-[   11.632568] twl4030: power (irq 373) chaining IRQs 376..383
-[   11.632904] twl4030: gpio (irq 368) chaining IRQs 384..401
-[   11.634277] regulator: VMMC1: 1850 <--> 3150 mV normal standby
-[   11.634765] regulator: VDAC: 1800 mV normal standby
-[   11.635253] regulator: VUSB1V5: 1500 <--> 0 mV normal standby
-[   11.635772] regulator: VUSB1V8: 1800 <--> 0 mV normal standby
-[   11.636230] regulator: VUSB3V1: 3100 <--> 0 mV normal standby
-[   11.636718] regulator: VPLL2: 1800 mV normal standby
-[   11.637237] regulator: VMMC2: 2800 <--> 3150 mV normal standby
-[   11.637756] regulator: VSIM: 1800 <--> 3000 mV normal standby
-[   11.637939] i2c_omap i2c_omap.2: bus 2 rev3.12 at 400 kHz
-[   11.638275] i2c_omap i2c_omap.3: bus 3 rev3.12 at 100 kHz
-[   11.639312] SCSI subsystem initialized
-[   11.641693] twl4030_usb twl4030_usb: Initialized TWL4030 USB module
-[   11.642425] usbcore: registered new interface driver usbfs
-[   11.642608] usbcore: registered new interface driver hub
-[   11.642852] usbcore: registered new device driver usb
-[   11.644134] Bluetooth: Core ver 2.14
-[   11.644470] NET: Registered protocol family 31
-[   11.644500] Bluetooth: HCI device and connection manager initialized
-[   11.644531] Bluetooth: HCI socket layer initialized
-[   11.644866] cfg80211: Using static regulatory domain info
-[   11.644866] cfg80211: Regulatory domain: US
-[   11.644897]  (start_freq - end_freq @ bandwidth), (max_antenna_gain, max_eirp)
-[   11.644927]  (2402000 KHz - 2472000 KHz @ 40000 KHz), (600 mBi, 2700 mBm)
-[   11.644927]  (5170000 KHz - 5190000 KHz @ 40000 KHz), (600 mBi, 2300 mBm)
-[   11.644958]  (5190000 KHz - 5210000 KHz @ 40000 KHz), (600 mBi, 2300 mBm)
-[   11.644989]  (5210000 KHz - 5230000 KHz @ 40000 KHz), (600 mBi, 2300 mBm)
-[   11.644989]  (5230000 KHz - 5330000 KHz @ 40000 KHz), (600 mBi, 2300 mBm)
-[   11.645019]  (5735000 KHz - 5835000 KHz @ 40000 KHz), (600 mBi, 3000 mBm)
-[   11.645050] cfg80211: Calling CRDA for country: US
-[   11.646423] musb_hdrc: version 6.0, musb-dma, otg (peripheral+host), debug=0
-[   11.648986] musb_hdrc: USB OTG mode controller at d80ab000 using DMA, IRQ 92
-[   11.649780] NET: Registered protocol family 2
-[   11.650054] IP route cache hash table entries: 1024 (order: 0, 4096 bytes)
-[   11.650695] TCP established hash table entries: 4096 (order: 3, 32768 bytes)
-[   11.650817] TCP bind hash table entries: 4096 (order: 2, 16384 bytes)
-[   11.650909] TCP: Hash tables configured (established 4096 bind 4096)
-[   11.650939] TCP reno registered
-[   11.651428] NET: Registered protocol family 1
-[   11.654083] VFS: Disk quotas dquot_6.5.2
-[   11.654205] Dquot-cache hash table entries: 1024 (order 0, 4096 bytes)
-[   11.655487] squashfs: version 4.0 (2009/01/31) Phillip Lougher
-[   11.656311] JFFS2 version 2.2. (NAND) (SUMMARY)  �� 2001-2006 Red Hat, Inc.
-[   11.657379] msgmni has been set to 216
-[   11.662445] alg: No test for stdrng (krng)
-[   11.662811] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 253)
-[   11.662811] io scheduler noop registered
-[   11.662841] io scheduler anticipatory registered
-[   11.662841] io scheduler deadline registered
-[   11.663055] io scheduler cfq registered (default)
-[   11.672576] Serial: 8250/16550 driver, 4 ports, IRQ sharing enabled
-[   11.693786] serial8250.0: ttyS0 at MMIO 0x4806a000 (irq = 72) is a ST16654
-[   11.714111] serial8250.0: ttyS1 at MMIO 0x4806c000 (irq = 73) is a ST16654
-[   11.734405] serial8250.0: ttyS2 at MMIO 0x49020000 (irq = 74) is a ST16654
-[   11.734466] console [ttyS2] enabled
-[   12.265563] brd: module loaded
-[   12.271728] loop: module loaded
-[   12.275177] enc28j60 spi4.0: enc28j60 Ethernet driver 1.01 loaded
-[   12.284179] enc28j60 spi4.0: enc28j60 chip not found
-[   12.289184] enc28j60: probe of spi4.0 failed with error -5
-[   12.294952] usbcore: registered new interface driver catc
-[   12.300445] catc: v2.8:CATC EL1210A NetMate USB Ethernet driver
-[   12.306488] usbcore: registered new interface driver kaweth
-[   12.312133] pegasus: v0.6.14 (2006/09/27), Pegasus/Pegasus II USB Ethernet driver
-[   12.319793] usbcore: registered new interface driver pegasus
-[   12.325531] rtl8150: v0.6.2 (2004/08/27):rtl8150 based usb-ethernet driver
-[   12.332550] usbcore: registered new interface driver rtl8150
-[   12.338317] usbcore: registered new interface driver asix
-[   12.343872] usbcore: registered new interface driver cdc_ether
-[   12.349884] usbcore: registered new interface driver dm9601
-[   12.355651] usbcore: registered new interface driver smsc95xx
-[   12.361511] usbcore: registered new interface driver gl620a
-[   12.367279] usbcore: registered new interface driver net1080
-[   12.373077] usbcore: registered new interface driver plusb
-[   12.378723] usbcore: registered new interface driver rndis_host
-[   12.384796] usbcore: registered new interface driver cdc_subset
-[   12.390869] usbcore: registered new interface driver zaurus
-[   12.396606] usbcore: registered new interface driver MOSCHIP usb-ethernet driver
-[   12.404205] Broadcom 43xx driver loaded [ Features: L, Firmware-ID: FW13 ]
-[   12.411437] usbcore: registered new interface driver zd1211rw
-[   12.417358] usbcore: registered new interface driver rtl8187
-[   12.423187] usbcore: registered new interface driver rndis_wlan
-[   12.429290] usbcore: registered new interface driver zd1201
-[   12.435089] usbcore: registered new interface driver usb8xxx
-[   12.440948] usbcore: registered new interface driver rt2500usb
-[   12.446929] usbcore: registered new interface driver rt73usb
-[   12.452789] usbcore: registered new interface driver p54usb
-[   12.458435] i2c /dev entries driver
-[   12.462707] Driver 'sd' needs updating - please use bus_type methods
-[   12.469207] Driver 'sr' needs updating - please use bus_type methods
-[   12.476165] omap2-nand driver initializing
-[   12.480621] NAND device: Manufacturer ID: 0x2c, Chip ID: 0xba (Micron NAND 256MiB 1,8V 16-bit)
-[   12.489837] cmdlinepart partition parsing not available
-[   12.495147] Creating 5 MTD partitions on "omap2-nand":
-[   12.500335] 0x000000000000-0x000000080000 : "X-Loader"
-[   12.506744] 0x000000080000-0x000000260000 : "U-Boot"
-[   12.513275] 0x000000260000-0x000000280000 : "U-Boot Env"
-[   12.519439] 0x000000280000-0x000000680000 : "Kernel"
-[   12.526763] 0x000000680000-0x000010000000 : "File System"
-[   12.637725] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
-[   12.644683] ehci-omap ehci-omap.0: OMAP-EHCI Host Controller
-[   12.650848] ehci-omap ehci-omap.0: new USB bus registered, assigned bus number 1
-[   12.658721] ehci-omap ehci-omap.0: irq 77, io mem 0x48064800
-[   12.674713] ehci-omap ehci-omap.0: USB 2.0 started, EHCI 1.00
-[   12.681030] usb usb1: configuration #1 chosen from 1 choice
-[   12.686920] hub 1-0:1.0: USB hub found
-[   12.690826] hub 1-0:1.0: 3 ports detected
-[   12.695831] Initializing USB Mass Storage driver...
-[   12.700958] usbcore: registered new interface driver usb-storage
-[   12.707061] USB Mass Storage support registered.
-[   12.712005] mice: PS/2 mouse device common for all mice
-[   12.717742] input: gpio-keys as /devices/platform/gpio-keys/input/input0
-[   12.725860] input: twl4030_pwrbutton as /devices/platform/i2c_omap.1/i2c-adapter/i2c-1/1-0049/twl4030_pwrbutton/input/input1
-[   13.737243] i2c_omap i2c_omap.2: controller timed out
-[   13.742370] rtc-ds1307: probe of 2-0068 failed with error -5
-[   13.749114] OMAP Watchdog Timer Rev 0x31: initial timeout 60 sec
-[   13.755310] Bluetooth: HCI UART driver ver 2.2
-[   13.759765] Bluetooth: HCI H4 protocol initialized
-[   13.764617] Bluetooth: HCI BCSP protocol initialized
-[   13.769653] Bluetooth: HCILL protocol initialized
-[   13.774383] Bluetooth: Broadcom Blutonium firmware driver ver 1.2
-[   13.780670] usbcore: registered new interface driver bcm203x
-[   13.786407] Bluetooth: Digianswer Bluetooth USB driver ver 0.10
-[   13.792510] usbcore: registered new interface driver bpa10x
-[   13.798126] Bluetooth: BlueFRITZ! USB driver ver 1.2
-[   13.803222] usbcore: registered new interface driver bfusb
-[   13.808807] Bluetooth: Generic Bluetooth USB driver ver 0.4
-[   13.814514] usbcore: registered new interface driver btusb
-[   13.820098] Bluetooth: Generic Bluetooth SDIO driver ver 0.1
-[   13.826354] mmci-omap-hs mmci-omap-hs.0: Failed to get debounce clock
-[   13.940551] mmci-omap-hs mmci-omap-hs.1: Failed to get debounce clock
-[   13.947113] regulator: Unable to get requested regulator: vmmc_aux
-[   13.954650] Registered led device: beagleboard::usr0
-[   13.959838] Registered led device: beagleboard::usr1
-[   13.967132] usbcore: registered new interface driver usbhid
-[   13.972839] usbhid: v2.6:USB HID core driver
-[   13.977691] Advanced Linux Sound Architecture Driver Version 1.0.18a.
-[   13.984649] usbcore: registered new interface driver snd-usb-audio
-[   13.991088] No device for DAI twl4030
-[   13.994781] No device for DAI omap-mcbsp-dai-0
-[   13.999298] No device for DAI omap-mcbsp-dai-1
-[   14.003814] No device for DAI omap-mcbsp-dai-2
-[   14.008270] No device for DAI omap-mcbsp-dai-3
-[   14.012786] No device for DAI omap-mcbsp-dai-4
-[   14.017272] OMAP3 Beagle SoC init
-[   14.020843] TWL4030 Audio Codec init 
-[   14.026062] asoc: twl4030 <-> omap-mcbsp-dai-0 mapping ok
-[   14.041412] ALSA device list:
-[   14.044464]   #0: omap3beagle (twl4030)
-[   14.048431] oprofile: using arm/armv7
-[   14.052459] TCP cubic registered
-[   14.055725] NET: Registered protocol family 17
-[   14.060272] NET: Registered protocol family 15
-[   14.064819] Bluetooth: L2CAP ver 2.11
-[   14.068542] Bluetooth: L2CAP socket layer initialized
-[   14.073669] Bluetooth: SCO (Voice Link) ver 0.6
-[   14.078216] Bluetooth: SCO socket layer initialized
-[   14.083343] Bluetooth: RFCOMM socket layer initialized
-[   14.088562] Bluetooth: RFCOMM TTY layer initialized
-[   14.093536] Bluetooth: RFCOMM ver 1.10
-[   14.097351] Bluetooth: BNEP (Ethernet Emulation) ver 1.3
-[   14.102691] Bluetooth: BNEP filters: protocol multicast
-[   14.107971] Bluetooth: HIDP (Human Interface Emulation) ver 1.2
-[   14.114776] RPC: Registered udp transport module.
-[   14.119506] RPC: Registered tcp transport module.
-[   14.124359] lib80211: common routines for IEEE802.11 drivers
-[   14.130157] ThumbEE CPU extension supported.
-[   14.134460] Power Management for TI OMAP3.
-[   14.147857] Disabling unused clock "sr2_fck"
-[   14.152252] Disabling unused clock "sr1_fck"
-[   14.156555] Disabling unused clock "mcbsp_fck"
-[   14.161071] Disabling unused clock "mcbsp_fck"
-[   14.165557] Disabling unused clock "mcbsp_fck"
-[   14.170074] Disabling unused clock "mcbsp_ick"
-[   14.174530] Disabling unused clock "mcbsp_ick"
-[   14.179046] Disabling unused clock "mcbsp_ick"
-[   14.183532] Disabling unused clock "gpt2_ick"
-[   14.187927] Disabling unused clock "gpt3_ick"
-[   14.192352] Disabling unused clock "gpt4_ick"
-[   14.196746] Disabling unused clock "gpt5_ick"
-[   14.201141] Disabling unused clock "gpt6_ick"
-[   14.205535] Disabling unused clock "gpt7_ick"
-[   14.209960] Disabling unused clock "gpt8_ick"
-[   14.214385] Disabling unused clock "gpt9_ick"
-[   14.218750] Disabling unused clock "wdt3_ick"
-[   14.223175] Disabling unused clock "wdt3_fck"
-[   14.227569] Disabling unused clock "gpio2_dbck"
-[   14.232147] Disabling unused clock "gpio3_dbck"
-[   14.236724] Disabling unused clock "gpio4_dbck"
-[   14.241302] Disabling unused clock "gpio5_dbck"
-[   14.245910] Disabling unused clock "gpio6_dbck"
-[   14.250457] Disabling unused clock "gpt9_fck"
-[   14.254882] Disabling unused clock "gpt8_fck"
-[   14.259277] Disabling unused clock "gpt7_fck"
-[   14.263671] Disabling unused clock "gpt6_fck"
-[   14.268066] Disabling unused clock "gpt5_fck"
-[   14.272491] Disabling unused clock "gpt4_fck"
-[   14.276916] Disabling unused clock "gpt3_fck"
-[   14.281280] Disabling unused clock "gpt2_fck"
-[   14.285705] Disabling unused clock "gpt1_ick"
-[   14.290100] Disabling unused clock "wdt1_ick"
-[   14.294525] Disabling unused clock "wdt2_ick"
-[   14.298889] Disabling unused clock "wdt2_fck"
-[   14.303314] Disabling unused clock "gpio1_dbck"
-[   14.307891] Disabling unused clock "gpt1_fck"
-[   14.312286] Disabling unused clock "cam_ick"
-[   14.316650] Disabling unused clock "cam_mclk"
-[   14.321075] Disabling unused clock "des1_ick"
-[   14.325469] Disabling unused clock "sha11_ick"
-[   14.329956] Disabling unused clock "rng_ick"
-[   14.334289] Disabling unused clock "aes1_ick"
-[   14.338653] Disabling unused clock "ssi_ick"
-[   14.342987] Disabling unused clock "mailboxes_ick"
-[   14.347839] Disabling unused clock "mcbsp_ick"
-[   14.352325] Disabling unused clock "mcbsp_ick"
-[   14.356842] Disabling unused clock "gpt10_ick"
-[   14.361297] Disabling unused clock "gpt11_ick"
-[   14.365814] Disabling unused clock "hdq_ick"
-[   14.370147] Disabling unused clock "mspro_ick"
-[   14.374603] Disabling unused clock "des2_ick"
-[   14.379028] Disabling unused clock "sha12_ick"
-[   14.383514] Disabling unused clock "aes2_ick"
-[   14.387908] Disabling unused clock "icr_ick"
-[   14.392211] Disabling unused clock "pka_ick"
-[   14.396545] Disabling unused clock "ssi_ssr_fck"
-[   14.401184] Disabling unused clock "hdq_fck"
-[   14.405517] Disabling unused clock "mcbsp_fck"
-[   14.410034] Disabling unused clock "mcbsp_fck"
-[   14.414520] Disabling unused clock "mspro_fck"
-[   14.419006] Disabling unused clock "gpt11_fck"
-[   14.423492] Disabling unused clock "gpt10_fck"
-[   14.428009] Disabling unused clock "dpll4_m6x2_ck"
-[   14.432861] Disabling unused clock "dpll3_m3x2_ck"
-[   14.437683] Disabling unused clock "sys_clkout1"
-[   14.442382] VFP support v0.3: implementor 41 architecture 3 part 30 variant c rev 1
-[   14.450866] registered taskstats version 1
-[   14.456604] fbcvt: 1024x768@60: CVT Name - .786M3-R
-[   14.487426] Console: switching to colour frame buffer device 128x48
-[   14.507751] clock: clksel_round_rate_div: dpll4_m4_ck target_rate 48000000
-[   14.514678] clock: new_div = 9, new_rate = 48000000
-[   14.521972] drivers/rtc/hctosys.c: unable to open rtc device (rtc0)
-[   14.528900] Waiting for root device /dev/mmcblk0p2...
-[   14.651397] mmc0: new high speed SDHC card at address 352a
-[   14.657440] mmcblk0: mmc0:352a SD04G 3.69 GiB 
-[   14.662322]  mmcblk0: p1 p2
-[   17.860504] kjournald starting.  Commit interval 5 seconds
-[   17.866149] EXT3-fs warning: maximal mount count reached, running e2fsck is recommended
-[   18.017456] EXT3 FS on mmcblk0p2, internal journal
-[   18.022308] EXT3-fs: recovery complete.
-[   18.268249] EXT3-fs: mounted filesystem with ordered data mode.
-[   18.274322] VFS: Mounted root (ext3 filesystem) on device 179:2.
-[   18.280609] Freeing init memory: 204K
-INIT: version 2.86 booting
-Starting udev[   19.235687] udevd version 124 started
-
-Remounting root file system...
-[   23.001342] uncorrectable error : <3>end_request: I/O error, dev mtdblock0, sector 0
-[   23.009368] Buffer I/O error on device mtdblock0, logical block 0
-[   23.266235] uncorrectable error : <3>end_request: I/O error, dev mtdblock0, sector 8
-[   23.274169] Buffer I/O error on device mtdblock0, logical block 1
-[   23.342163] end_request: I/O error, dev mtdblock0, sector 16
-[   23.347900] Buffer I/O error on device mtdblock0, logical block 2                                                 
-[   23.424194] uncorrectable error : <3>end_request: I/O error, dev mtdblock0, sector 24                             
-[   23.432250] Buffer I/O error on device mtdblock0, logical block 3                                                 
-[   23.444458] uncorrectable error : <3>end_request: I/O error, dev mtdblock0, sector 0                              
-[   23.452301] Buffer I/O error on device mtdblock0, logical block 0                                                 
-ALSA: Restoring mixer settings...                                                                                    
-Configuring network interfaces... No state is present for card omap3beagle                                           
-/usr/sbin/alsactl: parse:1620: Unable to open file '/usr/share/alsa/init/00main': No such file or directory          
-No state is present for card omap3beagle                                                                             
-ifconfig: SIOCGIFFLAGS: No such device                                                                               
-ifconfig: SIOCGIFFLAGS: No such device                                                                               
-eth0      No such device                                                                                             
-                                                                                                                     
-ifconfig: SIOCGIFFLAGS: No such device                                                                               
-done.                                                                                                                
-Starting portmap daemon: portmap.                                                                                    
-net.ipv4.conf.default.rp_filter = 1                                                                                  
-net.ipv4.conf.all.rp_filter = 1                                                                                      
-hwclock: can't open '/dev/misc/rtc': No such file or directory                                                       
-Mon Apr 26 00:48:00 UTC 2010                                                                                         
-hwclock: can't open '/dev/misc/rtc': No such file or directory                                                       
-INIT: Entering runlevel: 5                                                                                           
-Starting Dropbear SSH server: dropbear.                                                                              
-Starting advanced power management daemon: No APM support in kernel                                                  
-(failed.)                                                                                                            
-Starting system message bus: dbus.                                                                                   
-Starting syslogd/klogd: done                                                                                         
- * Starting Avahi mDNS/DNS-SD Daemon: avahi-daemon                                                                   
-[ ok ]                                                                                                               
-                                                                                                                     
-.-------.                                                                                                            
-|       |                  .-.                                                                                       
-|   |   |-----.-----.-----.| |   .----..-----.-----.                                                                 
-|       |     | __  |  ---'| '--.|  .-'|     |     |                                                                 
-|   |   |  |  |     |---  ||  --'|  |  |  '  | | | |                                                                 
-'---'---'--'--'--.  |-----''----''--'  '-----'-'-'-'                                                                 
-                -'  |                                                                                                
-                '---'                                                                                                
-                                                                                                                     
-The Angstrom Distribution beagleboard ttyS2                                                                          
-                                                                                                                     
-Angstrom 2009.X-stable beagleboard ttyS2                                                                             
-                                                                                                                     
-beagleboard login: root                                                                                              
-root@beagleboard:~#                                                                                                  
-root@beagleboard:~#                                                                                                  
 root@beagleboard:~#                                                                                                  
 root@beagleboard:~# rm helloMcBSP.ko 
 root@beagleboard:~# rz                                                                                               
 ..root@beagleboard:~# **B0100000023be50
 root@beagleboard:~# 
 root@beagleboard:~# insmod helloMcBSP.ko 
-[  719.237670] Hello McBSP world!
-[  719.240753] Gpio 134 (ADS1258EVM-clockselect) was requested. Return status: 0
-[  719.248718] Setting gpio134 (ADS1258EVM-clockselect) as output, value 1=EXTERNAL clock from BB. Return status: 0
-[  719.259399] Setting IO type was 0. Requesting McBSP 1 returned: 0 
-[  719.265991] Configured McBSP 1 registers for raw mode..
-[  719.271575] omap_mcbsp_start part 0 (dumping regs) ... 
-[  719.277160] omap-mcbsp omap-mcbsp.1: **** McBSP1 regs ****
-[  719.282684] omap-mcbsp omap-mcbsp.1: DRR2:  0x44e85f0a
-[  719.288360] omap-mcbsp omap-mcbsp.1: DRR1:  0x0000
-[  719.293518] omap-mcbsp omap-mcbsp.1: DXR2:  0x0000
-[  719.298339] omap-mcbsp omap-mcbsp.1: DXR1:  0x0000
-[  719.303649] omap-mcbsp omap-mcbsp.1: DRR (OMAP3530):  0x44e85f0a
-[  719.310028] omap-mcbsp omap-mcbsp.1: DXR (OMAP3530):  0x0000
-[  719.316009] omap-mcbsp omap-mcbsp.1: SPCR2: 0x0030
-[  719.320861] omap-mcbsp omap-mcbsp.1: SPCR1: 0x0030
-[  719.326171] omap-mcbsp omap-mcbsp.1: RCR2:  0x0000
-[  719.331451] omap-mcbsp omap-mcbsp.1: RCR1:  0x00a0
-[  719.336273] omap-mcbsp omap-mcbsp.1: XCR2:  0x0000
-[  719.341644] omap-mcbsp omap-mcbsp.1: XCR1:  0x00a0
-[  719.346466] omap-mcbsp omap-mcbsp.1: SRGR2: 0xc0fa
-[  719.351776] omap-mcbsp omap-mcbsp.1: SRGR1: 0x1f32
-[  719.356933] omap-mcbsp omap-mcbsp.1: PCR0:  0x0b0f
-[  719.361755] omap-mcbsp omap-mcbsp.1: XCCR:  0x1008
-[  719.367065] omap-mcbsp omap-mcbsp.1: RCCR:  0x0808
-[  719.372406] omap-mcbsp omap-mcbsp.1: ***********************
-[  719.378509] omap-mcbsp omap-mcbsp.1: SYSCON:  0x0214
-[  719.383483] omap-mcbsp omap-mcbsp.1: WAKEUPEN:  0x478f
-[  719.389190] omap-mcbsp omap-mcbsp.1: ***********************
-[  719.395233] omap-mcbsp omap-mcbsp.1: MCR2:  0x0000
-[  719.400054] omap-mcbsp omap-mcbsp.1: MCR1:  0x0000
-[  719.405395] omap-mcbsp omap-mcbsp.1: XCERA:  0x0000
-[  719.410614] omap-mcbsp omap-mcbsp.1: XCERB:  0x0000
-[  719.415527] omap-mcbsp omap-mcbsp.1: XCERC:  0x0000
-[  719.420928] omap-mcbsp omap-mcbsp.1: XCERD:  0x0000
-[  719.426147] omap-mcbsp omap-mcbsp.1: XCERE:  0x0000
-[  719.431060] omap-mcbsp omap-mcbsp.1: XCERF:  0x0000
-[  719.436462] omap-mcbsp omap-mcbsp.1: XCERG:  0x0000
-[  719.441680] omap-mcbsp omap-mcbsp.1: XCERH:  0x0000
-[  719.446594] omap-mcbsp omap-mcbsp.1: RCERA:  0x0000
-[  719.452026] omap-mcbsp omap-mcbsp.1: RCERB:  0x0000
-[  719.457244] omap-mcbsp omap-mcbsp.1: RCERC:  0x0000
-[  719.462158] omap-mcbsp omap-mcbsp.1: RCERD:  0x0000
-[  719.467559] omap-mcbsp omap-mcbsp.1: RCERE:  0x0000
-[  719.472778] omap-mcbsp omap-mcbsp.1: RCERF:  0x0000
-[  719.477691] omap-mcbsp omap-mcbsp.1: RCERG:  0x0000
-[  719.483123] omap-mcbsp omap-mcbsp.1: RCERH:  0x0000
-[  719.488342] omap-mcbsp omap-mcbsp.1: ***********************
-[  719.494018] omap_mcbsp_start part 1 ... 
-[  719.498474] omap_mcbsp_start part 2 ... 
-[  719.502410] omap_mcbsp_start part 3 ... 
-[  719.506958] omap_mcbsp_start part 4 ... 
-[  719.511199] omap_mcbsp_start part 5 ... 
-[  719.515258] omap_mcbsp_start part 6 ... 
-[  719.519683] omap_mcbsp_start part 7 ... 
-[  719.523742] omap_mcbsp_start part 8 ... 
-[  719.528289] omap_mcbsp_start part 9 ... 
-[  719.532226] omap_mcbsp_start part 10 ... 
-[  719.536743] omap-mcbsp omap-mcbsp.1: **** McBSP1 regs ****
-[  719.542572] omap-mcbsp omap-mcbsp.1: DRR2:  0x88f6fb6c
-[  719.547760] omap-mcbsp omap-mcbsp.1: DRR1:  0x0000
-[  719.553070] omap-mcbsp omap-mcbsp.1: DXR2:  0x0000
-[  719.558227] omap-mcbsp omap-mcbsp.1: DXR1:  0x0000
-[  719.563049] omap-mcbsp omap-mcbsp.1: DRR (OMAP3530):  0x8900011b
-[  719.569580] omap-mcbsp omap-mcbsp.1: DXR (OMAP3530):  0x0000
-[  719.575592] omap-mcbsp omap-mcbsp.1: SPCR2: 0x00f3
-[  719.580413] omap-mcbsp omap-mcbsp.1: SPCR1: 0x0037
-[  719.585723] omap-mcbsp omap-mcbsp.1: RCR2:  0x0000
-[  719.590881] omap-mcbsp omap-mcbsp.1: RCR1:  0x00a0
-[  719.595703] omap-mcbsp omap-mcbsp.1: XCR2:  0x0000
-[  719.601013] omap-mcbsp omap-mcbsp.1: XCR1:  0x00a0
-[  719.606140] omap-mcbsp omap-mcbsp.1: SRGR2: 0xc0fa
-[  719.610961] omap-mcbsp omap-mcbsp.1: SRGR1: 0x1f32
-[  719.616302] omap-mcbsp omap-mcbsp.1: PCR0:  0x0b0f
-[  719.621429] omap-mcbsp omap-mcbsp.1: XCCR:  0x1008
-[  719.626251] omap-mcbsp omap-mcbsp.1: RCCR:  0x0808
-[  719.631561] omap-mcbsp omap-mcbsp.1: ***********************
-[  719.637573] omap-mcbsp omap-mcbsp.1: SYSCON:  0x0214
-[  719.642578] omap-mcbsp omap-mcbsp.1: WAKEUPEN:  0x478f
-[  719.648254] omap-mcbsp omap-mcbsp.1: ***********************
-[  719.654235] omap-mcbsp omap-mcbsp.1: MCR2:  0x0000
-[  719.659057] omap-mcbsp omap-mcbsp.1: MCR1:  0x0000
-[  719.664398] omap-mcbsp omap-mcbsp.1: XCERA:  0x0000
-[  719.669616] omap-mcbsp omap-mcbsp.1: XCERB:  0x0000
-[  719.674530] omap-mcbsp omap-mcbsp.1: XCERC:  0x0000
-[  719.679931] omap-mcbsp omap-mcbsp.1: XCERD:  0x0000
-[  719.685150] omap-mcbsp omap-mcbsp.1: XCERE:  0x0000
-[  719.690063] omap-mcbsp omap-mcbsp.1: XCERF:  0x0000
-[  719.695465] omap-mcbsp omap-mcbsp.1: XCERG:  0x0000
-[  719.700683] omap-mcbsp omap-mcbsp.1: XCERH:  0x0000
-[  719.705596] omap-mcbsp omap-mcbsp.1: RCERA:  0x0000
-[  719.710998] omap-mcbsp omap-mcbsp.1: RCERB:  0x0000
-[  719.716217] omap-mcbsp omap-mcbsp.1: RCERC:  0x0000
-[  719.721130] omap-mcbsp omap-mcbsp.1: RCERD:  0x0000
-[  719.726531] omap-mcbsp omap-mcbsp.1: RCERE:  0x0000
-[  719.731750] omap-mcbsp omap-mcbsp.1: RCERF:  0x0000
-[  719.736663] omap-mcbsp omap-mcbsp.1: RCERG:  0x0000
-[  719.742095] omap-mcbsp omap-mcbsp.1: RCERH:  0x0000
-[  719.747314] omap-mcbsp omap-mcbsp.1: ***********************
-[  719.753295] omap_mcbsp_start part 11 ... 
-[  719.757354] Started McBSP 1. 
-[  719.760345] Now reading data from McBSP 1 in SPI mode... 
-[  719.766448] Reading from McBSP 1 in SPI mode returned as status: 0 and as value: 0x8a00003f 
-[  719.775268] Now writing data to McBSP 1 in SPI mode... 
-[  719.780822] Writing to McBSP 1 in SPI mode returned as status: 0 
-[  719.787292] Now writing data to McBSP 1 (raw & polled)... 
-[  719.793121] Writing to McBSP 1 (raw, polled mode) returned as status: 0 
-[  719.800170] Now writing 2nd data to McBSP 1 (raw & polled)... 
-[  719.806060] Writing to McBSP 1 (raw, polled mode) returned as status: 0 
-[  719.813293] Now reading data from McBSP 1 (raw & polled)... 
-[  719.819305] Reading from McBSP 1 (raw, polled mode) returned as status: 0 and as value 0x8c0000be 
-[  719.828643] Now writing data to McBSP 1 via DMA! 
-[  719.833709] omap-mcbsp omap-mcbsp.1: McBSP1 TX DMA on channel 2
-[  719.839996] omap-mcbsp omap-mcbsp.1: **** McBSP1 regs ****
-[  719.845520] omap-mcbsp omap-mcbsp.1: DRR2:  0x8d00009e
-[  719.851196] omap-mcbsp omap-mcbsp.1: DRR1:  0x0000
-[  719.856323] omap-mcbsp omap-mcbsp.1: DXR2:  0x0000
-[  719.861145] omap-mcbsp omap-mcbsp.1: DXR1:  0x0000
-[  719.866455] omap-mcbsp omap-mcbsp.1: DRR (OMAP3530):  0x8e00004f
-[  719.872833] omap-mcbsp omap-mcbsp.1: DXR (OMAP3530):  0x0000
-[  719.878845] omap-mcbsp omap-mcbsp.1: SPCR2: 0x00f7
-[  719.883666] omap-mcbsp omap-mcbsp.1: SPCR1: 0x0037
-[  719.888977] omap-mcbsp omap-mcbsp.1: RCR2:  0x0000
-[  719.894104] omap-mcbsp omap-mcbsp.1: RCR1:  0x00a0
-[  719.898925] omap-mcbsp omap-mcbsp.1: XCR2:  0x0000
-[  719.904235] omap-mcbsp omap-mcbsp.1: XCR1:  0x00a0
-[  719.909057] omap-mcbsp omap-mcbsp.1: SRGR2: 0xc0fa
-[  719.914398] omap-mcbsp omap-mcbsp.1: SRGR1: 0x1f32
-[  719.919525] omap-mcbsp omap-mcbsp.1: PCR0:  0x0b0f
-[  719.924346] omap-mcbsp omap-mcbsp.1: XCCR:  0x1008
-[  719.929656] omap-mcbsp omap-mcbsp.1: RCCR:  0x0808
-[  719.934783] omap-mcbsp omap-mcbsp.1: ***********************
-[  719.940795] omap-mcbsp omap-mcbsp.1: SYSCON:  0x0214
-[  719.945800] omap-mcbsp omap-mcbsp.1: WAKEUPEN:  0x478f
-[  719.951477] omap-mcbsp omap-mcbsp.1: ***********************
-[  719.957489] omap-mcbsp omap-mcbsp.1: MCR2:  0x0000
-[  719.962310] omap-mcbsp omap-mcbsp.1: MCR1:  0x0000
-[  719.967620] omap-mcbsp omap-mcbsp.1: XCERA:  0x0000
-[  719.972839] omap-mcbsp omap-mcbsp.1: XCERB:  0x0000
-[  719.977752] omap-mcbsp omap-mcbsp.1: XCERC:  0x0000
-[  719.983154] omap-mcbsp omap-mcbsp.1: XCERD:  0x0000
-[  719.988403] omap-mcbsp omap-mcbsp.1: XCERE:  0x0000
-[  719.993286] omap-mcbsp omap-mcbsp.1: XCERF:  0x0000
-[  719.998718] omap-mcbsp omap-mcbsp.1: XCERG:  0x0000
-[  720.003936] omap-mcbsp omap-mcbsp.1: XCERH:  0x0000
-[  720.008850] omap-mcbsp omap-mcbsp.1: RCERA:  0x0000
-[  720.014251] omap-mcbsp omap-mcbsp.1: RCERB:  0x0000
-[  720.019470] omap-mcbsp omap-mcbsp.1: RCERC:  0x0000
-[  720.024383] omap-mcbsp omap-mcbsp.1: RCERD:  0x0000
-[  720.029785] omap-mcbsp omap-mcbsp.1: RCERE:  0x0000
-[  720.035003] omap-mcbsp omap-mcbsp.1: RCERF:  0x0000
-[  720.039916] omap-mcbsp omap-mcbsp.1: RCERG:  0x0000
-[  720.045318] omap-mcbsp omap-mcbsp.1: RCERH:  0x0000
-[  720.050537] omap-mcbsp omap-mcbsp.1: ***********************
-[  720.056243] omap_mcbsp_xmit_buffer: Now starting DMA...
-[  720.062011] omap-mcbsp omap-mcbsp.1: **** McBSP1 regs ****
-[  720.067840] omap-mcbsp omap-mcbsp.1: DRR2:  0x8f0000a5
-[  720.072998] omap-mcbsp omap-mcbsp.1: DRR1:  0x0000
-[  720.078308] omap-mcbsp omap-mcbsp.1: DXR2:  0x0000
-[  720.083465] omap-mcbsp omap-mcbsp.1: DXR1:  0x0000
-[  720.088287] omap-mcbsp omap-mcbsp.1: DRR (OMAP3530):  0x90000011
-[  720.094818] omap-mcbsp omap-mcbsp.1: DXR (OMAP3530):  0x0000
-[  720.100830] omap-mcbsp omap-mcbsp.1: SPCR2: 0x00f5
-[  720.105957] omap-mcbsp omap-mcbsp.1: SPCR1: 0x0037
-[  720.110778] omap-mcbsp omap-mcbsp.1: RCR2:  0x0000
-[  720.116088] omap-mcbsp omap-mcbsp.1: RCR1:  0x00a0
-[  720.121246] omap-mcbsp omap-mcbsp.1: XCR2:  0x0000
-[  720.126068] omap-mcbsp omap-mcbsp.1: XCR1:  0x00a0
-[  720.131378] omap-mcbsp omap-mcbsp.1: SRGR2: 0xc0fa
-[  720.136505] omap-mcbsp omap-mcbsp.1: SRGR1: 0x1f32
-[  720.141326] omap-mcbsp omap-mcbsp.1: PCR0:  0x0b0f
-[  720.146636] omap-mcbsp omap-mcbsp.1: XCCR:  0x1008
-[  720.151794] omap-mcbsp omap-mcbsp.1: RCCR:  0x0808
-[  720.156616] omap-mcbsp omap-mcbsp.1: ***********************
-[  720.162811] omap-mcbsp omap-mcbsp.1: SYSCON:  0x0214
-[  720.168121] omap-mcbsp omap-mcbsp.1: WAKEUPEN:  0x478f
-[  720.173278] omap-mcbsp omap-mcbsp.1: ***********************
-[  720.179473] omap-mcbsp omap-mcbsp.1: MCR2:  0x0000
-[  720.184600] omap-mcbsp omap-mcbsp.1: MCR1:  0x0000
-[  720.189422] omap-mcbsp omap-mcbsp.1: XCERA:  0x0000
-[  720.194824] omap-mcbsp omap-mcbsp.1: XCERB:  0x0000
-[  720.200042] omap-mcbsp omap-mcbsp.1: XCERC:  0x0000
-[  720.204956] omap-mcbsp omap-mcbsp.1: XCERD:  0x0000
-[  720.210357] omap-mcbsp omap-mcbsp.1: XCERE:  0x0000
-[  720.215606] omap-mcbsp omap-mcbsp.1: XCERF:  0x0000
-[  720.220489] omap-mcbsp omap-mcbsp.1: XCERG:  0x0000
-[  720.225921] omap-mcbsp omap-mcbsp.1: XCERH:  0x0000
-[  720.231140] omap-mcbsp omap-mcbsp.1: RCERA:  0x0000
-[  720.236053] omap-mcbsp omap-mcbsp.1: RCERB:  0x0000
-[  720.241455] omap-mcbsp omap-mcbsp.1: RCERC:  0x0000
-[  720.246673] omap-mcbsp omap-mcbsp.1: RCERD:  0x0000
-[  720.251586] omap-mcbsp omap-mcbsp.1: RCERE:  0x0000
-[  720.256988] omap-mcbsp omap-mcbsp.1: RCERF:  0x0000
-[  720.262207] omap-mcbsp omap-mcbsp.1: RCERG:  0x0000
-[  720.267120] omap-mcbsp omap-mcbsp.1: RCERH:  0x0000
-[  720.272521] omap-mcbsp omap-mcbsp.1: ***********************
-[  720.278533] omap_mcbsp_xmit_buffer: Now waiting for completion...
-[  720.657409] omap-mcbsp omap-mcbsp.1: TX DMA callback : 0xf5
-[  720.663116] Wrote to McBSP 1 via DMA! Return status: 0 
-[  720.668884] The first 40 of 896 values of the transferbuffer bufbuf after transmission are: 
-[  720.677703]  0x53c3c3ca,<1> 0x5c3c3c3a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7 
-[  720.693237]  0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7 
-[  720.708740]  0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7 
-[  720.724273]  0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7e7e7a,<1> 0x5e7 
-[  720.739807]  end. 
-[  720.741821] Now reading data from McBSP 1 via DMA! 
-[  720.747406] omap-mcbsp omap-mcbsp.1: McBSP1 RX DMA on channel 2
-[  720.753662] omap-mcbsp omap-mcbsp.1: **** McBSP1 regs ****
-[  720.759185] omap-mcbsp omap-mcbsp.1: DRR2:  0x910000a3
-[  720.764862] omap-mcbsp omap-mcbsp.1: DRR1:  0x0000
-[  720.770019] omap-mcbsp omap-mcbsp.1: DXR2:  0x0000
-[  720.774841] omap-mcbsp omap-mcbsp.1: DXR1:  0x0000
-[  720.780151] omap-mcbsp omap-mcbsp.1: DRR (OMAP3530):  0x92000022
-[  720.786499] omap-mcbsp omap-mcbsp.1: DXR (OMAP3530):  0x0000
-[  720.792510] omap-mcbsp omap-mcbsp.1: SPCR2: 0x00f7
-[  720.797332] omap-mcbsp omap-mcbsp.1: SPCR1: 0x0037
-[  720.802673] omap-mcbsp omap-mcbsp.1: RCR2:  0x0000
-[  720.807495] omap-mcbsp omap-mcbsp.1: RCR1:  0x00a0
-[  720.812805] omap-mcbsp omap-mcbsp.1: XCR2:  0x0000
-[  720.817932] omap-mcbsp omap-mcbsp.1: XCR1:  0x00a0
-[  720.822753] omap-mcbsp omap-mcbsp.1: SRGR2: 0xc0fa
-[  720.828094] omap-mcbsp omap-mcbsp.1: SRGR1: 0x1f32
-[  720.833221] omap-mcbsp omap-mcbsp.1: PCR0:  0x0b0f
-[  720.838043] omap-mcbsp omap-mcbsp.1: XCCR:  0x1008
-[  720.843353] omap-mcbsp omap-mcbsp.1: RCCR:  0x0808
-[  720.848480] omap-mcbsp omap-mcbsp.1: ***********************
-[  720.854187] omap-mcbsp omap-mcbsp.1: SYSCON:  0x0214
-[  720.859680] omap-mcbsp omap-mcbsp.1: WAKEUPEN:  0x478f
-[  720.865173] omap-mcbsp omap-mcbsp.1: ***********************
-[  720.871185] omap-mcbsp omap-mcbsp.1: MCR2:  0x0000
-[  720.876007] omap-mcbsp omap-mcbsp.1: MCR1:  0x0000
-[  720.881317] omap-mcbsp omap-mcbsp.1: XCERA:  0x0000
-[  720.886535] omap-mcbsp omap-mcbsp.1: XCERB:  0x0000
-[  720.891448] omap-mcbsp omap-mcbsp.1: XCERC:  0x0000
-[  720.896850] omap-mcbsp omap-mcbsp.1: XCERD:  0x0000
-[  720.902069] omap-mcbsp omap-mcbsp.1: XCERE:  0x0000
-[  720.906982] omap-mcbsp omap-mcbsp.1: XCERF:  0x0000
-[  720.912384] omap-mcbsp omap-mcbsp.1: XCERG:  0x0000
-[  720.917602] omap-mcbsp omap-mcbsp.1: XCERH:  0x0000
-[  720.922515] omap-mcbsp omap-mcbsp.1: RCERA:  0x0000
-[  720.927917] omap-mcbsp omap-mcbsp.1: RCERB:  0x0000
-[  720.933166] omap-mcbsp omap-mcbsp.1: RCERC:  0x0000
-[  720.938049] omap-mcbsp omap-mcbsp.1: RCERD:  0x0000
-[  720.943481] omap-mcbsp omap-mcbsp.1: RCERE:  0x0000
-[  720.948699] omap-mcbsp omap-mcbsp.1: RCERF:  0x0000
-[  720.953613] omap-mcbsp omap-mcbsp.1: RCERG:  0x0000
-[  720.959014] omap-mcbsp omap-mcbsp.1: RCERH:  0x0000
-[  720.964233] omap-mcbsp omap-mcbsp.1: ***********************
-[  720.969909] omap_mcbsp_recv_buffer: Now starting DMA...
-[  720.975677] omap-mcbsp omap-mcbsp.1: **** McBSP1 regs ****
-[  720.981506] omap-mcbsp omap-mcbsp.1: DRR2:  0x94000084
-[  720.986694] omap-mcbsp omap-mcbsp.1: DRR1:  0x0000
-[  720.992004] omap-mcbsp omap-mcbsp.1: DXR2:  0x0000
-[  720.997131] omap-mcbsp omap-mcbsp.1: DXR1:  0x0000
-[  721.001983] omap-mcbsp omap-mcbsp.1: DRR (OMAP3530):  0x8d0000e0
-[  721.008514] omap-mcbsp omap-mcbsp.1: DXR (OMAP3530):  0x0000
-[  721.014526] omap-mcbsp omap-mcbsp.1: SPCR2: 0x00f7
-[  721.019653] omap-mcbsp omap-mcbsp.1: SPCR1: 0x0031
-[  721.024475] omap-mcbsp omap-mcbsp.1: RCR2:  0x0000
-[  721.029785] omap-mcbsp omap-mcbsp.1: RCR1:  0x00a0
-[  721.034912] omap-mcbsp omap-mcbsp.1: XCR2:  0x0000
-[  721.039733] omap-mcbsp omap-mcbsp.1: XCR1:  0x00a0
-[  721.045074] omap-mcbsp omap-mcbsp.1: SRGR2: 0xc0fa
-[  721.050201] omap-mcbsp omap-mcbsp.1: SRGR1: 0x1f32
-[  721.055023] omap-mcbsp omap-mcbsp.1: PCR0:  0x0b0f
-[  721.060333] omap-mcbsp omap-mcbsp.1: XCCR:  0x1008
-[  721.065155] omap-mcbsp omap-mcbsp.1: RCCR:  0x0808
-[  721.070465] omap-mcbsp omap-mcbsp.1: ***********************
-[  721.076477] omap-mcbsp omap-mcbsp.1: SYSCON:  0x0214
-[  721.081787] omap-mcbsp omap-mcbsp.1: WAKEUPEN:  0x478f
-[  721.086944] omap-mcbsp omap-mcbsp.1: ***********************
-[  721.093139] omap-mcbsp omap-mcbsp.1: MCR2:  0x0000
-[  721.098297] omap-mcbsp omap-mcbsp.1: MCR1:  0x0000
-[  721.103118] omap-mcbsp omap-mcbsp.1: XCERA:  0x0000
-[  721.108520] omap-mcbsp omap-mcbsp.1: XCERB:  0x0000
-[  721.113739] omap-mcbsp omap-mcbsp.1: XCERC:  0x0000
-[  721.118652] omap-mcbsp omap-mcbsp.1: XCERD:  0x0000
-[  721.124053] omap-mcbsp omap-mcbsp.1: XCERE:  0x0000
-[  721.129272] omap-mcbsp omap-mcbsp.1: XCERF:  0x0000
-[  721.134185] omap-mcbsp omap-mcbsp.1: XCERG:  0x0000
-[  721.139587] omap-mcbsp omap-mcbsp.1: XCERH:  0x0000
-[  721.144805] omap-mcbsp omap-mcbsp.1: RCERA:  0x0000
-[  721.149719] omap-mcbsp omap-mcbsp.1: RCERB:  0x0000
-[  721.155120] omap-mcbsp omap-mcbsp.1: RCERC:  0x0000
-[  721.160339] omap-mcbsp omap-mcbsp.1: RCERD:  0x0000
-[  721.165252] omap-mcbsp omap-mcbsp.1: RCERE:  0x0000
-[  721.170654] omap-mcbsp omap-mcbsp.1: RCERF:  0x0000
-[  721.175872] omap-mcbsp omap-mcbsp.1: RCERG:  0x0000
-[  721.180786] omap-mcbsp omap-mcbsp.1: RCERH:  0x0000
-[  721.186187] omap-mcbsp omap-mcbsp.1: ***********************
-[  721.192199] omap_mcbsp_recv_buffer: Now waiting for completion...
-[  721.571228] omap-mcbsp omap-mcbsp.1: RX DMA callback : 0xf7
-[  721.576965] Read from McBSP 1 via DMA! Return status: 0 
-[  721.582885] The first millions of 896 values of the transferbuffer bufbuf after reception are: 
-[  721.591979]  0x930000bb,<1> 0x94000020,<1> 0x95000041,<1> 0x96000030,<1> 0x97000075,<1> 0x88f6fb47,<1> 0x89000115,<1> 0x8a000132,<1> 0x8b0000b8,<1> 0x8c0 
-[  721.615783]  0x9300007c,<1> 0x94000084,<1> 0x9500007e,<1> 0x9600008b,<1> 0x97000076,<1> 0x88f6fb94,<1> 0x89000110,<1> 0x8a0000cc,<1> 0x8b0000d4,<1> 0x8c0 
-[  721.639556]  0x9300006a,<1> 0x94000049,<1> 0x950000b9,<1> 0x96000097,<1> 0x97000095,<1> 0x88f6fbab,<1> 0x890000ff,<1> 0x8a000066,<1> 0x8b00011e,<1> 0x8c0 
-[  721.663299]  0x93000061,<1> 0x9400004f,<1> 0x95000090,<1> 0x96000054,<1> 0x97000075,<1> 0x88f6fb86,<1> 0x890000d6,<1> 0x8a00000a,<1> 0x8b000117,<1> 0x8c0 
-[  721.687072]  0x93000003,<1> 0x94000052,<1> 0x95000077,<1> 0x96000053,<1> 0x970000b5,<1> 0x88f6fb66,<1> 0x890000f5,<1> 0x8a0000d9,<1> 0x8b000145,<1> 0x8c0 
-[  721.710845]  0x93000006,<1> 0x94000003,<1> 0x950000fa,<1> 0x96000058,<1> 0x970000cc,<1> 0x88f6fbc3,<1> 0x89000134,<1> 0x8a0000bf,<1> 0x8b0000d4,<1> 0x8c0 
-[  721.734588]  0x9300003e,<1> 0x94000014,<1> 0x9500003e,<1> 0x96000027,<1> 0x97000060,<1> 0x88f6fb3d,<1> 0x890000cb,<1> 0x8a0000a5,<1> 0x8b000063,<1> 0x8c0 
-[  721.758361]  0x93000063,<1> 0x9400005f,<1> 0x95000094,<1> 0x960000b1,<1> 0x9700009b,<1> 0x88f6fb4a,<1> 0x89000151,<1> 0x96000031,<1> 0x8f000088,<1> 0x8a0 
-[  721.782104]  0x970000d9,<1> 0x88f6fb8e,<1> 0x89000102,<1> 0x8a0000eb,<1> 0x8b0000bd,<1> 0x8c000078,<1> 0x8d0000aa,<1> 0x8e0000a1,<1> 0x8f000059,<1> 0x900 
-[  721.805877]  0x97000095,<1> 0x88f6fb58,<1> 0x89000117,<1> 0x8a0000b4,<1> 0x8b000088,<1> 0x8c0000f5,<1> 0x8d000052,<1> 0x8e000094,<1> 0x8f000086,<1> 0x900 
-[  721.829620]  0x9700009a,<1> 0x88f6fbb4,<1> 0x890000e5,<1> 0x8a0000b5,<1> 0x8b0000c0,<1> 0x8c00009f,<1> 0x8d00006e,<1> 0x8e000078,<1> 0x8f000089,<1> 0x900 
-[  721.853363]  0x970000c2,<1> 0x88f6fbc6,<1> 0x89000112,<1> 0x8a0000cb,<1> 0x8b0000a7,<1> 0x8c00005c,<1> 0x8d0000d4,<1> 0x8e000079,<1> 0x8f000104,<1> 0x900 
-[  721.877136]  0x97000087,<1> 0x88f6fb48,<1> 0x89000175,<1> 0x8a000098,<1> 0x8b00009c,<1> 0x8c0000a3,<1> 0x8d0000ca,<1> 0x8e000058,<1> 0x8f000032,<1> 0x90f 
-[  721.900878]  0x97000110,<1> 0x88f6fb4d,<1> 0x8900011f,<1> 0x8a0000c6,<1> 0x8b0000a6,<1> 0x8c000066,<1> 0x8d0000b0,<1> 0x8e000067,<1> 0x8f000079,<1> 0x900 
-[  721.924652]  0x97000079,<1> 0x88f6fba0,<1> 0x890000f1,<1> 0x8a0000b8,<1> 0x8b00009d,<1> 0x8c0000a1,<1> 0x8d000105,<1> 0x8e00007e,<1> 0x8f000076,<1> 0x900 
-[  721.948699]  0x9700009c,<1> 0x88f6fbf2,<1> 0x890000a3,<1> 0x8a0000cc,<1> 0x8b000119,<1> 0x8c000051,<1> 0x8d000036,<1> 0x8e00006a,<1> 0x8f00009d,<1> 0x900 
-[  721.972473]  0x970000b9,<1> 0x88f6fb7c,<1> 0x8900014b,<1> 0x8a0000a5,<1> 0x8b000076,<1> 0x8c0000cd,<1> 0x8d000093,<1> 0x8e0000a1,<1> 0x8f000058,<1> 0x900 
-[  721.996246]  0x970000c0,<1> 0x88f6fb3f,<1> 0x89000124,<1> 0x8a00010d,<1> 0x8b000093,<1> 0x8c00008c,<1> 0x8d0000a3,<1> 0x8e0000b9,<1> 0x8f000049,<1> 0x900 
-[  722.019989]  0x97000097,<1> 0x88f6fbcc,<1> 0x890000b4,<1> 0x8a00003a,<1> 0x8b000054,<1> 0x8c0000ca,<1> 0x8d0000db,<1> 0x8e0000a6,<1> 0x8f0000a1,<1> 0x900 
-[  722.043762]  0x970000ea,<1> 0x88f6fb8c,<1> 0x890000e6,<1> 0x8a0000de,<1> 0x8b000096,<1> 0x8c0000d3,<1> 0x8d00008a,<1> 0x8e0000c3,<1> 0x8f000092,<1> 0x900 
-[  722.067504]  0x9700010a,<1> 0x88f6fb83,<1> 0x8900011c,<1> 0x8a0000d9,<1> 0x8b0000cd,<1> 0x8c00006a,<1> 0x8d000063,<1> 0x8e000064,<1> 0x8f000089,<1> 0x900 
-[  722.091278]  0x970000a5,<1> 0x88f6fb9c,<1> 0x890000e3,<1> 0x8a0000a4,<1> 0x8b0000e7,<1> 0x8c0000a3,<1> 0x8d0000a8,<1> 0x8e00009c,<1> 0x8f0000b3,<1> 0x900 
-[  722.115020]  0x970000ba,<1> 0x88f6fbad,<1> 0x89000198,<1> 0x8a0000b2,<1> 0x8b0000c3,<1> 0x8c000051,<1> 0x8d000086,<1> 0x8e000087,<1> 0x8f000054,<1> 0x900 
-[  722.138763]  0x970000c7,<1> 0x88f6fb8e,<1> 0x8900010d,<1> 0x8a0000fa,<1> 0x8b00006d,<1> 0x8c000089,<1> 0x8d0000c2,<1> 0x8e0000bd,<1> 0x8f000096,<1> 0x900 
-[  722.162536]  0x97000087,<1> 0x88f6fba0,<1> 0x8900015d,<1> 0x8a000121,<1> 0x8b0000ca,<1> 0x8c00006e,<1> 0x8d00012d,<1> 0x8e000099,<1> 0x8f00005b,<1> 0x900 
-[  722.186279]  0x97000092,<1> 0x88f6fb8f,<1> 0x890000da,<1> 0x8a00005c,<1> 0x8b00008f,<1> 0x8c00008c,<1> 0x8d000080,<1> 0x8e000068,<1> 0x8f000067,<1> 0x900 
-[  722.210021]  0x970000a3,<1> 0x88f6fb82,<1> 0x89000123,<1> 0x8a0000c9,<1> 0x8b0000bd,<1> 0x8c00008f,<1> 0x8d0000a7,<1> 0x8e0000a9,<1> 0x8f000077,<1> 0x900 
-[  722.233795]  0x9700007e,<1> 0x88f6fbe0,<1> 0x89000144,<1> 0x8a0000d5,<1> 0x8b0000c1,<1> 0x8c00008e,<1> 0x8d0000a5,<1> 0x8e000075,<1> 0x8f000087,<1> 0x900 
-[  722.257537]  0x970000ae,<1> 0x88f6fb61,<1> 0x890000e3,<1> 0x8a0000b4,<1> 0x8b00009a,<1> 0x8c000022,<1> 0x8d0000be,<1> 0x8e0000e0,<1> 0x8f000075,<1> 0x900 
-[  722.281311]  0x97000104,<1> 0x88f6fb4f,<1> 0x89000121,<1> 0x8a0000a1,<1> 0x8b0000c4,<1> 0x8c00008e,<1> 0x8d0000d9,<1> 0x8e0000b8,<1> 0x8f0000d8,<1> 0x900 
-[  722.305053]  0x97000059,<1> 0x88f6fbc3,<1> 0x89000185,<1> 0x8a0000ee,<1> 0x8b0000a7,<1> 0x8c0000fe,<1> 0x8d000041,<1> 0x8e00007d,<1> 0x8f0000cc,<1> 0x900 
-[  722.328796]  0x97000084,<1> 0x88f6fc0f,<1> 0x89000137,<1> 0x8a0000e0,<1> 0x8b0000d6,<1> 0x8c000035,<1> 0x8d00008d,<1> 0x8e0000cd,<1> 0x8f00005c,<1> 0x900 
-[  722.352569]  0x970000a6,<1> 0x88f6fbee,<1> 0x890000e1,<1> 0x8a0000c1,<1> 0x8b000081,<1> 0x8c000081,<1> 0x8d000079,<1> 0x8e000090,<1> 0x8f000059,<1> 0x900 
-[  722.376312]  0x97000068,<1> 0x88f6fbfc,<1> 0x890000c8,<1> 0x8a0000d8,<1> 0x8b0000ce,<1> 0x8c0000a8,<1> 0x8d000070,<1> 0x8e0000dc,<1> 0x8f000076,<1> 0x900 
-[  722.400085]  0x97000083,<1> 0x88f6fb57,<1> 0x8900018b,<1> 0x8a0000ce,<1> 0x8b0000bd,<1> 0x8c0000b5,<1> 0x8d0000ad,<1> 0x8e00006d,<1> 0x8f00006a,<1> 0x900 
-[  722.423828]  0x97000094,<1> 0x88f6fbf0,<1> 0x8900000b,<1> 0x8a00005f,<1> 0x8b00016b,<1> 0x8c000025,<1> 0x8d00008e,<1> 0x8e000028,<1> 0x8f000091,<1> 0x900 
-[  722.447570]  0x970000bf,<1> 0x88f6fb6a,<1> 0x89000142,<1> 0x8a0000aa,<1> 0x8b0000b1,<1> 0x8c0000c2,<1> 0x8d000012,<1> 0x8e00007b,<1> 0x8f000006,<1> 0x900 
-[  722.471343]  0x97000027,<1> 0x88f6fb7f,<1> 0x89000122,<1> 0x8a0000d9,<1> 0x8b000105,<1> 0x8c000098,<1> 0x8d0000e4,<1> 0x8e0000d4,<1> 0x8f000021,<1> 0x900 
-[  722.495391]  0x970000c9,<1> 0x88f6fb8f,<1> 0x89000125,<1> 0x8a0000bb,<1> 0x8b00009a,<1> 0x8c00006c,<1> 0x8d00006a,<1> 0x8e00008d,<1> 0x8f000052,<1> 0x900 
-[  722.519165]  0x97000092,<1> 0x88f6fb45,<1> 0x89000126,<1> 0x8a0000a1,<1> 0x8b00004f,<1> 0x8c000096,<1> 0x8d00006f,<1> 0x8e000056,<1> 0x8f000040,<1> 0x900 
-[  722.542907]  0x970000e1,<1> 0x88f6fc11,<1> 0x89000105,<1> 0x8a0000b4,<1> 0x8b0000bc,<1> 0x8c0000c9,<1> 0x8d0000e1,<1> 0x8e000091,<1> 0x8f000057,<1> 0x900 
-[  722.566680]  0x970000bb,<1> 0x88f6fb9c,<1> 0x89000128,<1> 0x8a0000d7,<1> 0x8b000068,<1> 0x8c0000a0,<1> 0x8d0000f2,<1> 0x8e000042,<1> 0x8f000075,<1> 0x900 
-[  722.590423]  0x9700008d,<1> 0x88f6fc00,<1> 0x890000ff,<1> 0x8a0000d8,<1> 0x8b000066,<1> 0x8c0000bb,<1> 0x8d000018,<1> 0x8e0000b6,<1> 0x8f000045,<1> 0x900 
-[  722.614196]  0x970000fc,<1> 0x88f6fc04,<1> 0x890000e9,<1> 0x8a000086,<1> 0x8b00006d,<1> 0x8c000061,<1> 0x8dfffff2,<1> 0x8e000017,<1> 0x8f0000aa,<1> 0x900 
-[  722.637939]  0x97000082,<1> 0x88f6fb50,<1> 0x8900011e,<1> 0x8a0000b5,<1> 0x8b0000b5,<1> 0x8c0000b5,<1> 0x8d00008c,<1> 0x8e00007f,<1> 0x8f000046,<1> 0x900 
-[  722.661682]  0x970000a7,<1> 0x88f6fb67,<1> 0x8900013c,<1> 0x8a0000ca,<1> 0x8b0000c0,<1> 0x8c000071,<1> 0x8d0000d7,<1> 0x8e000049,<1> 0x8f000062,<1> 0x900 
-[  722.685455]  0x970000e7,<1> 0x88f6fb74,<1> 0x890000e0,<1> 0x8a0000c6,<1> 0x8b000094,<1> 0x8c000099,<1> 0x8d000004,<1> 0x8e000061,<1> 0x8f00005e,<1> 0x900 
-[  722.709197]  0x97000079,<1> 0x88f6fb51,<1> 0x89000127,<1> 0x8a0000fd,<1> 0x8b0000da,<1> 0x8c00006d,<1> 0x8d000088,<1> 0x8e0000b3,<1> 0x8f000097,<1> 0x900 
-[  722.732971]  0x970000a5,<1> 0x88f6fc3f,<1> 0x89000138,<1> 0x8a000111,<1> 0x8b0000e3,<1> 0x8c0000b4,<1> 0x8d000103,<1> 0x8e000015,<1> 0x8f0000b4,<1> 0x900 
-[  722.756713]  0x97000108,<1> 0x88f6fb83,<1> 0x8900008a,<1> 0x8a00006f,<1> 0x8b0000b7,<1> 0x8c0000a6,<1> 0x8d000015,<1> 0x8e0000f6,<1> 0x8f000082,<1> 0x900 
-[  722.780487]  0x97000089,<1> 0x88f6fbd4,<1> 0x89000103,<1> 0x8a000079,<1> 0x8b0000d8,<1> 0x8c00007f,<1> 0x8d0000f8,<1> 0x8e000063,<1> 0x8f000082,<1> 0x900 
-[  722.804229]  0x97000049,<1> 0x88f6fb87,<1> 0x8900015b,<1> 0x8a0000d6,<1> 0x8b0000fb,<1> 0x8c000086,<1> 0x8d00005d,<1> 0x8e000092,<1> 0x8f000077,<1> 0x900 
-[  722.828002]  0x970000ad,<1> 0x88f6fb75,<1> 0x89000113,<1> 0x8a0000c1,<1> 0x8b00002e,<1> 0x8c000085,<1> 0x8d000058,<1> 0x8e000095,<1> 0x8f00003d,<1> 0x900 
-[  722.851745]  0x9700010b,<1> 0x88f6fc07,<1> 0x890000e6,<1> 0x8a0000d2,<1> 0x8b000099,<1> 0x8c00008c,<1> 0x8d000093,<1> 0x8e0000b8,<1> 0x8f00007d,<1> 0x900 
-[  722.875488]  0x970000be,<1> 0x88f6fbaf,<1> 0x89000151,<1> 0x8a0000b7,<1> 0x8b00004f,<1> 0x8c00004c,<1> 0x8d00007e,<1> 0x8e000087,<1> 0x8f000057,<1> 0x900 
-[  722.899230]  0x970000bc,<1> 0x88f6fb8e,<1> 0x8900012f,<1> 0x8a0000e4,<1> 0x8b0000bb,<1> 0x8c000083,<1> 0x8d00006a,<1> 0x8e00008e,<1> 0x8f00005c,<1> 0x900 
-[  722.923004]  end. 
-root@beagleboard:~# 
-root@beagleboard:~# 
-root@beagleboard:~# rmmod helloMcBSP.ko 
-[  727.370697] Stopping McBSP 1...<1>Freeing McBSP 1...<1>done.
-[  727.376434] Goodbye, McBSP world
-root@beagleboard:~# 
-root@beagleboard:~# 
+[ 2748.984771] Hello McBSP world!
+[ 2748.987884] Gpio 134 (ADS1258EVM-clockselect) was requested. Return status: -16
+[ 2748.996032] Setting gpio134 (ADS1258EVM-clockselect) as output, value 1=EXTERNAL clock from BB. Return status: 0
+[ 2749.006683] Setting IO type was 0. Requesting McBSP 1 returned: 0 
+[ 2749.013305] Configured McBSP 1 registers for raw mode..
+[ 2749.019012] Started McBSP 1. 
+[ 2749.022003] Now reading data from McBSP 1 in SPI mode... 
+[ 2749.027923] Reading from McBSP 1 in SPI mode returned as status: 0 and as value: 0x9b3d 
+[ 2749.036407] Now writing data to McBSP 1 in SPI mode... 
+[ 2749.041992] Writing to McBSP 1 in SPI mode returned as status: 0 
+[ 2749.048461] Now writing data to McBSP 1 (raw & polled)... 
+[ 2749.053985] Writing to McBSP 1 (raw, polled mode) returned as status: 0 
+[ 2749.061248] Now writing 2nd data to McBSP 1 (raw & polled)... 
+[ 2749.067413] Writing to McBSP 1 (raw, polled mode) returned as status: 0 
+[ 2749.074493] Now reading data from McBSP 1 (raw & polled)... 
+[ 2749.080505] Reading from McBSP 1 (raw, polled mode) returned as status: 0 and as value 0x9b3d 
+[ 2749.089508] Now writing data to McBSP 1 via DMA! 
+[ 2749.094573] omap-mcbsp omap-mcbsp.1: McBSP1 TX DMA on channel 2
+[ 2749.696044] Wrote to McBSP 1 via DMA! Return status: 0 
+[ 2749.701324] The first 40 of 896 values of the transferbuffer bufbuf after transmission are: 
+[ 2749.710418] trans: 
+[ 2749.710418]  0x53c3c3ca, 0x5c3c3c3a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e 
+[ 2749.731597]     0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7e7e7a, 0x5e7 
+[ 2749.750701]  end. 
+[ 2749.752716] Now reading data from McBSP 1 via DMA! 
+[ 2749.758117] omap-mcbsp omap-mcbsp.1: McBSP1 RX DMA on channel 2
+[ 2750.359954] Read from McBSP 1 via DMA! Return status: 0 
+[ 2750.365295] The first millions of 896 values of the transferbuffer bufbuf after reception are: 
+[ 2750.374633] receive: 
+[ 2750.374664]  0x92000033, 0x9300007c, 0x94000020, 0x95000065, 0x96000018, 0x97000050, 0x88f6fa86, 0x89000058, 0x8a000050, 0x8b0000c4, 0x8c000085, 0x8d0000 
+[ 2750.395874]     0x92000050, 0x93000090, 0x9400003c, 0x95000090, 0x9600005a, 0x9700009f, 0x88f6fa8b, 0x890000f5, 0x8a0000de, 0x8b0000b3, 0x8c000097, 0x8d0 
+[ 2750.414947]     0x92000044, 0x93000078, 0x9400005d, 0x95000085, 0x96000040, 0x970000af, 0x88f6faf1, 0x890000c0, 0x8a0000a6, 0x8b0000b6, 0x8c000076, 0x8d0 
+[ 2750.433990]     0x9200003a, 0x9300005f, 0x94000023, 0x950000aa, 0x9600004c, 0x970000a0, 0x88f6faee, 0x890000ee, 0x8a000093, 0x8b0000a0, 0x8c0000a9, 0x8d0 
+[ 2750.453094]     0x9200003b, 0x93000063, 0x94000040, 0x95000082, 0x96000028, 0x970000ac, 0x88f6fa6b, 0x890000fc, 0x8a0000df, 0x8b0000b9, 0x8c000096, 0x8d0 
+[ 2750.472167]     0x92000049, 0x93000091, 0x9400005d, 0x9500007d, 0x9600003f, 0x970000b2, 0x88f6faae, 0x890000f2, 0x8a0000ae, 0x8b000099, 0x8c00008e, 0x8d0 
+[ 2750.491210]     0x92000020, 0x93000073, 0x9400004d, 0x9500007c, 0x96000056, 0x970000a3, 0x88f6fad8, 0x890000e8, 0x8a0000a3, 0x8b0000a8, 0x8c000085, 0x8d0 
+[ 2750.510253]     0x92000053, 0x93000069, 0x94000040, 0x9500008f, 0x9600005d, 0x970000c6, 0x88f6fa74, 0x89000136, 0x8a0000c6, 0x8b0000af, 0x8c0000b5, 0x8d0 
+[ 2750.529296]     0x90000027, 0x91000046, 0x9200003c, 0x93000086, 0x9400001f, 0x95000082, 0x96000075, 0x970000a1, 0x88f6fab1, 0x89000109, 0x8a0000a3, 0x8b0 
+[ 2750.548370]     0x90000031, 0x91000034, 0x9200003a, 0x9300007b, 0x9400004a, 0x9500008a, 0x96000064, 0x970000b4, 0x88f6fb0d, 0x890000e1, 0x8a0000a4, 0x8b0 
+[ 2750.567413]     0x90000036, 0x91000038, 0x9200004f, 0x93000079, 0x9400006c, 0x95000096, 0x96000050, 0x970000ae, 0x88f6fa80, 0x890000fb, 0x8a0000b5, 0x8b0 
+[ 2750.586456]     0x90000050, 0x9100003b, 0x92000053, 0x93000065, 0x94000044, 0x95000096, 0x96000053, 0x970000b8, 0x88f6fa42, 0x89000135, 0x8a0000cf, 0x8b0 
+[ 2750.605499]     0x90000054, 0x91000036, 0x92000061, 0x93000074, 0x94000044, 0x95000082, 0x96000038, 0x970000b5, 0x88f6fa7e, 0x890000fa, 0x8a000082, 0x8b0 
+[ 2750.624572]     0x9000004b, 0x9100003c, 0x92000035, 0x9300006e, 0x94000037, 0x950000a3, 0x9600004a, 0x970000aa, 0x88f6fa8d, 0x890000df, 0x8a000099, 0x8b0 
+[ 2750.643615]     0x9000004d, 0x9100003a, 0x92000044, 0x93000081, 0x94000022, 0x950000aa, 0x96000055, 0x97000098, 0x88f6fa46, 0x8900012b, 0x8a0000b5, 0x8b0 
+[ 2750.662658]     0x90000035, 0x91000032, 0x9200003f, 0x9300007e, 0x94000046, 0x95000080, 0x9600002a, 0x970000c7, 0x88f6fa4b, 0x8900012b, 0x8a0000bd, 0x8b0 
+[ 2750.681701]     0x90000036, 0x91000033, 0x92000063, 0x93000057, 0x94000013, 0x95000073, 0x96000043, 0x970000cd, 0x88f6fa90, 0x890000eb, 0x8a0000b0, 0x8b0 
+[ 2750.700988]     0x90000042, 0x9100002c, 0x92000049, 0x9300006c, 0x9400003b, 0x95000099, 0x96000054, 0x970000a9, 0x88f6fa96, 0x890000e9, 0x8a0000a8, 0x8b0 
+[ 2750.720092]     0x90000041, 0x91000036, 0x92000036, 0x930000aa, 0x9400004a, 0x95000089, 0x96000057, 0x970000ae, 0x88f6fa72, 0x8900011c, 0x8a0000c8, 0x8b0 
+[ 2750.739166]     0x90000049, 0x9100004b, 0x92000038, 0x93000064, 0x94000053, 0x950000aa, 0x9600003f, 0x970000b4, 0x88f6fa90, 0x890000e1, 0x8a0000a4, 0x8b0 
+[ 2750.758209]     0x90000039, 0x9100003b, 0x92000042, 0x93000087, 0x94000036, 0x9500008d, 0x9600005f, 0x970000c7, 0x88f6fa95, 0x890000c3, 0x8a00008c, 0x8b0 
+[ 2750.777282]     0x90000043, 0x91000067, 0x9200003e, 0x9300008c, 0x94000031, 0x95000095, 0x96000059, 0x970000a0, 0x88f6fa53, 0x89000104, 0x8a0000c2, 0x8b0 
+[ 2750.796325]     0x90000037, 0x91000052, 0x9200004b, 0x9300006c, 0x9400005c, 0x950000a7, 0x9600005d, 0x970000c1, 0x88f6fa74, 0x8900010f, 0x8a0000bd, 0x8b0 
+[ 2750.815399]     0x9000002c, 0x9100003f, 0x92000042, 0x93000077, 0x94000057, 0x95000099, 0x9600005b, 0x970000bf, 0x88f6faaa, 0x890000c5, 0x8a000085, 0x8b0 
+[ 2750.834442]     0x90000033, 0x91000058, 0x92000037, 0x93000072, 0x9400005b, 0x95000097, 0x96000043, 0x97000093, 0x88f6fa55, 0x89000106, 0x8a00009b, 0x8b0 
+[ 2750.853485]     0x90000050, 0x9100004d, 0x9200002f, 0x93000091, 0x94000044, 0x95000083, 0x9600005d, 0x970000b3, 0x88f6fa44, 0x89000133, 0x8a0000c0, 0x8b0 
+[ 2750.872528]     0x90000027, 0x91000036, 0x92000020, 0x9300004d, 0x94000038, 0x95000087, 0x9600005b, 0x970000b5, 0x88f6fa7e, 0x890000f3, 0x8a000095, 0x8b0 
+[ 2750.891601]     0x9000001e, 0x91000053, 0x92000041, 0x9300008f, 0x9400003b, 0x95000080, 0x9600004a, 0x970000bc, 0x88f6fabd, 0x890000e0, 0x8a0000ae, 0x8b0 
+[ 2750.910644]     0x90000032, 0x9100003f, 0x9200004a, 0x93000073, 0x94000053, 0x95000089, 0x9600004c, 0x970000bb, 0x88f6fa41, 0x89000112, 0x8a0000c2, 0x8b0 
+[ 2750.929718]     0x9000002c, 0x91000045, 0x92000038, 0x9300008b, 0x94000051, 0x950000b9, 0x96000067, 0x970000bc, 0x88f6fa81, 0x8900011b, 0x8a0000c1, 0x8b0 
+[ 2750.948760]     0x90000048, 0x91000023, 0x9200003a, 0x93000068, 0x94000048, 0x9500008a, 0x96000041, 0x970000ba, 0x88f6fa90, 0x890000e6, 0x8a0000b5, 0x8b0 
+[ 2750.967803]     0x90000034, 0x91000052, 0x9200003e, 0x9300004b, 0x94000039, 0x95000077, 0x96000051, 0x97000098, 0x88f6fa74, 0x890000dc, 0x8a0000b1, 0x8b0 
+[ 2750.986877]     0x90000011, 0x91000037, 0x9200003c, 0x93000067, 0x94000017, 0x9500008a, 0x9600006d, 0x970000a9, 0x88f6fa7c, 0x89000125, 0x8a0000d5, 0x8b0 
+[ 2751.005920]     0x90000062, 0x9100003e, 0x9200003c, 0x93000071, 0x94000042, 0x950000a2, 0x96000063, 0x970000ba, 0x88f6fab7, 0x890000f6, 0x8a0000a0, 0x8b0 
+[ 2751.024963]     0x90000053, 0x9100004f, 0x92000041, 0x93000071, 0x9400004c, 0x9500009a, 0x96000065, 0x9700009c, 0x88f6faec, 0x890000f2, 0x8a000090, 0x8b0 
+[ 2751.044036]     0x90000037, 0x9100000c, 0x92000052, 0x9300007e, 0x94000055, 0x95000091, 0x96000056, 0x970000a5, 0x88f6faa0, 0x89000115, 0x8a0000b8, 0x8b0 
+[ 2751.063079]     0x90000047, 0x9100003a, 0x92000047, 0x93000096, 0x9400003f, 0x950000b8, 0x96000050, 0x970000a8, 0x88f6fa7a, 0x8900011b, 0x8a0000b3, 0x8b0 
+[ 2751.082122]     0x90000025, 0x91000043, 0x9200003d, 0x9300005b, 0x9400003c, 0x95000089, 0x96000065, 0x970000a9, 0x88f6fabd, 0x890000d5, 0x8a00008e, 0x8b0 
+[ 2751.101196]     0x90000045, 0x9100003c, 0x9200003e, 0x9300005c, 0x94000045, 0x950000d0, 0x9600005b, 0x970000bb, 0x88f6fa72, 0x890000f6, 0x8a0000ab, 0x8b0 
+[ 2751.120239]     0x90000038, 0x91000033, 0x92000049, 0x9300005f, 0x9400002e, 0x9500007b, 0x9600005c, 0x970000a6, 0x88f6fa41, 0x8900013e, 0x8a0000c6, 0x8b0 
+[ 2751.139282]     0x90000028, 0x91000052, 0x9200001e, 0x93000075, 0x94000067, 0x9500009a, 0x96000035, 0x970000bf, 0x88f6faab, 0x89000101, 0x8a00009b, 0x8b0 
+[ 2751.158355]     0x90000047, 0x9100002f, 0x9200002a, 0x9300007e, 0x94000043, 0x95000090, 0x96000061, 0x970000bd, 0x88f6fa99, 0x890000bd, 0x8a00007d, 0x8b0 
+[ 2751.177398]     0x90000057, 0x9100001e, 0x92000055, 0x93000075, 0x94000053, 0x95000077, 0x9600004d, 0x970000c1, 0x88f6fa9a, 0x89000138, 0x8a0000e2, 0x8b0 
+[ 2751.196441]     0x90000032, 0x91000050, 0x9200005a, 0x9300005d, 0x9400005e, 0x95000097, 0x9600004f, 0x97000096, 0x88f6fa7d, 0x8900011b, 0x8a0000b2, 0x8b0 
+[ 2751.215515]     0x90000065, 0x9100004f, 0x92000050, 0x9300007d, 0x9400004f, 0x950000a2, 0x96000057, 0x970000aa, 0x88f6faad, 0x890000f0, 0x8a0000a4, 0x8b0 
+[ 2751.234558]     0x90000023, 0x91000047, 0x9200002a, 0x93000074, 0x9400002b, 0x9500008e, 0x96000058, 0x970000b8, 0x88f6fa7a, 0x89000102, 0x8a0000b1, 0x8b0 
+[ 2751.253601]     0x90000033, 0x91000041, 0x9200001e, 0x9300008b, 0x9400005a, 0x950000a4, 0x96000057, 0x970000b6, 0x88f6fa94, 0x89000126, 0x8a0000bc, 0x8b0 
+[ 2751.272644]     0x9000003a, 0x91000040, 0x92000059, 0x93000089, 0x94000045, 0x95000099, 0x96000065, 0x970000b4, 0x88f6fad1, 0x890000fc, 0x8a0000ad, 0x8b0 
+[ 2751.291687]     0x90000051, 0x91000064, 0x92000056, 0x93000087, 0x94000049, 0x9500009e, 0x9600005f, 0x970000d5, 0x88f6fad6, 0x890000e5, 0x8a00007d, 0x8b0 
+[ 2751.310760]     0x9000003d, 0x91000038, 0x9200005e, 0x93000072, 0x94000049, 0x9500009b, 0x96000034, 0x970000cf, 0x88f6fa42, 0x89000137, 0x8a0000c5, 0x8b0 
+[ 2751.329803]     0x9000001b, 0x9100005c, 0x92000050, 0x9300007b, 0x94000061, 0x95000077, 0x96000064, 0x970000a6, 0x88f6fa80, 0x890000cc, 0x8a0000ca, 0x8b0 
+[ 2751.348846]     0x9000004a, 0x91000040, 0x92000045, 0x93000083, 0x94000030, 0x95000094, 0x96000058, 0x97000082, 0x88f6fa6b, 0x890000d4, 0x8a00007a, 0x8b0 
+[ 2751.367919]     0x90000047, 0x9100005e, 0x92000021, 0x93000070, 0x9400003d, 0x9500007b, 0x9600004f, 0x970000a5, 0x88f6faa4, 0x89000112, 0x8a000087, 0x8b0 
+[ 2751.386962]     0x9000002f, 0x9100002e, 0x92000049, 0x9300007c, 0x9400004a, 0x9500007a, 0x9600004e, 0x970000a6, 0x88f6fa5c, 0x89000136, 0x8a0000e9, 0x8b0 
+[ 2751.406066]     0x9000002a, 0x91000047, 0x9200003d, 0x93000058, 0x9400004f, 0x9500007b, 0x9600004c, 0x970000b3, 0x88f6fa7d, 0x89000111, 0x8a0000a9, 0x8b0 
+[ 2751.425109]     0x90000058, 0x91000067, 0x9200003f, 0x9300007a, 0x9400002a, 0x950000a8, 0x96000040, 0x970000da, 0x88f6fa54, 0x890000d8, 0x8a00009c, 0x8b0 
+[ 2751.444091]  end. 
 root@beagleboard:~# 
 

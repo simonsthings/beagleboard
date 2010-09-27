@@ -6,8 +6,8 @@
 
 KERNEL_VERSION := `2.6.31`
 #KERNEL_DIR := /opt/oe/angstrom-dev/work/beagleboard-angstrom-linux-gnueabi/linux-omap-2.6.32-r89/git
-KERNEL_DIR := /opt/oe/old-angstrom-dev/work/beagleboard-angstrom-linux-gnueabi/linux-omap-2.6.29-r46/git
-#KERNEL_DIR := /opt/oe/angstrom-dev/work/beagleboard-angstrom-linux-gnueabi/linux-omap-2.6.31-r89/git
+#KERNEL_DIR := /opt/oe/old-angstrom-dev/work/beagleboard-angstrom-linux-gnueabi/linux-omap-2.6.29-r46/git
+KERNEL_DIR := /opt/oe/angstrom-dev/work/beagleboard-angstrom-linux-gnueabi/linux-omap-2.6.31-r89/git
 #KERNEL_DIR := /opt/oe/angstrom-dev/sysroots/beagleboard-angstrom-linux-gnueabi/kernel/
 KERNEL_CROSS := /opt/oe/angstrom-dev/sysroots/i686-linux/usr/armv7a/bin/arm-angstrom-linux-gnueabi-
 

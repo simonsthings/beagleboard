@@ -79,6 +79,7 @@ int hello_init(void)
 	u32 mybuffer = 0x5CCC333A; // 01011100110011000011001100111010
 	u32 mybuffer2 = 0x53CA; // 0101 00111100 1010
 	int i;
+	char printtemp[500];
 
 	int bufbufsize = 128 * 7; // number of array elements
 	int bytesPerVal = 4; // number of bytes per array element (32bit = 4 bytes, 16bit = 2 bytes)
@@ -189,7 +190,7 @@ int hello_init(void)
 		printk(KERN_ALERT "Writing to McBSP %d (raw, polled mode) returned as status: %d \n", (mcbspID+1), status);
 
 		printk(KERN_ALERT "Now reading data from McBSP %d (raw & polled)... \n", (mcbspID+1));
-		status = omap_mcbsp_pollread(mcbspID, &value32);  // needs changes in mcbsp.c --> kernel patch & recompile
+		status = omap_mcbsp_pollread(mcbspID, &value16);  // needs changes in mcbsp.c --> kernel patch & recompile
 		printk(KERN_ALERT "Reading from McBSP %d (raw, polled mode) returned as status: %d and as value 0x%x \n", (mcbspID+1), status,value32);
 
 		/* Non-Polled operations (IRQ or DMA!) */
@@ -204,12 +205,15 @@ int hello_init(void)
 		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
 		printk(KERN_ALERT "The first 40 of %d values of the transferbuffer bufbuf after transmission are: \n",bufbufsize);
+		sprintf(printtemp, "trans: \n");
 		for (i = 0 ; i<min(bufbufsize,40); i++)
 		{
-			printk(KERN_ALERT " 0x%x,", bufbuf[i]);
-			if ((i%10) == 9)
+			sprintf(printtemp, "%s 0x%x,", printtemp,bufbuf[i]);
+
+			if ((i%16) == 15)
 			{
-				printk(KERN_ALERT ", \n");
+				printk(KERN_ALERT "%s, \n",printtemp);
+				sprintf(printtemp, "   ");
 			}
 		}
 		printk(KERN_ALERT " end. \n");
@@ -220,18 +224,18 @@ int hello_init(void)
 		printk(KERN_ALERT "Read from McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
 		printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufbuf after reception are: \n",bufbufsize);
+		sprintf(printtemp, "receive: \n");
 		for (i = 0 ; i<min(bufbufsize,1000000); i++)
 		{
-			printk(KERN_ALERT " 0x%x,",bufbuf[i]);
+			sprintf(printtemp, "%s 0x%x,", printtemp,bufbuf[i]);
+
 			if ((i%16) == 15)
 			{
-				printk(KERN_ALERT ", \n");
+				printk(KERN_ALERT "%s \n",printtemp);
+				sprintf(printtemp, "   ");
 			}
 		}
 		printk(KERN_ALERT " end. \n");
-		
-
-		
 
 	}
 	else printk(KERN_ALERT "Not attempting to continue because requesting failed.\n");
