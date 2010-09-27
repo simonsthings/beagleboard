@@ -1,0 +1,2 @@
+kernel/arch/arm/plat-omap/iommu.ko
+kernel/arch/arm/plat-omap/iovmm.ko

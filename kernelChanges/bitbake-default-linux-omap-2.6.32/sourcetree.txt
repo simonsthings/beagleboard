@@ -1,0 +1,1 @@
+/opt/oe/angstrom-dev/work/beagleboard-angstrom-linux-gnueabi/linux-omap-2.6.32-r89/git/

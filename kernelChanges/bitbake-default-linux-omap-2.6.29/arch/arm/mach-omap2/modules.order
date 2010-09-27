@@ -1,0 +1,2 @@
+kernel/arch/arm/mach-omap2/iommu2.ko
+kernel/arch/arm/mach-omap2/omap3-iommu.ko
