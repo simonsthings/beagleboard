@@ -1,4 +1,4 @@
-//#define DEBUG
+#define KERNEL31
 
 #include <config/modversions.h>
 #include <linux/init.h>
@@ -11,7 +11,12 @@
 //#include <linux/interrupt.h>	/* We want an interrupt */
 //#include <asm/io.h>
 
-#include <mach/mcbsp.h>
+#ifdef KERNEL31
+ #include <mach/mcbsp.h>
+#else
+ #include <plat/mcbsp.h>
+ #include <plat/mux.h>
+#endif
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Simon Vogt <simonsunimail@gmail.com>");
@@ -40,9 +45,9 @@ static struct omap_mcbsp_reg_cfg simon_regs = {
         .spcr2 = XINTM(3),
         .spcr1 = RINTM(3),
         .rcr2  = 0,
-        .rcr1  = RFRLEN1(1) | RWDLEN1(OMAP_MCBSP_WORD_16),  // frame is 1 word. word is 32 bits.
+        .rcr1  = RFRLEN1(0) | RWDLEN1(OMAP_MCBSP_WORD_32),  // frame is 1 word. word is 32 bits.
         .xcr2  = 0,
-        .xcr1  = XFRLEN1(1) | XWDLEN1(OMAP_MCBSP_WORD_16),
+        .xcr1  = XFRLEN1(0) | XWDLEN1(OMAP_MCBSP_WORD_32),
         .srgr1 = FWID(31) | CLKGDV(50),
         .srgr2 = GSYNC | 0/*CLKSM*/ | CLKSP  | FPER(250),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
         .pcr0  = FSXM | 0/*FSRM*/ | CLKXM | CLKRM | FSXP | FSRP | CLKXP | CLKRP,
@@ -51,6 +56,17 @@ static struct omap_mcbsp_reg_cfg simon_regs = {
 	.rccr = RFULL_CYCLE | RDMAEN,// | RDISABLE,
 };
 
+#ifdef KERNEL31
+#else
+static void omap3530_mcbsp_mux_setup(void)
+{
+	omap_cfg_reg(Y15_24XX_MCBSP2_CLKX);
+	omap_cfg_reg(R14_24XX_MCBSP2_FSX);
+	omap_cfg_reg(W15_24XX_MCBSP2_DR);
+	omap_cfg_reg(V15_24XX_MCBSP2_DX);
+	omap_cfg_reg(V14_24XX_GPIO117);
+}
+#endif
 
 int hello_init(void)
 {
@@ -64,9 +80,9 @@ int hello_init(void)
 	u32 mybuffer2 = 0x53CA; // 0101 00111100 1010
 	int i;
 
-	int bufbufsize = 1 * 160; // number of array elements
-	int bytesPerVal = 2; // number of bytes per array element (32bit = 4 bytes, 16bit = 2 bytes)
-	u16* bufbuf;
+	int bufbufsize = 128 * 7; // number of array elements
+	int bytesPerVal = 4; // number of bytes per array element (32bit = 4 bytes, 16bit = 2 bytes)
+	u32* bufbuf;
 
 	dma_addr_t bufbufdmaaddr;
 	bufbuf = dma_alloc_coherent(NULL, bufbufsize * bytesPerVal /*each u32 value has 4 bytes*/, &bufbufdmaaddr, GFP_ATOMIC);
@@ -76,14 +92,19 @@ int hello_init(void)
 		return -ENOMEM;
 	}
 
-	bufbuf[0] = 0x53CA;  // 01010011 11001010  
-	bufbuf[1] = 0x5C3A;  // 01011100 00111010  
+	/* MUX configuration: */
+	
+	/* End of MUX configuration */
+
+
+	bufbuf[0] = 0x53C3C3CA;  // 01010011 11001010  
+	bufbuf[1] = 0x5C3C3C3A;  // 01011100 00111010  
 	for (i = 2 ; i<bufbufsize-1; i++)
 	{
-		bufbuf[i] = 0x5E7A;  // 01011110 01111010  
+		bufbuf[i] = 0x5E7E7E7A;  // 01011110 01111010  
 	}
 	// so that we can see that the last word really was transmitted, it should be different:
-	bufbuf[bufbufsize-1] = 0x518A;  // 01010001 10001010  
+	bufbuf[bufbufsize-1] = 0x5181818A;  // 01010001 10001010  
 
 	/*
 	179 
@@ -141,8 +162,11 @@ int hello_init(void)
 		printk(KERN_ALERT "Configured McBSP %d registers for raw mode..\n", (mcbspID+1));
 
 		/* start McBSP */
-		omap_mcbsp_start(mcbspID);	// kernel 2.6.31 and below have only one argument here!
-		//omap_mcbsp_start(mcbspID,0,0); // kernel 2.6.32 and beyond require tx and rx arguments on omap_mcbsp_start() and omap_mcbsp_stop().
+		#ifdef KERNEL31
+		  omap_mcbsp_start(mcbspID);	// kernel 2.6.31 and below have only one argument here!
+		#else
+		  omap_mcbsp_start(mcbspID,1,1); // kernel 2.6.32 and beyond require tx and rx arguments on omap_mcbsp_start() and omap_mcbsp_stop().
+		#endif
 		printk(KERN_ALERT "Started McBSP %d. \n", (mcbspID+1));
 
 		/* show McBSP register contents: */
@@ -195,11 +219,11 @@ int hello_init(void)
 		status = omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
 		printk(KERN_ALERT "Read from McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
-		printk(KERN_ALERT "The first 160 of %d values of the transferbuffer bufbuf after reception are: \n",bufbufsize);
-		for (i = 0 ; i<min(bufbufsize,160); i=i+2)
+		printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufbuf after reception are: \n",bufbufsize);
+		for (i = 0 ; i<min(bufbufsize,1000000); i++)
 		{
-			printk(KERN_ALERT " 0x%x 00 %x,", bufbuf[i+1],bufbuf[i]);
-			if ((i%8) == 6)
+			printk(KERN_ALERT " 0x%x,",bufbuf[i]);
+			if ((i%16) == 15)
 			{
 				printk(KERN_ALERT ", \n");
 			}
@@ -220,7 +244,11 @@ int hello_init(void)
 void hello_exit(void)
 {
 	printk(KERN_ALERT "Stopping McBSP %d...", (mcbspID+1));
-	omap_mcbsp_stop(mcbspID);
+	#ifdef KERNEL31
+	  omap_mcbsp_stop(mcbspID);	// kernel 2.6.31 and below have only one argument here!
+	#else
+	  omap_mcbsp_stop(mcbspID,1,1); // kernel 2.6.32 and beyond require tx and rx arguments on omap_mcbsp_start() and omap_mcbsp_stop().
+	#endif
 	printk(KERN_ALERT "Freeing McBSP %d...", (mcbspID+1));
 	omap_mcbsp_free(mcbspID);
 	printk(KERN_ALERT "done.\n");

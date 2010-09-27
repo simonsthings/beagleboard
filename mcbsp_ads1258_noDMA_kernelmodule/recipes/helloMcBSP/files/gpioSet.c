@@ -44,7 +44,7 @@ int gpioset_init(void)
 {
 	int status = 0;
 	int reqstatus = -4;
-	int value = 0;
+	//int value = 0;
 	int returnstatus = 3;
 
 
