@@ -838,7 +838,7 @@ int omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer,
 		sync_dev = mcbsp->dma_tx_sync;
 
 	omap_set_dma_transfer_params(mcbsp->dma_tx_lch,
-				     OMAP_DMA_DATA_TYPE_S16,
+				     OMAP_DMA_DATA_TYPE_S32,
 				     length >> 1, 1,
 				     OMAP_DMA_SYNC_ELEMENT,
 	 sync_dev, 0);
@@ -912,7 +912,7 @@ int omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer,
 		sync_dev = mcbsp->dma_rx_sync;
 
 	omap_set_dma_transfer_params(mcbsp->dma_rx_lch,
-					OMAP_DMA_DATA_TYPE_S16,
+					OMAP_DMA_DATA_TYPE_S32,
 					length >> 1, 1,
 					OMAP_DMA_SYNC_ELEMENT,
 					sync_dev, 0);
