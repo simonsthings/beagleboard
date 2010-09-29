@@ -58,7 +58,21 @@ static void omap_mcbsp_dump_reg(u8 id)
 {
 	struct omap_mcbsp *mcbsp = id_to_mcbsp_ptr(id);
 
+	printk(KERN_EMERG   "This is a KERN_EMERG message. See http://www.xml.com/ldd/chapter/book/ch04.html for descriptions.\n");
+	printk(KERN_ALERT   "This is a KERN_ALERT message. \n");
+	printk(KERN_CRIT    "This is a KERN_CRIT message. \n");
+	printk(KERN_ERR     "This is a KERN_ERR message. \n");
+	printk(KERN_WARNING "This is a KERN_WARNING message. \n");
+	printk(KERN_NOTICE  "This is a KERN_NOTICE message. \n");
+	printk(KERN_INFO    "This is a KERN_INFO message. \n");
+	printk(KERN_DEBUG   "This is a KERN_DEBUG message. \n");
+
+	/* Make DEBUG messages appear by typing: echo 8 4 0 8 > /proc/sys/kernel/printk  */
 	dev_dbg(mcbsp->dev, "**** McBSP%d regs ****\n", mcbsp->id);
+	dev_dbg(mcbsp->dev, "DRR:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, DRR));
+	dev_dbg(mcbsp->dev, "DXR:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, DXR));
 	dev_dbg(mcbsp->dev, "DRR2:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, DRR2));
 	dev_dbg(mcbsp->dev, "DRR1:  0x%04x\n",
@@ -85,6 +99,23 @@ static void omap_mcbsp_dump_reg(u8 id)
 			OMAP_MCBSP_READ(mcbsp->io_base, SRGR1));
 	dev_dbg(mcbsp->dev, "PCR0:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, PCR0));
+	dev_dbg(mcbsp->dev, "***********************\n");
+	dev_dbg(mcbsp->dev, "SYSCON:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, SYSCON));
+	dev_dbg(mcbsp->dev, "THRSH1:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, THRSH1));
+	dev_dbg(mcbsp->dev, "THRSH2:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, THRSH2));
+	dev_dbg(mcbsp->dev, "IRQST:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, IRQST));
+	dev_dbg(mcbsp->dev, "IRQEN:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, IRQEN));
+	dev_dbg(mcbsp->dev, "WAKEUPEN:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, WAKEUPEN));
+	dev_dbg(mcbsp->dev, "XCCR:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, XCCR));
+	dev_dbg(mcbsp->dev, "RCCR:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, RCCR));
 	dev_dbg(mcbsp->dev, "***********************\n");
 }
 
@@ -622,7 +653,11 @@ int omap_mcbsp_pollwrite(unsigned int id, u16 buf)
 	mcbsp = id_to_mcbsp_ptr(id);
 	base = mcbsp->io_base;
 
+#ifdef CONFIG_ARCH_OMAP34XX
+	writew(buf, base + OMAP_MCBSP_REG_DXR);
+#else
 	writew(buf, base + OMAP_MCBSP_REG_DXR1);
+#endif
 	/* if frame sync error - clear the error */
 	if (readw(base + OMAP_MCBSP_REG_SPCR2) & XSYNC_ERR) {
 		/* clear error */
@@ -692,8 +727,11 @@ int omap_mcbsp_pollread(unsigned int id, u16 *buf)
 			}
 		}
 	}
+#ifdef CONFIG_ARCH_OMAP34XX
+	*buf = readw(base + OMAP_MCBSP_REG_DRR);
+#else
 	*buf = readw(base + OMAP_MCBSP_REG_DRR1);
-
+#endif
 	return 0;
 }
 EXPORT_SYMBOL(omap_mcbsp_pollread);
@@ -718,9 +756,13 @@ void omap_mcbsp_xmit_word(unsigned int id, u32 word)
 
 	wait_for_completion(&mcbsp->tx_irq_completion);
 
+#ifdef CONFIG_ARCH_OMAP34XX
+	OMAP_MCBSP_WRITE(io_base, DXR, word);
+#else
 	if (word_length > OMAP_MCBSP_WORD_16)
 		OMAP_MCBSP_WRITE(io_base, DXR2, word >> 16);
 	OMAP_MCBSP_WRITE(io_base, DXR1, word & 0xffff);
+#endif
 }
 EXPORT_SYMBOL(omap_mcbsp_xmit_word);
 
@@ -742,9 +784,13 @@ u32 omap_mcbsp_recv_word(unsigned int id)
 
 	wait_for_completion(&mcbsp->rx_irq_completion);
 
+#ifdef CONFIG_ARCH_OMAP34XX
+	word_lsb = OMAP_MCBSP_READ(io_base, DRR);
+#else
 	if (word_length > OMAP_MCBSP_WORD_16)
 		word_msb = OMAP_MCBSP_READ(io_base, DRR2);
 	word_lsb = OMAP_MCBSP_READ(io_base, DRR1);
+#endif
 
 	return (word_lsb | (word_msb << 16));
 }
@@ -787,9 +833,13 @@ int omap_mcbsp_spi_master_xmit_word_poll(unsigned int id, u32 word)
 	}
 
 	/* Now we can push the data */
+#ifdef CONFIG_ARCH_OMAP34XX
+	OMAP_MCBSP_WRITE(io_base, DXR, word);
+#else
 	if (tx_word_length > OMAP_MCBSP_WORD_16)
 		OMAP_MCBSP_WRITE(io_base, DXR2, word >> 16);
 	OMAP_MCBSP_WRITE(io_base, DXR1, word & 0xffff);
+#endif
 
 	/* We wait for the receiver to be ready */
 	spcr1 = OMAP_MCBSP_READ(io_base, SPCR1);
@@ -808,9 +858,13 @@ int omap_mcbsp_spi_master_xmit_word_poll(unsigned int id, u32 word)
 	}
 
 	/* Receiver is ready, let's read the dummy data */
+#ifdef CONFIG_ARCH_OMAP34XX
+	word_lsb = OMAP_MCBSP_READ(io_base, DRR);
+#else
 	if (rx_word_length > OMAP_MCBSP_WORD_16)
 		word_msb = OMAP_MCBSP_READ(io_base, DRR2);
 	word_lsb = OMAP_MCBSP_READ(io_base, DRR1);
+#endif
 
 	return 0;
 }
@@ -856,9 +910,13 @@ int omap_mcbsp_spi_master_recv_word_poll(unsigned int id, u32 *word)
 	}
 
 	/* We first need to enable the bus clock */
+#ifdef CONFIG_ARCH_OMAP34XX
+	OMAP_MCBSP_WRITE(io_base, DXR, clock_word);
+#else
 	if (tx_word_length > OMAP_MCBSP_WORD_16)
 		OMAP_MCBSP_WRITE(io_base, DXR2, clock_word >> 16);
 	OMAP_MCBSP_WRITE(io_base, DXR1, clock_word & 0xffff);
+#endif
 
 	/* We wait for the receiver to be ready */
 	spcr1 = OMAP_MCBSP_READ(io_base, SPCR1);
@@ -877,11 +935,15 @@ int omap_mcbsp_spi_master_recv_word_poll(unsigned int id, u32 *word)
 	}
 
 	/* Receiver is ready, there is something for us */
+#ifdef CONFIG_ARCH_OMAP34XX
+	word[0] = OMAP_MCBSP_READ(io_base, DRR);
+#else
 	if (rx_word_length > OMAP_MCBSP_WORD_16)
 		word_msb = OMAP_MCBSP_READ(io_base, DRR2);
 	word_lsb = OMAP_MCBSP_READ(io_base, DRR1);
 
 	word[0] = (word_lsb | (word_msb << 16));
+#endif
 
 	return 0;
 }
@@ -893,9 +955,10 @@ EXPORT_SYMBOL(omap_mcbsp_spi_master_recv_word_poll);
  * The DMA resources are released once the transfer is done.
  * For anything fancier, you should use your own customized DMA
  * routines and callbacks.
+ * The parameter dma_data_type should be one of OMAP_DMA_DATA_TYPE_S8,OMAP_DMA_DATA_TYPE_S16 or OMAP_DMA_DATA_TYPE_S32 .
  */
 int omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer,
-				unsigned int length)
+				unsigned int length, int dma_data_type)
 {
 	struct omap_mcbsp *mcbsp;
 	int dma_tx_ch;
@@ -933,15 +996,19 @@ int omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer,
 		sync_dev = mcbsp->dma_tx_sync;
 
 	omap_set_dma_transfer_params(mcbsp->dma_tx_lch,
-				     OMAP_DMA_DATA_TYPE_S16,
+				     dma_data_type,
 				     length >> 1, 1,
 				     OMAP_DMA_SYNC_ELEMENT,
-	 sync_dev, 0);
+	 			     sync_dev, 0);
 
 	omap_set_dma_dest_params(mcbsp->dma_tx_lch,
 				 src_port,
 				 OMAP_DMA_AMODE_CONSTANT,
+#ifdef CONFIG_ARCH_OMAP34XX
+				 mcbsp->phys_base + OMAP_MCBSP_REG_DXR,
+#else
 				 mcbsp->phys_base + OMAP_MCBSP_REG_DXR1,
+#endif
 				 0, 0);
 
 	omap_set_dma_src_params(mcbsp->dma_tx_lch,
@@ -957,8 +1024,10 @@ int omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer,
 }
 EXPORT_SYMBOL(omap_mcbsp_xmit_buffer);
 
-int omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer,
-				unsigned int length)
+/*
+ * The parameter dma_data_type should be one of OMAP_DMA_DATA_TYPE_S8,OMAP_DMA_DATA_TYPE_S16 or OMAP_DMA_DATA_TYPE_S32 .
+ */
+int omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer,unsigned int length, int dma_data_type)
 {
 	struct omap_mcbsp *mcbsp;
 	int dma_rx_ch;
@@ -996,7 +1065,7 @@ int omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer,
 		sync_dev = mcbsp->dma_rx_sync;
 
 	omap_set_dma_transfer_params(mcbsp->dma_rx_lch,
-					OMAP_DMA_DATA_TYPE_S16,
+					dma_data_type,
 					length >> 1, 1,
 					OMAP_DMA_SYNC_ELEMENT,
 					sync_dev, 0);
@@ -1004,7 +1073,11 @@ int omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer,
 	omap_set_dma_src_params(mcbsp->dma_rx_lch,
 				src_port,
 				OMAP_DMA_AMODE_CONSTANT,
+#ifdef CONFIG_ARCH_OMAP34XX
+				mcbsp->phys_base + OMAP_MCBSP_REG_DRR,
+#else
 				mcbsp->phys_base + OMAP_MCBSP_REG_DRR1,
+#endif
 				0, 0);
 
 	omap_set_dma_dest_params(mcbsp->dma_rx_lch,

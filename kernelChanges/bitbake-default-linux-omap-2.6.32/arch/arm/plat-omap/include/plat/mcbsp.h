@@ -445,8 +445,8 @@ void omap_mcbsp_stop(unsigned int id, int tx, int rx);
 void omap_mcbsp_xmit_word(unsigned int id, u32 word);
 u32 omap_mcbsp_recv_word(unsigned int id);
 
-int omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer, unsigned int length);
-int omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer, unsigned int length);
+int omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer, unsigned int length, int dma_data_type);
+int omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer, unsigned int length, int dma_data_type);
 int omap_mcbsp_spi_master_xmit_word_poll(unsigned int id, u32 word);
 int omap_mcbsp_spi_master_recv_word_poll(unsigned int id, u32 * word);
 
