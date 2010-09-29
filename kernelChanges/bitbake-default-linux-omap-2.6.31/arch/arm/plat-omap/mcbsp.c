@@ -58,6 +58,15 @@ static void omap_mcbsp_dump_reg(u8 id)
 {
 	struct omap_mcbsp *mcbsp = id_to_mcbsp_ptr(id);
 
+	printk(KERN_EMERG   "This is a KERN_EMERG message. See http://www.xml.com/ldd/chapter/book/ch04.html for descriptions.\n");
+	printk(KERN_ALERT   "This is a KERN_ALERT message. \n");
+	printk(KERN_CRIT    "This is a KERN_CRIT message. \n");
+	printk(KERN_ERR     "This is a KERN_ERR message. \n");
+	printk(KERN_WARNING "This is a KERN_WARNING message. \n");
+	printk(KERN_NOTICE  "This is a KERN_NOTICE message. \n");
+	printk(KERN_INFO    "This is a KERN_INFO message. \n");
+	printk(KERN_DEBUG   "This is a KERN_DEBUG message. \n");
+
 	dev_dbg(mcbsp->dev, "**** McBSP%d regs ****\n", mcbsp->id);
 	dev_dbg(mcbsp->dev, "DRR2:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, DRR2));
@@ -85,6 +94,23 @@ static void omap_mcbsp_dump_reg(u8 id)
 			OMAP_MCBSP_READ(mcbsp->io_base, SRGR1));
 	dev_dbg(mcbsp->dev, "PCR0:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, PCR0));
+	dev_dbg(mcbsp->dev, "***********************\n");
+	dev_dbg(mcbsp->dev, "SYSCON:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, SYSCON));
+	dev_dbg(mcbsp->dev, "THRSH1:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, THRSH1));
+	dev_dbg(mcbsp->dev, "THRSH2:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, THRSH2));
+	dev_dbg(mcbsp->dev, "IRQST:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, IRQST));
+	dev_dbg(mcbsp->dev, "IRQEN:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, IRQEN));
+	dev_dbg(mcbsp->dev, "WAKEUPEN:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, WAKEUPEN));
+	dev_dbg(mcbsp->dev, "XCCR:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, XCCR));
+	dev_dbg(mcbsp->dev, "RCCR:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, RCCR));
 	dev_dbg(mcbsp->dev, "***********************\n");
 }
 
@@ -197,6 +223,166 @@ void omap_mcbsp_config(unsigned int id, const struct omap_mcbsp_reg_cfg *config)
 	}
 }
 EXPORT_SYMBOL(omap_mcbsp_config);
+
+#ifdef CONFIG_ARCH_OMAP34XX
+/*
+ * omap_mcbsp_set_tx_threshold configures how to deal
+ * with transmit threshold. the threshold value and handler can be
+ * configure in here.
+ */
+void omap_mcbsp_set_tx_threshold(unsigned int id, u16 threshold)
+{
+	struct omap_mcbsp *mcbsp;
+	void __iomem *io_base;
+
+	if (!cpu_is_omap34xx())
+		return;
+
+	if (!omap_mcbsp_check_valid_id(id)) {
+		printk(KERN_ERR "%s: Invalid id (%d)\n", __func__, id + 1);
+		return;
+	}
+	mcbsp = id_to_mcbsp_ptr(id);
+	io_base = mcbsp->io_base;
+
+	OMAP_MCBSP_WRITE(io_base, THRSH2, threshold);
+}
+EXPORT_SYMBOL(omap_mcbsp_set_tx_threshold);
+
+/*
+ * omap_mcbsp_set_rx_threshold configures how to deal
+ * with receive threshold. the threshold value and handler can be
+ * configure in here.
+ */
+void omap_mcbsp_set_rx_threshold(unsigned int id, u16 threshold)
+{
+	struct omap_mcbsp *mcbsp;
+	void __iomem *io_base;
+
+	if (!cpu_is_omap34xx())
+		return;
+
+	if (!omap_mcbsp_check_valid_id(id)) {
+		printk(KERN_ERR "%s: Invalid id (%d)\n", __func__, id + 1);
+		return;
+	}
+	mcbsp = id_to_mcbsp_ptr(id);
+	io_base = mcbsp->io_base;
+
+	OMAP_MCBSP_WRITE(io_base, THRSH1, threshold);
+}
+EXPORT_SYMBOL(omap_mcbsp_set_rx_threshold);
+
+/*
+ * omap_mcbsp_get_max_tx_thres just return the current configured
+ * maximum threshold for transmission
+ */
+u16 omap_mcbsp_get_max_tx_threshold(unsigned int id)
+{
+	struct omap_mcbsp *mcbsp;
+
+	if (!omap_mcbsp_check_valid_id(id)) {
+		printk(KERN_ERR "%s: Invalid id (%d)\n", __func__, id + 1);
+		return -ENODEV;
+	}
+	mcbsp = id_to_mcbsp_ptr(id);
+
+	return mcbsp->max_tx_thres;
+}
+EXPORT_SYMBOL(omap_mcbsp_get_max_tx_threshold);
+
+/*
+ * omap_mcbsp_get_max_rx_thres just return the current configured
+ * maximum threshold for reception
+ */
+u16 omap_mcbsp_get_max_rx_threshold(unsigned int id)
+{
+	struct omap_mcbsp *mcbsp;
+
+	if (!omap_mcbsp_check_valid_id(id)) {
+		printk(KERN_ERR "%s: Invalid id (%d)\n", __func__, id + 1);
+		return -ENODEV;
+	}
+	mcbsp = id_to_mcbsp_ptr(id);
+
+	return mcbsp->max_rx_thres;
+}
+EXPORT_SYMBOL(omap_mcbsp_get_max_rx_threshold);
+
+/*
+ * omap_mcbsp_get_dma_op_mode just return the current configured
+ * operating mode for the mcbsp channel
+ */
+int omap_mcbsp_get_dma_op_mode(unsigned int id)
+{
+	struct omap_mcbsp *mcbsp;
+	int dma_op_mode;
+
+	if (!omap_mcbsp_check_valid_id(id)) {
+		printk(KERN_ERR "%s: Invalid id (%u)\n", __func__, id + 1);
+		return -ENODEV;
+	}
+	mcbsp = id_to_mcbsp_ptr(id);
+
+	dma_op_mode = mcbsp->dma_op_mode;
+
+	return dma_op_mode;
+}
+EXPORT_SYMBOL(omap_mcbsp_get_dma_op_mode);
+
+static inline void omap34xx_mcbsp_request(struct omap_mcbsp *mcbsp)
+{
+	/*
+	 * Enable wakup behavior, smart idle and all wakeups
+	 * REVISIT: some wakeups may be unnecessary
+	 */
+	if (cpu_is_omap34xx()) {
+		u16 syscon;
+
+		syscon = OMAP_MCBSP_READ(mcbsp->io_base, SYSCON);
+		syscon &= ~(ENAWAKEUP | SIDLEMODE(0x03) | CLOCKACTIVITY(0x03));
+
+		if (mcbsp->dma_op_mode == MCBSP_DMA_MODE_THRESHOLD) {
+			syscon |= (ENAWAKEUP | SIDLEMODE(0x02) |
+					CLOCKACTIVITY(0x02));
+			OMAP_MCBSP_WRITE(mcbsp->io_base, WAKEUPEN,
+					XRDYEN | RRDYEN);
+		} else {
+			syscon |= SIDLEMODE(0x01);
+		}
+
+		OMAP_MCBSP_WRITE(mcbsp->io_base, SYSCON, syscon);
+	}
+}
+
+static inline void omap34xx_mcbsp_free(struct omap_mcbsp *mcbsp)
+{
+	/*
+	 * Disable wakup behavior, smart idle and all wakeups
+	 */
+	if (cpu_is_omap34xx()) {
+		u16 syscon;
+
+		syscon = OMAP_MCBSP_READ(mcbsp->io_base, SYSCON);
+		syscon &= ~(ENAWAKEUP | SIDLEMODE(0x03) | CLOCKACTIVITY(0x03));
+		/*
+		 * HW bug workaround - If no_idle mode is taken, we need to
+		 * go to smart_idle before going to always_idle, or the
+		 * device will not hit retention anymore.
+		 */
+		syscon |= SIDLEMODE(0x02);
+		OMAP_MCBSP_WRITE(mcbsp->io_base, SYSCON, syscon);
+
+		syscon &= ~(SIDLEMODE(0x03));
+		OMAP_MCBSP_WRITE(mcbsp->io_base, SYSCON, syscon);
+
+		OMAP_MCBSP_WRITE(mcbsp->io_base, WAKEUPEN, 0);
+	}
+}
+#else
+static inline void omap34xx_mcbsp_request(struct omap_mcbsp *mcbsp) {}
+static inline void omap34xx_mcbsp_free(struct omap_mcbsp *mcbsp) {}
+#endif
 
 /*
  * We can choose between IRQ based or polled IO.
