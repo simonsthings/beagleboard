@@ -16,6 +16,7 @@
 #else
  #include <plat/mcbsp.h>
  #include <plat/mux.h>
+ #include <plat/dma.h>
 #endif
 
 MODULE_LICENSE("Dual BSD/GPL");
@@ -68,6 +69,13 @@ static void omap3530_mcbsp_mux_setup(void)
 }
 #endif
 
+// seems to work:
+struct omap_mcbsp **mcbsp_ptr;
+int omap_mcbsp_count;
+#define omap_mcbsp_check_valid_id(id)	(id < omap_mcbsp_count)
+#define id_to_mcbsp_ptr(id)		mcbsp_ptr[id];
+
+
 int hello_init(void)
 {
 	int status = 3;
@@ -81,6 +89,8 @@ int hello_init(void)
 	int i;
 	char printtemp[500];
 
+	struct omap_mcbsp *mcbsp;
+
 	int bufbufsize = 128 * 7; // number of array elements
 	int bytesPerVal = 4; // number of bytes per array element (32bit = 4 bytes, 16bit = 2 bytes)
 	u32* bufbuf;
@@ -93,8 +103,21 @@ int hello_init(void)
 		return -ENOMEM;
 	}
 
+	// define mcbsp variable:
+	mcbsp = id_to_mcbsp_ptr(mcbspID);
+
+
 	/* MUX configuration: */
-	
+#ifdef	CONFIG_OMAP_MUX
+printk(KERN_ALERT "CONFIG_OMAP_MUX is defined!!!!!!\n");
+#else
+printk(KERN_ALERT "CONFIG_OMAP_MUX is not defined. (so uses uboot settings)\n");
+#endif
+#ifdef CONFIG_ARCH_OMAP34XX
+printk(KERN_ALERT "CONFIG_ARCH_OMAP34XX is defined!!!!!!\n");
+#else
+printk(KERN_ALERT "CONFIG_ARCH_OMAP34XX is not defined. \n");
+#endif
 	/* End of MUX configuration */
 
 
@@ -144,6 +167,9 @@ int hello_init(void)
 	printk(KERN_ALERT "Setting gpio134 (ADS1258EVM-clockselect) as output, value 1=EXTERNAL clock from BB. Return status: %d\n",status);
 	/* End of GPIO stuff */
 
+	// test if we can access the device structure that was set up in mcbsp.h:
+	printk(KERN_ALERT "### The McBSP base address is 0x%x\n", sizeof(mcbsp));//->phys_base);
+	//dev_err(mcbsp->dev, "Configuring (MODULE) McBSP%d  phys_base: 0x%08lx\n", mcbsp->id, mcbsp->phys_base);
 
 	/* Setting IO type & requesting McBSP */
 	status = omap_mcbsp_set_io_type(mcbspID, OMAP_MCBSP_POLL_IO);  // POLL because we don't want to use IRQ and DMA will be set up when needed.
@@ -201,7 +227,11 @@ int hello_init(void)
 
 		/* DMA */
 		printk(KERN_ALERT "Now writing data to McBSP %d via DMA! \n", (mcbspID+1));
-		status = omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
+#ifdef KERNEL31
+		status = omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
+#else
+		status = omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* elem_count in dma.c */, OMAP_DMA_DATA_TYPE_S32); 
+#endif
 		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
 		printk(KERN_ALERT "The first 40 of %d values of the transferbuffer bufbuf after transmission are: \n",bufbufsize);
@@ -220,7 +250,12 @@ int hello_init(void)
 
 
 		printk(KERN_ALERT "Now reading data from McBSP %d via DMA! \n", (mcbspID+1));
-		status = omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // currently waits forever, probably because nothing dma-like has been set up yet? Or word-length wrong?
+
+#ifdef KERNEL31
+		status = omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
+#else
+		status = omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* = elem_count in arch/arm/plat-omap/dma.c */, OMAP_DMA_DATA_TYPE_S32); 
+#endif
 		printk(KERN_ALERT "Read from McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
 		printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufbuf after reception are: \n",bufbufsize);
