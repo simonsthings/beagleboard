@@ -50,8 +50,8 @@ static struct omap_mcbsp_reg_cfg simon_regs = {
         .xcr2  = 0,
         .xcr1  = XFRLEN1(0) | XWDLEN1(OMAP_MCBSP_WORD_32),
         .srgr1 = FWID(31) | CLKGDV(50),
-        .srgr2 = GSYNC | 0/*CLKSM*/ | CLKSP  | FPER(250),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
-        .pcr0  = FSXM | 0/*FSRM*/ | CLKXM | CLKRM | FSXP | FSRP | CLKXP | CLKRP,
+        .srgr2 = /*GSYNC |*/ 0/*CLKSM*/ | CLKSP  | FPER(250),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
+        .pcr0  = FSXM | FSRM | CLKXM | CLKRM | FSXP | FSRP | CLKXP | CLKRP,
         //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
 	.xccr = DXENDLY(1) | XDMAEN ,//| XDISABLE,
 	.rccr = RFULL_CYCLE | RDMAEN,// | RDISABLE,
@@ -162,9 +162,21 @@ printk(KERN_ALERT "CONFIG_ARCH_OMAP34XX is not defined. \n");
 	// requesting:
 	reqstatus = gpio_request(134, "ADS1258EVM-clockselect");
 	printk(KERN_ALERT "Gpio 134 (ADS1258EVM-clockselect) was requested. Return status: %d\n",reqstatus);
+	reqstatus = gpio_request(135, "ADS1258EVM-nRESET");
+	printk(KERN_ALERT "Gpio 135 (ADS1258EVM-nRESET) was requested. Return status: %d\n",reqstatus);
+	reqstatus = gpio_request(136, "ADS1258EVM-nPWDN");
+	printk(KERN_ALERT "Gpio 136 (ADS1258EVM-nPWDN) was requested. Return status: %d\n",reqstatus);
+	reqstatus = gpio_request(183, "ADS1258EVM-analogPowerMode");
+	printk(KERN_ALERT "Gpio 183 (ADS1258EVM-analogPowerMode) was requested. Return status: %d\n",reqstatus);
 	// setting:
 	status = gpio_direction_output(134,1);
 	printk(KERN_ALERT "Setting gpio134 (ADS1258EVM-clockselect) as output, value 1=EXTERNAL clock from BB. Return status: %d\n",status);
+	status = gpio_direction_output(135,1);
+	printk(KERN_ALERT "Setting gpio135 (ADS1258EVM-nRESET) as output, value 1=no reset, so be active!. Return status: %d\n",status);
+	status = gpio_direction_output(136,1);
+	printk(KERN_ALERT "Setting gpio136 (ADS1258EVM-nPWDN) as output, value 1=no powerdown, so be active!. Return status: %d\n",status);
+	status = gpio_direction_output(183,1);
+	printk(KERN_ALERT "Setting gpio183 (ADS1258EVM-analogPowerMode) as output, value 1=unipolar. Return status: %d\n",status);
 	/* End of GPIO stuff */
 
 	// test if we can access the device structure that was set up in mcbsp.h:
