@@ -13,6 +13,7 @@
 
 #ifdef KERNEL31
  #include <mach/mcbsp.h>
+ #include <mach/dma.h>
 #else
  #include <plat/mcbsp.h>
  #include <plat/mux.h>
@@ -28,10 +29,10 @@ MODULE_PARM_DESC(mcbspID, "The McBSP to use. Starts at 0.");
 
 
 /*original from http://old.nabble.com/ADC--McBSP-advice-and-questions-about-writing-a-driver.-td26889185.html */
-static struct omap_mcbsp_reg_cfg mcbsp_regs = {
+struct omap_mcbsp_reg_cfg mcbsp_regs = {
         .spcr2 = FREE,
         .spcr1 = RINTM(0),
-        .rcr2  = RFRLEN2(OMAP_MCBSP_WORD_8) |RWDLEN2(OMAP_MCBSP_WORD_8) | RDATDLY(1),
+        .rcr2  = RFRLEN2(OMAP_MCBSP_WORD_8) | RWDLEN2(OMAP_MCBSP_WORD_8) | RDATDLY(1),
         .rcr1  = RFRLEN1(OMAP_MCBSP_WORD_8) | RWDLEN1(OMAP_MCBSP_WORD_8),
         .xcr2  = XFRLEN2(OMAP_MCBSP_WORD_8) | XWDLEN2(OMAP_MCBSP_WORD_8) | XDATDLY(1),
         .xcr1  = XFRLEN1(OMAP_MCBSP_WORD_8) | XWDLEN1(OMAP_MCBSP_WORD_8),
@@ -70,10 +71,272 @@ static void omap3530_mcbsp_mux_setup(void)
 #endif
 
 // seems to work:
-struct omap_mcbsp **mcbsp_ptr;
-int omap_mcbsp_count;
-#define omap_mcbsp_check_valid_id(id)	(id < omap_mcbsp_count)
-#define id_to_mcbsp_ptr(id)		mcbsp_ptr[id];
+//extern struct omap_mcbsp **mcbsp_ptr;
+//extern int omap_mcbsp_count;
+//#define omap_mcbsp_check_valid_id(id)	(id < omap_mcbsp_count)
+//#define id_to_mcbsp_ptr(id)		mcbsp_ptr[id];
+
+void omap_mcbsp_write(void __iomem *io_base, u16 reg, u32 val)
+{
+	if (cpu_class_is_omap1() || cpu_is_omap2420())
+		__raw_writew((u16)val, io_base + reg);
+	else
+		__raw_writel(val, io_base + reg);
+}
+
+int omap_mcbsp_read(void __iomem *io_base, u16 reg)
+{
+	if (cpu_class_is_omap1() || cpu_is_omap2420())
+		return __raw_readw(io_base + reg);
+	else
+		return __raw_readl(io_base + reg);
+}
+
+#define OMAP_MCBSP_READ(base, reg) \
+			omap_mcbsp_read(base, OMAP_MCBSP_REG_##reg)
+#define OMAP_MCBSP_WRITE(base, reg, val) \
+			omap_mcbsp_write(base, OMAP_MCBSP_REG_##reg, val)
+
+
+int simon_omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer,
+				unsigned int length);
+int simon_omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer,
+				unsigned int length);
+
+
+static void simon_omap_mcbsp_dump_reg(u8 id)
+{
+	struct omap_mcbsp *mcbsp;
+	getMcBSPDevice(mcbspID,&mcbsp);
+
+	printk(KERN_EMERG   "This is a KERN_EMERG message. See http://www.xml.com/ldd/chapter/book/ch04.html for descriptions.\n");
+	printk(KERN_ALERT   "This is a KERN_ALERT message. \n");
+	printk(KERN_CRIT    "This is a KERN_CRIT message. \n");
+	printk(KERN_ERR     "This is a KERN_ERR message. \n");
+	printk(KERN_WARNING "This is a KERN_WARNING message. \n");
+	printk(KERN_NOTICE  "This is a KERN_NOTICE message. \n");
+	printk(KERN_INFO    "This is a KERN_INFO message. \n");
+	printk(KERN_DEBUG   "This is a KERN_DEBUG message. \n");
+
+	dev_info(mcbsp->dev, "**** McBSP%d regs ****\n", mcbsp->id);
+	dev_info(mcbsp->dev, "DRR2:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, DRR2));
+	dev_info(mcbsp->dev, "DRR:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, DRR));
+	dev_info(mcbsp->dev, "DXR2:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, DXR2));
+	dev_info(mcbsp->dev, "DXR:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, DXR));
+	dev_info(mcbsp->dev, "SPCR2: 0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, SPCR2));
+	dev_info(mcbsp->dev, "SPCR1: 0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, SPCR1));
+	dev_info(mcbsp->dev, "RCR2:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, RCR2));
+	dev_info(mcbsp->dev, "RCR1:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, RCR1));
+	dev_info(mcbsp->dev, "XCR2:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, XCR2));
+	dev_info(mcbsp->dev, "XCR1:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, XCR1));
+	dev_info(mcbsp->dev, "SRGR2: 0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, SRGR2));
+	dev_info(mcbsp->dev, "SRGR1: 0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, SRGR1));
+	dev_info(mcbsp->dev, "PCR0:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, PCR0));
+	dev_info(mcbsp->dev, "***********************\n");
+	dev_info(mcbsp->dev, "SYSCON:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, SYSCON));
+	dev_info(mcbsp->dev, "THRSH1:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, THRSH1));
+	dev_info(mcbsp->dev, "THRSH2:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, THRSH2));
+	dev_info(mcbsp->dev, "IRQST:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, IRQST));
+	dev_info(mcbsp->dev, "IRQEN:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, IRQEN));
+	dev_info(mcbsp->dev, "WAKEUPEN:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, WAKEUPEN));
+	dev_info(mcbsp->dev, "XCCR:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, XCCR));
+	dev_info(mcbsp->dev, "RCCR:  0x%04x\n",
+			OMAP_MCBSP_READ(mcbsp->io_base, RCCR));
+	dev_info(mcbsp->dev, "***********************\n");
+}
+
+static void simon_omap_mcbsp_tx_dma_callback(int lch, u16 ch_status, void *data)
+{
+	struct omap_mcbsp *mcbsp_dma_tx = data;
+
+	dev_info(mcbsp_dma_tx->dev, "TX DMA callback : 0x%x\n",
+		OMAP_MCBSP_READ(mcbsp_dma_tx->io_base, SPCR2));
+
+	/* We can free the channels */
+	omap_free_dma(mcbsp_dma_tx->dma_tx_lch);
+	mcbsp_dma_tx->dma_tx_lch = -1;
+
+	complete(&mcbsp_dma_tx->tx_dma_completion);
+}
+
+static void simon_omap_mcbsp_rx_dma_callback(int lch, u16 ch_status, void *data)
+{
+	struct omap_mcbsp *mcbsp_dma_rx = data;
+
+	dev_info(mcbsp_dma_rx->dev, "RX DMA callback : 0x%x\n",
+		OMAP_MCBSP_READ(mcbsp_dma_rx->io_base, SPCR2));
+
+	/* We can free the channels */
+	omap_free_dma(mcbsp_dma_rx->dma_rx_lch);
+	mcbsp_dma_rx->dma_rx_lch = -1;
+
+	complete(&mcbsp_dma_rx->rx_dma_completion);
+}
+
+
+
+/*
+ * Simple DMA based buffer rx/tx routines.
+ * Nothing fancy, just a single buffer tx/rx through DMA.
+ * The DMA resources are released once the transfer is done.
+ * For anything fancier, you should use your own customized DMA
+ * routines and callbacks.
+ */
+int simon_omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer,
+				unsigned int length)
+{
+	struct omap_mcbsp *mcbsp;
+	int dma_tx_ch;
+	int src_port = 0;
+	int dest_port = 0;
+	int sync_dev = 0;
+
+//	if (!omap_mcbsp_check_valid_id(id)) {
+//		printk(KERN_ERR "%s: Invalid id (%d)\n", __func__, id + 1);
+//		return -ENODEV;
+//	}
+//	mcbsp = id_to_mcbsp_ptr(id);
+	getMcBSPDevice(mcbspID,&mcbsp);
+
+	if (omap_request_dma(mcbsp->dma_tx_sync, "McBSP TX",
+				simon_omap_mcbsp_tx_dma_callback,
+				mcbsp,
+				&dma_tx_ch)) {
+		dev_err(mcbsp->dev, " Unable to request DMA channel for "
+				"McBSP%d TX. Trying IRQ based TX\n",
+				mcbsp->id);
+		return -EAGAIN;
+	}
+	mcbsp->dma_tx_lch = dma_tx_ch;
+
+	dev_err(mcbsp->dev, "McBSP%d TX DMA on channel %d\n", mcbsp->id,
+		dma_tx_ch);
+
+	init_completion(&mcbsp->tx_dma_completion);
+
+	if (cpu_class_is_omap1()) {
+		src_port = OMAP_DMA_PORT_TIPB;
+		dest_port = OMAP_DMA_PORT_EMIFF;
+	}
+	if (cpu_class_is_omap2())
+		sync_dev = mcbsp->dma_tx_sync;
+
+	omap_set_dma_transfer_params(mcbsp->dma_tx_lch,
+				     OMAP_DMA_DATA_TYPE_S32,
+				     length >> 1, 1,
+				     OMAP_DMA_SYNC_ELEMENT,
+	 sync_dev, 0);
+
+	omap_set_dma_dest_params(mcbsp->dma_tx_lch,
+				 src_port,
+				 OMAP_DMA_AMODE_CONSTANT,
+				 mcbsp->phys_base + OMAP_MCBSP_REG_DXR,
+				 0, 0);
+
+	omap_set_dma_src_params(mcbsp->dma_tx_lch,
+				dest_port,
+				OMAP_DMA_AMODE_POST_INC,
+				buffer,
+				0, 0);
+
+	omap_start_dma(mcbsp->dma_tx_lch);
+	wait_for_completion(&mcbsp->tx_dma_completion);
+
+	return 0;
+}
+//EXPORT_SYMBOL(omap_mcbsp_xmit_buffer);
+
+
+int simon_omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer,
+				unsigned int length)
+{
+	struct omap_mcbsp *mcbsp;
+	int dma_rx_ch;
+	int src_port = 0;
+	int dest_port = 0;
+	int sync_dev = 0;
+
+//	if (!omap_mcbsp_check_valid_id(id)) {
+//		printk(KERN_ERR "%s: Invalid id (%d)\n", __func__, id + 1);
+//		return -ENODEV;
+//	}
+//	mcbsp = id_to_mcbsp_ptr(id);
+	getMcBSPDevice(mcbspID,&mcbsp);
+
+	if (omap_request_dma(mcbsp->dma_rx_sync, "McBSP RX",
+				simon_omap_mcbsp_rx_dma_callback,
+				mcbsp,
+				&dma_rx_ch)) {
+		dev_err(mcbsp->dev, "Unable to request DMA channel for "
+				"McBSP%d RX. Trying IRQ based RX\n",
+				mcbsp->id);
+		return -EAGAIN;
+	}
+	mcbsp->dma_rx_lch = dma_rx_ch;
+
+	dev_err(mcbsp->dev, "McBSP%d RX DMA on channel %d\n", mcbsp->id,
+		dma_rx_ch);
+
+	init_completion(&mcbsp->rx_dma_completion);
+
+	if (cpu_class_is_omap1()) {
+		src_port = OMAP_DMA_PORT_TIPB;
+		dest_port = OMAP_DMA_PORT_EMIFF;
+	}
+	if (cpu_class_is_omap2())
+		sync_dev = mcbsp->dma_rx_sync;
+
+	omap_set_dma_transfer_params(mcbsp->dma_rx_lch,
+					OMAP_DMA_DATA_TYPE_S32,
+					length >> 1, 1,
+					OMAP_DMA_SYNC_ELEMENT,
+					sync_dev, 0);
+
+	omap_set_dma_src_params(mcbsp->dma_rx_lch,
+				src_port,
+				OMAP_DMA_AMODE_CONSTANT,
+				mcbsp->phys_base + OMAP_MCBSP_REG_DRR,
+				0, 0);
+
+	omap_set_dma_dest_params(mcbsp->dma_rx_lch,
+					dest_port,
+					OMAP_DMA_AMODE_POST_INC,
+					buffer,
+					0, 0);
+
+	omap_start_dma(mcbsp->dma_rx_lch);
+	wait_for_completion(&mcbsp->rx_dma_completion);
+
+	return 0;
+}
+//EXPORT_SYMBOL(omap_mcbsp_recv_buffer);
+
+
+
+
+
+
+
 
 
 int hello_init(void)
@@ -103,22 +366,19 @@ int hello_init(void)
 		return -ENOMEM;
 	}
 
-	// define mcbsp variable:
-	mcbsp = id_to_mcbsp_ptr(mcbspID);
 
-
-	/* MUX configuration: */
-#ifdef	CONFIG_OMAP_MUX
-printk(KERN_ALERT "CONFIG_OMAP_MUX is defined!!!!!!\n");
-#else
-printk(KERN_ALERT "CONFIG_OMAP_MUX is not defined. (so uses uboot settings)\n");
-#endif
-#ifdef CONFIG_ARCH_OMAP34XX
-printk(KERN_ALERT "CONFIG_ARCH_OMAP34XX is defined!!!!!!\n");
-#else
-printk(KERN_ALERT "CONFIG_ARCH_OMAP34XX is not defined. \n");
-#endif
-	/* End of MUX configuration */
+	/* MUX configuration check: */
+	#ifdef	CONFIG_OMAP_MUX
+	printk(KERN_ALERT "CONFIG_OMAP_MUX is defined!!!!!!\n");
+	#else
+	printk(KERN_ALERT "CONFIG_OMAP_MUX is not defined. (so uses uboot settings)\n");
+	#endif
+	#ifdef CONFIG_ARCH_OMAP34XX
+	printk(KERN_ALERT "CONFIG_ARCH_OMAP34XX is defined!!!!!!\n");
+	#else
+	printk(KERN_ALERT "CONFIG_ARCH_OMAP34XX is not defined. \n");
+	#endif
+	/* End of MUX configuration check */
 
 
 	bufbuf[0] = 0x53C3C3CA;  // 01010011 11001010  
@@ -179,10 +439,6 @@ printk(KERN_ALERT "CONFIG_ARCH_OMAP34XX is not defined. \n");
 	printk(KERN_ALERT "Setting gpio183 (ADS1258EVM-analogPowerMode) as output, value 1=unipolar. Return status: %d\n",status);
 	/* End of GPIO stuff */
 
-	// test if we can access the device structure that was set up in mcbsp.h:
-	printk(KERN_ALERT "### The McBSP base address is 0x%x\n", sizeof(mcbsp));//->phys_base);
-	//dev_err(mcbsp->dev, "Configuring (MODULE) McBSP%d  phys_base: 0x%08lx\n", mcbsp->id, mcbsp->phys_base);
-
 	/* Setting IO type & requesting McBSP */
 	status = omap_mcbsp_set_io_type(mcbspID, OMAP_MCBSP_POLL_IO);  // POLL because we don't want to use IRQ and DMA will be set up when needed.
 	
@@ -210,6 +466,22 @@ printk(KERN_ALERT "CONFIG_ARCH_OMAP34XX is not defined. \n");
 
 		/* show McBSP register contents: */
 		//printk(KERN_ALERT "MCBSP1_SRGR2: 0x%04x\n", __raw_readl( (*(OMAP34XX_MCBSP1_BASE + OMAP_MCBSP_REG_SRGR2)) ));
+
+
+	
+	// Define mcbsp variable:
+	//mcbsp = id_to_mcbsp_ptr(mcbspID);
+	getMcBSPDevice(mcbspID,&mcbsp);
+
+	// test if we can access the device structure that was set up in mcbsp.h:
+	//printk(KERN_ALERT "### The McBSP pointer is 0x%lx\n", mcbsp);
+	printk(KERN_ALERT "### The McBSP base address is 0x%lx\n", mcbsp->phys_base);
+	//dev_err(mcbsp->dev, "Configuring (MODULE) McBSP%d  phys_base: 0x%08lx\n", mcbsp->id, mcbsp->phys_base);
+
+		// setting threshold...
+		simon_omap_mcbsp_dump_reg(mcbspID);
+		omap_mcbsp_set_rx_threshold(mcbspID, 64);
+		simon_omap_mcbsp_dump_reg(mcbspID);
 
 		/* polled SPI mode operations */
 		printk(KERN_ALERT "Now reading data from McBSP %d in SPI mode... \n", (mcbspID+1));
@@ -240,9 +512,9 @@ printk(KERN_ALERT "CONFIG_ARCH_OMAP34XX is not defined. \n");
 		/* DMA */
 		printk(KERN_ALERT "Now writing data to McBSP %d via DMA! \n", (mcbspID+1));
 #ifdef KERNEL31
-		status = omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
+		status = simon_omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
 #else
-		status = omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* elem_count in dma.c */, OMAP_DMA_DATA_TYPE_S32); 
+		status = siomap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* elem_count in dma.c */, OMAP_DMA_DATA_TYPE_S32); 
 #endif
 		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
@@ -264,9 +536,9 @@ printk(KERN_ALERT "CONFIG_ARCH_OMAP34XX is not defined. \n");
 		printk(KERN_ALERT "Now reading data from McBSP %d via DMA! \n", (mcbspID+1));
 
 #ifdef KERNEL31
-		status = omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
+		status = simon_omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
 #else
-		status = omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* = elem_count in arch/arm/plat-omap/dma.c */, OMAP_DMA_DATA_TYPE_S32); 
+		status = siomap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* = elem_count in arch/arm/plat-omap/dma.c */, OMAP_DMA_DATA_TYPE_S32); 
 #endif
 		printk(KERN_ALERT "Read from McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 

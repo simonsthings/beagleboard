@@ -67,51 +67,51 @@ static void omap_mcbsp_dump_reg(u8 id)
 	printk(KERN_INFO    "This is a KERN_INFO message. \n");
 	printk(KERN_DEBUG   "This is a KERN_DEBUG message. \n");
 
-	dev_dbg(mcbsp->dev, "**** McBSP%d regs ****\n", mcbsp->id);
-	dev_dbg(mcbsp->dev, "DRR2:  0x%04x\n",
+	dev_info(mcbsp->dev, "**** McBSP%d regs ****\n", mcbsp->id);
+	dev_info(mcbsp->dev, "DRR2:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, DRR2));
-	dev_dbg(mcbsp->dev, "DRR:  0x%04x\n",
+	dev_info(mcbsp->dev, "DRR:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, DRR));
-	dev_dbg(mcbsp->dev, "DXR2:  0x%04x\n",
+	dev_info(mcbsp->dev, "DXR2:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, DXR2));
-	dev_dbg(mcbsp->dev, "DXR:  0x%04x\n",
+	dev_info(mcbsp->dev, "DXR:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, DXR));
-	dev_dbg(mcbsp->dev, "SPCR2: 0x%04x\n",
+	dev_info(mcbsp->dev, "SPCR2: 0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, SPCR2));
-	dev_dbg(mcbsp->dev, "SPCR1: 0x%04x\n",
+	dev_info(mcbsp->dev, "SPCR1: 0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, SPCR1));
-	dev_dbg(mcbsp->dev, "RCR2:  0x%04x\n",
+	dev_info(mcbsp->dev, "RCR2:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, RCR2));
-	dev_dbg(mcbsp->dev, "RCR1:  0x%04x\n",
+	dev_info(mcbsp->dev, "RCR1:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, RCR1));
-	dev_dbg(mcbsp->dev, "XCR2:  0x%04x\n",
+	dev_info(mcbsp->dev, "XCR2:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, XCR2));
-	dev_dbg(mcbsp->dev, "XCR1:  0x%04x\n",
+	dev_info(mcbsp->dev, "XCR1:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, XCR1));
-	dev_dbg(mcbsp->dev, "SRGR2: 0x%04x\n",
+	dev_info(mcbsp->dev, "SRGR2: 0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, SRGR2));
-	dev_dbg(mcbsp->dev, "SRGR1: 0x%04x\n",
+	dev_info(mcbsp->dev, "SRGR1: 0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, SRGR1));
-	dev_dbg(mcbsp->dev, "PCR0:  0x%04x\n",
+	dev_info(mcbsp->dev, "PCR0:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, PCR0));
-	dev_dbg(mcbsp->dev, "***********************\n");
-	dev_dbg(mcbsp->dev, "SYSCON:  0x%04x\n",
+	dev_info(mcbsp->dev, "***********************\n");
+	dev_info(mcbsp->dev, "SYSCON:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, SYSCON));
-	dev_dbg(mcbsp->dev, "THRSH1:  0x%04x\n",
+	dev_info(mcbsp->dev, "THRSH1:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, THRSH1));
-	dev_dbg(mcbsp->dev, "THRSH2:  0x%04x\n",
+	dev_info(mcbsp->dev, "THRSH2:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, THRSH2));
-	dev_dbg(mcbsp->dev, "IRQST:  0x%04x\n",
+	dev_info(mcbsp->dev, "IRQST:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, IRQST));
-	dev_dbg(mcbsp->dev, "IRQEN:  0x%04x\n",
+	dev_info(mcbsp->dev, "IRQEN:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, IRQEN));
-	dev_dbg(mcbsp->dev, "WAKEUPEN:  0x%04x\n",
+	dev_info(mcbsp->dev, "WAKEUPEN:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, WAKEUPEN));
-	dev_dbg(mcbsp->dev, "XCCR:  0x%04x\n",
+	dev_info(mcbsp->dev, "XCCR:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, XCCR));
-	dev_dbg(mcbsp->dev, "RCCR:  0x%04x\n",
+	dev_info(mcbsp->dev, "RCCR:  0x%04x\n",
 			OMAP_MCBSP_READ(mcbsp->io_base, RCCR));
-	dev_dbg(mcbsp->dev, "***********************\n");
+	dev_info(mcbsp->dev, "***********************\n");
 }
 
 static irqreturn_t omap_mcbsp_tx_irq_handler(int irq, void *dev_id)
@@ -120,7 +120,7 @@ static irqreturn_t omap_mcbsp_tx_irq_handler(int irq, void *dev_id)
 	u16 irqst_spcr2;
 
 	irqst_spcr2 = OMAP_MCBSP_READ(mcbsp_tx->io_base, SPCR2);
-	dev_dbg(mcbsp_tx->dev, "TX IRQ callback : 0x%x\n", irqst_spcr2);
+	dev_info(mcbsp_tx->dev, "TX IRQ callback : 0x%x\n", irqst_spcr2);
 
 	if (irqst_spcr2 & XSYNC_ERR) {
 		dev_err(mcbsp_tx->dev, "TX Frame Sync Error! : 0x%x\n",
@@ -141,7 +141,7 @@ static irqreturn_t omap_mcbsp_rx_irq_handler(int irq, void *dev_id)
 	u16 irqst_spcr1;
 
 	irqst_spcr1 = OMAP_MCBSP_READ(mcbsp_rx->io_base, SPCR1);
-	dev_dbg(mcbsp_rx->dev, "RX IRQ callback : 0x%x\n", irqst_spcr1);
+	dev_info(mcbsp_rx->dev, "RX IRQ callback : 0x%x\n", irqst_spcr1);
 
 	if (irqst_spcr1 & RSYNC_ERR) {
 		dev_err(mcbsp_rx->dev, "RX Frame Sync Error! : 0x%x\n",
@@ -160,7 +160,7 @@ static void omap_mcbsp_tx_dma_callback(int lch, u16 ch_status, void *data)
 {
 	struct omap_mcbsp *mcbsp_dma_tx = data;
 
-	dev_dbg(mcbsp_dma_tx->dev, "TX DMA callback : 0x%x\n",
+	dev_info(mcbsp_dma_tx->dev, "TX DMA callback : 0x%x\n",
 		OMAP_MCBSP_READ(mcbsp_dma_tx->io_base, SPCR2));
 
 	/* We can free the channels */
@@ -174,7 +174,7 @@ static void omap_mcbsp_rx_dma_callback(int lch, u16 ch_status, void *data)
 {
 	struct omap_mcbsp *mcbsp_dma_rx = data;
 
-	dev_dbg(mcbsp_dma_rx->dev, "RX DMA callback : 0x%x\n",
+	dev_info(mcbsp_dma_rx->dev, "RX DMA callback : 0x%x\n",
 		OMAP_MCBSP_READ(mcbsp_dma_rx->io_base, SPCR2));
 
 	/* We can free the channels */
@@ -202,7 +202,7 @@ void omap_mcbsp_config(unsigned int id, const struct omap_mcbsp_reg_cfg *config)
 	mcbsp = id_to_mcbsp_ptr(id);
 
 	io_base = mcbsp->io_base;
-	dev_dbg(mcbsp->dev, "Configuring McBSP%d  phys_base: 0x%08lx\n",
+	dev_info(mcbsp->dev, "Configuring McBSP%d  phys_base: 0x%08lx\n",
 			mcbsp->id, mcbsp->phys_base);
 
 	/* We write the given config */
@@ -974,7 +974,7 @@ int omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer,
 	omap_set_dma_transfer_params(mcbsp->dma_rx_lch,
 					OMAP_DMA_DATA_TYPE_S32,
 					length >> 1, 1,
-					OMAP_DMA_SYNC_ELEMENT,
+					OMAP_DMA_SYNC_FRAME,
 					sync_dev, 0);
 
 	omap_set_dma_src_params(mcbsp->dma_rx_lch,
@@ -995,6 +995,14 @@ int omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer,
 	return 0;
 }
 EXPORT_SYMBOL(omap_mcbsp_recv_buffer);
+
+void getMcBSPDevice(unsigned int id, struct omap_mcbsp **mcbsp)
+{
+	*mcbsp = id_to_mcbsp_ptr(id);
+}
+EXPORT_SYMBOL(getMcBSPDevice);
+
+
 
 /*
  * SPI wrapper.
@@ -1087,7 +1095,7 @@ static int __devinit omap_mcbsp_probe(struct platform_device *pdev)
 		goto exit;
 	}
 
-	dev_dbg(&pdev->dev, "Initializing OMAP McBSP (%d).\n", pdev->id);
+	dev_info(&pdev->dev, "Initializing OMAP McBSP (%d).\n", pdev->id);
 
 	if (id >= omap_mcbsp_count) {
 		dev_err(&pdev->dev, "Invalid McBSP device id (%d)\n", id);
