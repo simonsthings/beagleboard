@@ -23,6 +23,7 @@ ifneq ($(KERNELRELEASE),)
 # call from kernel build system
 obj-m := helloMcBSP.o
 obj-m += gpioSet.o
+obj-m += streamingOutput.o
 else
 PWD := $(shell pwd)
 
