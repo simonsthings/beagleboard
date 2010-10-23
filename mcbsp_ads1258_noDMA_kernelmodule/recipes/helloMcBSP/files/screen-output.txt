@@ -1,4 +1,3 @@
-
 Texas Instruments X-Loader 1.4.4ss (Mar 26 2010 - 09:02:52)
 Beagle Rev Ax/Bx
 Reading boot sector
@@ -56,7 +55,7 @@ Uncompressing Linux.............................................................
 [    0.000000] OMAP34xx GPIO hardware version 2.5
 [    0.000000] OMAP clockevent source: GPTIMER12 at 32768 Hz
 [    0.000000] Console: colour dummy device 80x30
-[    0.000000] Calibrating delay loop... 497.82 BogoMIPS (lpj=1941504)
+[    0.000000] Calibrating delay loop... 496.77 BogoMIPS (lpj=1937408)
 [    0.000000] Mount-cache hash table entries: 512
 [    0.000000] CPU: Testing write buffer coherency: ok
 [    0.000000] regulator: core version 0.5
@@ -97,178 +96,178 @@ Uncompressing Linux.............................................................
 [    0.000000]  (5230000 KHz - 5330000 KHz @ 40000 KHz), (600 mBi, 2300 mBm)
 [    0.000000]  (5735000 KHz - 5835000 KHz @ 40000 KHz), (600 mBi, 3000 mBm)
 [    0.000000] cfg80211: Calling CRDA for country: US
-[  121.883453] musb_hdrc: version 6.0, musb-dma, otg (peripheral+host), debug=0
-[  121.886932] musb_hdrc: USB OTG mode controller at d80ab000 using DMA, IRQ 92
-[  121.887817] NET: Registered protocol family 2
-[  121.888092] IP route cache hash table entries: 1024 (order: 0, 4096 bytes)
-[  121.888885] TCP established hash table entries: 4096 (order: 3, 32768 bytes)
-[  121.889038] TCP bind hash table entries: 4096 (order: 2, 16384 bytes)
-[  121.889099] TCP: Hash tables configured (established 4096 bind 4096)
-[  121.889129] TCP reno registered
-[  121.889434] NET: Registered protocol family 1
-[  121.892242] VFS: Disk quotas dquot_6.5.2
-[  121.892364] Dquot-cache hash table entries: 1024 (order 0, 4096 bytes)
-[  121.893676] squashfs: version 4.0 (2009/01/31) Phillip Lougher
-[  121.894531] JFFS2 version 2.2. (NAND) (SUMMARY)  �󩊩 2001-2006 Red Hat, Inc.
-[  121.895568] msgmni has been set to 215
-[  121.900878] alg: No test for stdrng (krng)
-[  121.901245] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 254)
-[  121.901275] io scheduler noop registered
-[  121.901275] io scheduler anticipatory registered
-[  121.901306] io scheduler deadline registered
-[  121.901489] io scheduler cfq registered (default)
-[  121.958953] OMAP DSS rev 2.0
-[  121.959045] OMAP DISPC rev 3.0
-[  121.959106] OMAP VENC rev 2
-[  121.959411] OMAP DSI rev 1.0
-[  122.297454] Serial: 8250/16550 driver, 4 ports, IRQ sharing enabled
-[  122.318817] serial8250.0: ttyS0 at MMIO 0x4806a000 (irq = 72) is a ST16654
-[  122.339324] serial8250.1: ttyS1 at MMIO 0x4806c000 (irq = 73) is a ST16654
-[  122.359771] serial8250.2: ttyS2 at MMIO 0x49020000 (irq = 74) is a ST16654
-[  122.359832] console [ttyS2] enabled
-[  122.883514] brd: module loaded
-[  122.890899] loop: module loaded
-[  122.894226] i2c /dev entries driver
-[  122.899078] enc28j60 spi4.0: enc28j60 Ethernet driver 1.01 loaded
-[  122.907928] enc28j60 spi4.0: enc28j60 chip not found
-[  122.912994] enc28j60: probe of spi4.0 failed with error -5
-[  122.918670] usbcore: registered new interface driver catc
-[  122.924163] catc: v2.8:CATC EL1210A NetMate USB Ethernet driver
-[  122.930236] usbcore: registered new interface driver kaweth
-[  122.935913] pegasus: v0.6.14 (2006/09/27), Pegasus/Pegasus II USB Ethernet driver
-[  122.943542] usbcore: registered new interface driver pegasus
-[  122.949249] rtl8150: v0.6.2 (2004/08/27):rtl8150 based usb-ethernet driver
-[  122.956268] usbcore: registered new interface driver rtl8150
-[  122.962127] usbcore: registered new interface driver asix
-[  122.967681] usbcore: registered new interface driver cdc_ether
-[  122.973632] usbcore: registered new interface driver dm9601
-[  122.979370] usbcore: registered new interface driver smsc95xx
-[  122.985290] usbcore: registered new interface driver gl620a
-[  122.991027] usbcore: registered new interface driver net1080
-[  122.996795] usbcore: registered new interface driver plusb
-[  123.002441] usbcore: registered new interface driver rndis_host
-[  123.008514] usbcore: registered new interface driver cdc_subset
-[  123.014617] usbcore: registered new interface driver zaurus
-[  123.020294] usbcore: registered new interface driver MOSCHIP usb-ethernet driver
-[  123.027923] Broadcom 43xx driver loaded [ Features: L, Firmware-ID: FW13 ]
-[  123.035156] usbcore: registered new interface driver zd1211rw
-[  123.041107] usbcore: registered new interface driver rtl8187
-[  123.046966] usbcore: registered new interface driver rndis_wlan
-[  123.053039] usbcore: registered new interface driver zd1201
-[  123.058807] usbcore: registered new interface driver usb8xxx
-[  123.064666] usbcore: registered new interface driver rt2500usb
-[  123.070709] usbcore: registered new interface driver rt73usb
-[  123.076538] usbcore: registered new interface driver p54usb
-[  123.082489] omap2-nand driver initializing
-[  123.086975] NAND device: Manufacturer ID: 0x2c, Chip ID: 0xba (Micron NAND 256MiB 1,8V 16-bit)
-[  123.096191] cmdlinepart partition parsing not available
-[  123.101501] Creating 5 MTD partitions on "omap2-nand":
-[  123.106689] 0x000000000000-0x000000080000 : "X-Loader"
-[  123.113189] 0x000000080000-0x000000260000 : "U-Boot"
-[  123.119812] 0x000000260000-0x000000280000 : "U-Boot Env"
-[  123.126037] 0x000000280000-0x000000680000 : "Kernel"
-[  123.133514] 0x000000680000-0x000010000000 : "File System"
-[  123.245208] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
-[  123.252258] ehci-omap ehci-omap.0: OMAP-EHCI Host Controller
-[  123.258392] ehci-omap ehci-omap.0: new USB bus registered, assigned bus number 1
-[  123.266265] ehci-omap ehci-omap.0: irq 77, io mem 0x48064800
-[  123.287078] ehci-omap ehci-omap.0: USB 2.0 started, EHCI 1.00
-[  123.293457] usb usb1: configuration #1 chosen from 1 choice
-[  123.299377] hub 1-0:1.0: USB hub found
-[  123.303283] hub 1-0:1.0: 3 ports detected
-[  123.308013] Initializing USB Mass Storage driver...
-[  123.313171] usbcore: registered new interface driver usb-storage
-[  123.319244] USB Mass Storage support registered.
-[  123.324249] mice: PS/2 mouse device common for all mice
-[  123.330017] input: gpio-keys as /devices/platform/gpio-keys/input/input0
-[  123.338653] OMAP Watchdog Timer Rev 0x31: initial timeout 60 sec
-[  123.344879] Bluetooth: HCI UART driver ver 2.2
-[  123.349334] Bluetooth: HCI H4 protocol initialized
-[  123.354217] Bluetooth: HCI BCSP protocol initialized
-[  123.359252] Bluetooth: HCILL protocol initialized
-[  123.363983] Bluetooth: Broadcom Blutonium firmware driver ver 1.2
-[  123.370269] usbcore: registered new interface driver bcm203x
-[  123.376037] Bluetooth: Digianswer Bluetooth USB driver ver 0.10
-[  123.382110] usbcore: registered new interface driver bpa10x
-[  123.387725] Bluetooth: BlueFRITZ! USB driver ver 1.2
-[  123.392852] usbcore: registered new interface driver bfusb
-[  123.398437] Bluetooth: Generic Bluetooth USB driver ver 0.5
-[  123.404174] usbcore: registered new interface driver btusb
-[  123.409790] Bluetooth: Generic Bluetooth SDIO driver ver 0.1
-[  123.416412] mmci-omap-hs mmci-omap-hs.0: Failed to get debounce clock
-[  123.529510] mmci-omap-hs mmci-omap-hs.1: Failed to get debounce clock
-[  123.536682] Registered led device: beagleboard::usr0
-[  123.541900] Registered led device: beagleboard::usr1
-[  123.547546] Registered led device: beagleboard::pmu_stat
-[  123.555328] usbcore: registered new interface driver usbhid
-[  123.561004] usbhid: v2.6:USB HID core driver
-[  123.565948] Advanced Linux Sound Architecture Driver Version 1.0.20.
-[  123.572845] usbcore: registered new interface driver snd-usb-audio
-[  123.579315] No device for DAI twl4030
-[  123.583007] No device for DAI twl4030 Voice
-[  123.587249] No device for DAI omap-mcbsp-dai-0
-[  123.591766] No device for DAI omap-mcbsp-dai-1
-[  123.596252] No device for DAI omap-mcbsp-dai-2
-[  123.600738] No device for DAI omap-mcbsp-dai-3
-[  123.605224] No device for DAI omap-mcbsp-dai-4
-[  123.609710] Not OMAP3 EVM!
-[  123.612457] OMAP3 Beagle SoC init
-[  123.616027] TWL4030 Audio Codec init 
-[  123.621307] asoc: twl4030 <-> omap-mcbsp-dai-0 mapping ok
-[  123.704132] ALSA device list:
-[  123.707122]   #0: omap3beagle (twl4030)
-[  123.711151] oprofile: using arm/armv7
-[  123.715087] TCP cubic registered
-[  123.718383] NET: Registered protocol family 17
-[  123.722900] NET: Registered protocol family 15
-[  123.727478] Bluetooth: L2CAP ver 2.13
-[  123.731170] Bluetooth: L2CAP socket layer initialized
-[  123.736297] Bluetooth: SCO (Voice Link) ver 0.6
-[  123.740905] Bluetooth: SCO socket layer initialized
-[  123.746063] Bluetooth: RFCOMM TTY layer initialized
-[  123.751037] Bluetooth: RFCOMM socket layer initialized
-[  123.756225] Bluetooth: RFCOMM ver 1.11
-[  123.760009] Bluetooth: BNEP (Ethernet Emulation) ver 1.3
-[  123.765411] Bluetooth: BNEP filters: protocol multicast
-[  123.770660] Bluetooth: HIDP (Human Interface Emulation) ver 1.2
-[  123.777709] RPC: Registered udp transport module.
-[  123.782501] RPC: Registered tcp transport module.
-[  123.787353] lib80211: common routines for IEEE802.11 drivers
-[  123.793121] ThumbEE CPU extension supported.
-[  123.797454] Power Management for TI OMAP3.
-[  123.812255] VFP support v0.3: implementor 41 architecture 3 part 30 variant c rev 1
-[  123.820800] registered taskstats version 1
-[  123.826568] fbcvt: 1024x768@60: CVT Name - .786M3-R
-[  123.856781] Console: switching to colour frame buffer device 128x48
-[  123.879302] regulator_init_complete: incomplete constraints, leaving VDAC on
-[  123.886932] Waiting for root device /dev/mmcblk0p2...
-[  123.990356] mmc0: new high speed SDHC card at address 352a
-[  123.996429] mmcblk0: mmc0:352a SD04G 3.69 GiB 
-[  124.001281]  mmcblk0: p1 p2
-[  124.114105] kjournald starting.  Commit interval 5 seconds
-[  124.119720] EXT3-fs warning: maximal mount count reached, running e2fsck is recommended
-[  124.388458] EXT3 FS on mmcblk0p2, internal journal
-[  124.393371] EXT3-fs: mounted filesystem with writeback data mode.
-[  124.399597] VFS: Mounted root (ext3 filesystem) on device 179:2.
-[  124.405853] Freeing init memory: 188K
+[   12.267974] musb_hdrc: version 6.0, musb-dma, otg (peripheral+host), debug=0
+[   12.271606] musb_hdrc: USB OTG mode controller at d80ab000 using DMA, IRQ 92
+[   12.272491] NET: Registered protocol family 2
+[   12.272735] IP route cache hash table entries: 1024 (order: 0, 4096 bytes)
+[   12.273529] TCP established hash table entries: 4096 (order: 3, 32768 bytes)
+[   12.273681] TCP bind hash table entries: 4096 (order: 2, 16384 bytes)
+[   12.273773] TCP: Hash tables configured (established 4096 bind 4096)
+[   12.273803] TCP reno registered
+[   12.274108] NET: Registered protocol family 1
+[   12.276885] VFS: Disk quotas dquot_6.5.2
+[   12.277008] Dquot-cache hash table entries: 1024 (order 0, 4096 bytes)
+[   12.278350] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[   12.279174] JFFS2 version 2.2. (NAND) (SUMMARY)  © 2001-2006 Red Hat, Inc.
+[   12.280242] msgmni has been set to 215
+[   12.285522] alg: No test for stdrng (krng)
+[   12.285858] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 254)
+[   12.285888] io scheduler noop registered
+[   12.285919] io scheduler anticipatory registered
+[   12.285919] io scheduler deadline registered
+[   12.286102] io scheduler cfq registered (default)
+[   12.343444] OMAP DSS rev 2.0
+[   12.343536] OMAP DISPC rev 3.0
+[   12.343627] OMAP VENC rev 2
+[   12.343902] OMAP DSI rev 1.0
+[   12.681915] Serial: 8250/16550 driver, 4 ports, IRQ sharing enabled
+[   12.703247] serial8250.0: ttyS0 at MMIO 0x4806a000 (irq = 72) is a ST16654
+[   12.723693] serial8250.1: ttyS1 at MMIO 0x4806c000 (irq = 73) is a ST16654
+[   12.744110] serial8250.2: ttyS2 at MMIO 0x49020000 (irq = 74) is a ST16654
+[   12.744171] console [ttyS2] enabled
+[   13.267852] brd: module loaded
+[   13.275238] loop: module loaded
+[   13.278533] i2c /dev entries driver
+[   13.283416] enc28j60 spi4.0: enc28j60 Ethernet driver 1.01 loaded
+[   13.292266] enc28j60 spi4.0: enc28j60 chip not found
+[   13.297332] enc28j60: probe of spi4.0 failed with error -5
+[   13.303009] usbcore: registered new interface driver catc
+[   13.308502] catc: v2.8:CATC EL1210A NetMate USB Ethernet driver
+[   13.314575] usbcore: registered new interface driver kaweth
+[   13.320251] pegasus: v0.6.14 (2006/09/27), Pegasus/Pegasus II USB Ethernet driver
+[   13.327880] usbcore: registered new interface driver pegasus
+[   13.333587] rtl8150: v0.6.2 (2004/08/27):rtl8150 based usb-ethernet driver
+[   13.340637] usbcore: registered new interface driver rtl8150
+[   13.346466] usbcore: registered new interface driver asix
+[   13.352020] usbcore: registered new interface driver cdc_ether
+[   13.357971] usbcore: registered new interface driver dm9601
+[   13.363739] usbcore: registered new interface driver smsc95xx
+[   13.369628] usbcore: registered new interface driver gl620a
+[   13.375366] usbcore: registered new interface driver net1080
+[   13.381134] usbcore: registered new interface driver plusb
+[   13.386779] usbcore: registered new interface driver rndis_host
+[   13.392883] usbcore: registered new interface driver cdc_subset
+[   13.398956] usbcore: registered new interface driver zaurus
+[   13.404632] usbcore: registered new interface driver MOSCHIP usb-ethernet driver
+[   13.412261] Broadcom 43xx driver loaded [ Features: L, Firmware-ID: FW13 ]
+[   13.419525] usbcore: registered new interface driver zd1211rw
+[   13.425445] usbcore: registered new interface driver rtl8187
+[   13.431304] usbcore: registered new interface driver rndis_wlan
+[   13.437408] usbcore: registered new interface driver zd1201
+[   13.443176] usbcore: registered new interface driver usb8xxx
+[   13.449035] usbcore: registered new interface driver rt2500usb
+[   13.455047] usbcore: registered new interface driver rt73usb
+[   13.460876] usbcore: registered new interface driver p54usb
+[   13.466857] omap2-nand driver initializing
+[   13.471313] NAND device: Manufacturer ID: 0x2c, Chip ID: 0xba (Micron NAND 256MiB 1,8V 16-bit)
+[   13.480529] cmdlinepart partition parsing not available
+[   13.485870] Creating 5 MTD partitions on "omap2-nand":
+[   13.491027] 0x000000000000-0x000000080000 : "X-Loader"
+[   13.497528] 0x000000080000-0x000000260000 : "U-Boot"
+[   13.504150] 0x000000260000-0x000000280000 : "U-Boot Env"
+[   13.510375] 0x000000280000-0x000000680000 : "Kernel"
+[   13.517822] 0x000000680000-0x000010000000 : "File System"
+[   13.629333] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[   13.636352] ehci-omap ehci-omap.0: OMAP-EHCI Host Controller
+[   13.642517] ehci-omap ehci-omap.0: new USB bus registered, assigned bus number 1
+[   13.650360] ehci-omap ehci-omap.0: irq 77, io mem 0x48064800
+[   13.671569] ehci-omap ehci-omap.0: USB 2.0 started, EHCI 1.00
+[   13.677947] usb usb1: configuration #1 chosen from 1 choice
+[   13.683868] hub 1-0:1.0: USB hub found
+[   13.687774] hub 1-0:1.0: 3 ports detected
+[   13.692504] Initializing USB Mass Storage driver...
+[   13.697662] usbcore: registered new interface driver usb-storage
+[   13.703765] USB Mass Storage support registered.
+[   13.708740] mice: PS/2 mouse device common for all mice
+[   13.714538] input: gpio-keys as /devices/platform/gpio-keys/input/input0
+[   13.723175] OMAP Watchdog Timer Rev 0x31: initial timeout 60 sec
+[   13.729400] Bluetooth: HCI UART driver ver 2.2
+[   13.733856] Bluetooth: HCI H4 protocol initialized
+[   13.738739] Bluetooth: HCI BCSP protocol initialized
+[   13.743774] Bluetooth: HCILL protocol initialized
+[   13.748504] Bluetooth: Broadcom Blutonium firmware driver ver 1.2
+[   13.754791] usbcore: registered new interface driver bcm203x
+[   13.760528] Bluetooth: Digianswer Bluetooth USB driver ver 0.10
+[   13.766632] usbcore: registered new interface driver bpa10x
+[   13.772247] Bluetooth: BlueFRITZ! USB driver ver 1.2
+[   13.777374] usbcore: registered new interface driver bfusb
+[   13.782958] Bluetooth: Generic Bluetooth USB driver ver 0.5
+[   13.788757] usbcore: registered new interface driver btusb
+[   13.794311] Bluetooth: Generic Bluetooth SDIO driver ver 0.1
+[   13.800933] mmci-omap-hs mmci-omap-hs.0: Failed to get debounce clock
+[   13.914001] mmci-omap-hs mmci-omap-hs.1: Failed to get debounce clock
+[   13.921203] Registered led device: beagleboard::usr0
+[   13.926391] Registered led device: beagleboard::usr1
+[   13.932067] Registered led device: beagleboard::pmu_stat
+[   13.939819] usbcore: registered new interface driver usbhid
+[   13.945495] usbhid: v2.6:USB HID core driver
+[   13.950469] Advanced Linux Sound Architecture Driver Version 1.0.20.
+[   13.957366] usbcore: registered new interface driver snd-usb-audio
+[   13.963836] No device for DAI twl4030
+[   13.967529] No device for DAI twl4030 Voice
+[   13.971771] No device for DAI omap-mcbsp-dai-0
+[   13.976287] No device for DAI omap-mcbsp-dai-1
+[   13.980773] No device for DAI omap-mcbsp-dai-2
+[   13.985260] No device for DAI omap-mcbsp-dai-3
+[   13.989746] No device for DAI omap-mcbsp-dai-4
+[   13.994232] Not OMAP3 EVM!
+[   13.996978] OMAP3 Beagle SoC init
+[   14.000549] TWL4030 Audio Codec init 
+[   14.005798] asoc: twl4030 <-> omap-mcbsp-dai-0 mapping ok
+[   14.096893] ALSA device list:
+[   14.099914]   #0: omap3beagle (twl4030)
+[   14.103912] oprofile: using arm/armv7
+[   14.107849] TCP cubic registered
+[   14.111175] NET: Registered protocol family 17
+[   14.115692] NET: Registered protocol family 15
+[   14.120269] Bluetooth: L2CAP ver 2.13
+[   14.123962] Bluetooth: L2CAP socket layer initialized
+[   14.129089] Bluetooth: SCO (Voice Link) ver 0.6
+[   14.133666] Bluetooth: SCO socket layer initialized
+[   14.138824] Bluetooth: RFCOMM TTY layer initialized
+[   14.143798] Bluetooth: RFCOMM socket layer initialized
+[   14.149017] Bluetooth: RFCOMM ver 1.11
+[   14.152801] Bluetooth: BNEP (Ethernet Emulation) ver 1.3
+[   14.158172] Bluetooth: BNEP filters: protocol multicast
+[   14.163421] Bluetooth: HIDP (Human Interface Emulation) ver 1.2
+[   14.170471] RPC: Registered udp transport module.
+[   14.175262] RPC: Registered tcp transport module.
+[   14.180114] lib80211: common routines for IEEE802.11 drivers
+[   14.185882] ThumbEE CPU extension supported.
+[   14.190246] Power Management for TI OMAP3.
+[   14.205047] VFP support v0.3: implementor 41 architecture 3 part 30 variant c rev 1
+[   14.213592] registered taskstats version 1
+[   14.219360] fbcvt: 1024x768@60: CVT Name - .786M3-R
+[   14.249542] Console: switching to colour frame buffer device 128x48
+[   14.272033] regulator_init_complete: incomplete constraints, leaving VDAC on
+[   14.279663] Waiting for root device /dev/mmcblk0p2...
+[   14.368164] mmc0: new high speed SDHC card at address 352a
+[   14.374206] mmcblk0: mmc0:352a SD04G 3.69 GiB 
+[   14.379089]  mmcblk0: p1 p2
+[   17.758544] kjournald starting.  Commit interval 5 seconds
+[   17.764129] EXT3-fs warning: maximal mount count reached, running e2fsck is recommended
+[   18.014709] EXT3 FS on mmcblk0p2, internal journal
+[   18.019592] EXT3-fs: recovery complete.
+[   18.026428] EXT3-fs: mounted filesystem with writeback data mode.
+[   18.032653] VFS: Mounted root (ext3 filesystem) on device 179:2.
+[   18.038940] Freeing init memory: 188K
 INIT: version 2.86 booting
-Starting udev[  125.791931] udevd version 124 started
-
+Starting udev[   23.029541] uncorrectable error : 
+[   23.032958] end_request: I/O error, dev mtdblock0, sector 0
+[   23.038787] Buffer I/O error on device mtdblock0, logical block 0
+[   23.045196] uncorrectable error : 
+[   23.048492] end_request: I/O error, dev mtdblock0, sector 8
+[   23.054290] Buffer I/O error on device mtdblock0, logical block 1
+[   23.060760] end_request: I/O error, dev mtdblock0, sector 16
+[   23.066467] Buffer I/O error on device mtdblock0, logical block 2
+[   23.072784] uncorrectable error : 
+[   23.076049] end_request: I/O error, dev mtdblock0, sector 24
+[   23.081909] Buffer I/O error on device mtdblock0, logical block 3
+[   23.088348] uncorrectable error : 
+[   23.091613] end_request: I/O error, dev mtdblock0, sector 0
+[   23.097412] Buffer I/O error on device mtdblock0, logical block 0
+ and populating dev cache
 Remounting root file system...
-[  129.011901] uncorrectable error : 
-[  129.015228] end_request: I/O error, dev mtdblock0, sector 0
-[  129.021026] Buffer I/O error on device mtdblock0, logical block 0
-[  129.035247] uncorrectable error : 
-[  129.038635] end_request: I/O error, dev mtdblock0, sector 8
-[  129.044433] Buffer I/O error on device mtdblock0, logical block 1
-[  129.056579] end_request: I/O error, dev mtdblock0, sector 16
-[  129.062316] Buffer I/O error on device mtdblock0, logical block 2
-[  129.068786] uncorrectable error : 
-[  129.072052] end_request: I/O error, dev mtdblock0, sector 24
-[  129.077941] Buffer I/O error on device mtdblock0, logical block 3
-[  129.084350] uncorrectable error : 
-[  129.087615] end_request: I/O error, dev mtdblock0, sector 0
-[  129.093414] Buffer I/O error on device mtdblock0, logical block 0
 ALSA: Restoring mixer settings...
 Configuring network interfaces... No state is present for card omap3beagle
 /usr/sbin/alsactl: parse:1620: Unable to open file '/usr/share/alsa/init/00main': No such file or directory
@@ -280,369 +279,155 @@ eth0      No such device
 ifconfig: SIOCGIFFLAGS: No such device
 done.
 Starting portmap daemon: portmap.
-net.ipv4.conf.default.rp_filter = 1
-net.ipv4.conf.all.rp_filter = 1
-hwclock: can't open '/dev/misc/rtc': No such file or directory
-Mon Apr 26 20:26:00 UTC 2010
-hwclock: can't open '/dev/misc/rtc': No such file or directory
-INIT: Entering runlevel: 5
-Starting Dropbear SSH server: dropbear.
-Starting advanced power management daemon: No APM support in kernel
-(failed.)
-Starting system message bus: dbus.
-Starting syslogd/klogd: done
- * Starting Avahi mDNS/DNS-SD Daemon: avahi-daemon
-[ ok ]
-
-.-------.                                           
-|       |                  .-.                      
-|   |   |-----.-----.-----.| |   .----..-----.-----.
-|       |     | __  |  ---'| '--.|  .-'|     |     |
-|   |   |  |  |     |---  ||  --'|  |  |  '  | | | |
-'---'---'--'--'--.  |-----''----''--'  '-----'-'-'-'
-                -'  |
-                '---'
-
-The Angstrom Distribution beagleboard ttyS2
-
-Angstrom 2009.X-stable beagleboard ttyS2
-
-beagleboard login: root
+net.ipv4.conf.default.rp_filter = 1                                                                  
+net.ipv4.conf.all.rp_filter = 1                                                                      
+hwclock: can't open '/dev/misc/rtc': No such file or directory                                       
+Mon Apr 26 20:26:00 UTC 2010                                                                         
+hwclock: can't open '/dev/misc/rtc': No such file or directory                                       
+INIT: Entering runlevel: 5                                                                           
+Starting Dropbear SSH server: dropbear.                                                              
+Starting advanced power management daemon: No APM support in kernel                                  
+(failed.)                                                                                            
+Starting system message bus: dbus.                                                                   
+Starting syslogd/klogd: done                                                                         
+ * Starting Avahi mDNS/DNS-SD Daemon: avahi-daemon                                                   
+[ ok ]                                                                                               
+                                                                                                     
+.-------.                                                                                            
+|       |                  .-.                                                                       
+|   |   |-----.-----.-----.| |   .----..-----.-----.                                                 
+|       |     | __  |  ---'| '--.|  .-'|     |     |                                                 
+|   |   |  |  |     |---  ||  --'|  |  |  '  | | | |                                                 
+'---'---'--'--'--.  |-----''----''--'  '-----'-'-'-'                                                 
+                -'  |                                                                                
+                '---'                                                                                
+                                                                                                     
+The Angstrom Distribution beagleboard ttyS2                                                          
+                                                                                                     
+Angstrom 2009.X-stable beagleboard ttyS2                                                             
+                                                                                                     
+beagleboard login: root                                                                              
+root@beagleboard:~#                                                                                  
+root@beagleboard:~#                                                                                  
+root@beagleboard:~#                                                                                  
+root@beagleboard:~# rm streamingOutput.ko 
+root@beagleboard:~# rz                                                                               
+��root@beagleboard:~# **B0100000023be50
 root@beagleboard:~# 
-root@beagleboard:~# 
-root@beagleboard:~# cat debugMode.sh 
-echo 8 4 0 8 > /proc/sys/kernel/printk
-killall syslogd             
-syslogd -O /var/log/messages
-echo The system Debug level has been set to DEBUG and syslogd has been restarted.
-echo Your log messages are now being stored in /var/log/messages!
 root@beagleboard:~# 
 root@beagleboard:~# 
 root@beagleboard:~# insmod streamingOutput.ko 
-[  146.126190] Hello DMA-McBSP-send world!
-[  146.130065] Setting IO type was 0. Requesting McBSP 1 returned: 0 
-[  146.137145] Configured McBSP 1 registers for raw mode..
-[  146.142883] This is a KERN_EMERG message. See http://www.xml.com/ldd/chapter/book/ch04.html for descriptions.
-[  146.153228] This is a KERN_ALERT message. 
-[  146.157714] This is a KERN_CRIT message. 
-[  146.161743] This is a KERN_ERR message. 
-[  146.166168] This is a KERN_WARNING message. 
-[  146.170806] This is a KERN_NOTICE message. 
-[  146.175018] This is a KERN_INFO message. 
-[  146.179565] Started McBSP 1. 
-[  146.182556] ### The McBSP base address is 0x48074000
-[  146.188232] Now reading data from McBSP 1 in SPI mode... 
-[  146.193969] Reading from McBSP 1 in SPI mode returned as status: 0 and as value: 0xffff 
-[  146.202453] Now writing data to McBSP 1 in SPI mode... 
-[  146.207702] Writing to McBSP 1 in SPI mode returned as status: 0 
-[  146.214355] Now writing data to McBSP 1 (raw & polled)... 
-[  146.220184] Writing to McBSP 1 (raw, polled mode) returned as status: 0 
-[  146.227264] Now writing 2nd data to McBSP 1 (raw & polled)... 
-[  146.233428] Writing to McBSP 1 (raw, polled mode) returned as status: 0 
-[  146.240173] Now reading data from McBSP 1 (raw & polled)... 
-[  146.246398] Reading from McBSP 1 (raw, polled mode) returned as status: 0 and as value 0xffff 
-[  146.255371] Now writing data to McBSP 1 via DMA! 
-[  146.260437] omap-mcbsp omap-mcbsp.1: Requested McBSP1 TX DMA channel 2
-[  146.267333] omap-mcbsp omap-mcbsp.1: Starting McBSP1 TX DMA on the chain with ID 0
-[  146.275299] .
-[  146.276733] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.284393] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.291870] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.299346] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.306823] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.314300] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.321746] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.329223] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.336700] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.344177] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.351654] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.359130] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.366607] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.374053] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.381530] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.389007] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.396484] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.403930] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.411407] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.418853] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.426330] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.433807] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.441284] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.448760] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.456237] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.463714] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.471160] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.478637] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.486114] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.493591] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.501068] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.508544] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.515991] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.523468] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.530944] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.538421] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.545898] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.553375] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.560852] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.568267] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.575744] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.583221] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.590698] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.598175] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.605651] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.613128] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.620605] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.628082] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.635559] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.643035] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.650482] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.657958] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.665435] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.672912] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.680389] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.687866] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.695312] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.702789] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.710266] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.717742] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.725219] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.732696] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.740142] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.747589] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.755065] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.762542] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.770019] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
-[  146.777496] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.784973] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.792419] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.799896] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
-[  146.807373] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.814849] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.822326] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.829803] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
-[  146.837280] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.844726] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.852203] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.859680] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
-[  146.867156] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.874633] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.882110] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.889587] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
-[  146.897033] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.904510] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.911956] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.919433] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
-[  146.926910] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.934387] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.941833] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.949310] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
-[  146.956787] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.964263] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.971740] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.979217] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
-[  146.986694] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  146.994140] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.001617] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.009094] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.016571] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.024047] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.031524] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.038970] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.046447] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.053924] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.061401] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.068878] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.076354] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.083801] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.091247] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.098724] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.106201] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.113677] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.121154] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.128631] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.136077] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.143554] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.151031] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.158508] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.165985] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.173461] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.180908] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.188385] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.195861] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.203338] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.210815] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.218292] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.225738] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.233215] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.240692] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.248168] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.255615] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.263092] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.270568] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.278015] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.285491] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.292968] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.300445] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.307922] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.315399] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.322875] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.330322] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.337799] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.345275] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.352752] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.360229] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.367706] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.375152] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.382629] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.390106] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.397583] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.405059] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.412536] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.419982] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.427429] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.434906] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.442382] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.449859] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.457336] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.464813] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.472259] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.479736] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.487213] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.494689] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.502166] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.509643] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.517089] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.524566] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.532043] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.539520] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.546997] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.554473] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.561950] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.569396] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.576873] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.584350] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.591827] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.599273] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.606750] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.614196] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.621673] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.629150] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.636627] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.644104] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.651580] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.659027] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.666503] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.673980] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.681457] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.688934] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.696411] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.703857] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.711334] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.718811] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.726287] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.733734] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.741210] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.748687] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.756164] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.763610] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.771057] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.778533] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.786010] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.793487] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.800964] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.808410] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.815887] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.823364] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.830841] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.838287] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.845764] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.853240] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.860717] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.868194] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.875640] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.883117] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.890594] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.898071] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.905517] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.912994] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.920471] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.927947] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.935394] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.942840] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.950317] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.957794] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.965270] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.972747] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.980194] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.987670] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  147.995147] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.002624] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.010070] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.017578] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.025054] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.032501] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.039978] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.047454] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.054931] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.062377] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.069854] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.077331] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.084808] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.092254] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.099731] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.107177] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.114654] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.122131] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.129577] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.137054] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.144531] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.152008] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.159454] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.166931] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.174407] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.181884] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.189361] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.196807] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.204284] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.211761] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.219238] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.226684] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.234161] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.241638] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.249114] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.256591] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.264038] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.271514] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.278961] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.286437] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.293884] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.301361] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.308837] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.316314] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.323791] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.331268] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.338714] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.346191] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.353668] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.361145] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.368621] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.376068] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.383544] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.391021] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.398498] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.405975] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.413421] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.420898] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.428375] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.435852] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.443298] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.450744] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.458221] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.465698] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.473175] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.480621] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.488098] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.495574] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.503051] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
-[  148.510528] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
+[ 2379.480743] Hello DMA-McBSP-send world!
+[ 2379.485229] Setting IO type was 0. Requesting McBSP 1 returned: 0 
+[ 2379.491455] Configured McBSP 1 registers for raw mode..
+[ 2379.497436] This is a KERN_EMERG message. See http://www.xml.com/ldd/chapter/book/ch04.html for descriptions.
+[ 2379.507812] This is a KERN_ALERT message. 
+[ 2379.511932] This is a KERN_CRIT message. 
+[ 2379.516510] This is a KERN_ERR message. 
+[ 2379.520446] This is a KERN_WARNING message. 
+[ 2379.525238] This is a KERN_NOTICE message. 
+[ 2379.529449] This is a KERN_INFO message. 
+[ 2379.534027] Started McBSP 1. 
+[ 2379.536987] ### The McBSP base address is 0x48074000
+[ 2379.542663] Now reading data from McBSP 1 in SPI mode... 
+[ 2379.548431] Reading from McBSP 1 in SPI mode returned as status: 0 and as value: 0xffff 
+[ 2379.556884] Now writing data to McBSP 1 in SPI mode... 
+[ 2379.562500] Writing to McBSP 1 in SPI mode returned as status: 0 
+[ 2379.568634] Now writing data to McBSP 1 (raw & polled)... 
+[ 2379.574645] Writing to McBSP 1 (raw, polled mode) returned as status: 0 
+[ 2379.581726] Now writing 2nd data to McBSP 1 (raw & polled)... 
+[ 2379.587921] Writing to McBSP 1 (raw, polled mode) returned as status: 0 
+[ 2379.594970] Now reading data from McBSP 1 (raw & polled)... 
+[ 2379.600677] Reading from McBSP 1 (raw, polled mode) returned as status: 0 and as value 0xffff 
+[ 2379.609863] Now writing data to McBSP 1 via DMA! 
+[ 2379.614593] omap-mcbsp omap-mcbsp.1: Requested McBSP1 TX DMA channel 2
+[ 2379.621704] omap-mcbsp omap-mcbsp.1: Requested McBSP1 TX DMA channel 3
+[ 2379.628601] omap-mcbsp omap-mcbsp.1: Requested McBSP1 TX DMA channel 4
+[ 2379.635498] .
+[ 2379.636932] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.644561] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2379.652008] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2379.659484] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
+[ 2379.666931] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2379.674377] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2379.681854] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.689300] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2379.696777] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
+[ 2379.704223] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2379.711669] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2379.719116] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.726562] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2379.734039] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
+[ 2379.741485] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2379.748931] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2379.756408] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.763854] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2379.771331] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.778778] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2379.786193] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2379.793670] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.801116] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2379.808593] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.816040] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2379.823486] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2379.830963] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.838409] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2379.845886] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.853302] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2379.860748] DMA Channel 4 has completed its transfer of buffer 3 with status 96!
+[ 2379.868225] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.875671] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2379.883117] DMA Channel 4 has completed its transfer of buffer 3 with status 96!
+[ 2379.890594] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
+[ 2379.898040] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2379.905487] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2379.912933] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
+[ 2379.920379] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2379.927825] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2379.935302] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.942749] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2379.950225] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.957672] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2379.965118] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2379.972595] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.980041] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2379.987518] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2379.994964] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2380.002410] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2380.009887] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2380.017333] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2380.024810] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2380.032226] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2380.039672] DMA Channel 4 has completed its transfer of buffer 3 with status 96!
+[ 2380.047149] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2380.054595] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2380.062042] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2380.069519] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
+[ 2380.076965] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2380.084411] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2380.091888] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2380.099304] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2380.106781] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
+[ 2380.114227] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2380.121673] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2380.129150] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2380.136596] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2380.144073] DMA Channel 2 has completed its transfer of buffer 1 with status 96!
+[ 2380.151519] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2380.158966] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2380.166442] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2380.173889] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2380.181335] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2380.188781] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2380.196228] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2380.203704] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2380.211151] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2380.218627] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2380.226074] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2380.233520] DMA Channel 4 has completed its transfer of buffer 3 with status 32!
+[ 2380.240997] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2380.248413] DMA Channel 3 has completed its transfer of buffer 2 with status 32!
+[ 2380.255889] DMA Channel 2 has completed its transfer of buffer 1 with status 32!
+[ 2380.263336] DMA Channel 3 has completed its transfer of buffer 2 with status 96!
+[ 2380.270782] DMA Channel 4 has completed its transfer of buffer 3 with status 96!
 

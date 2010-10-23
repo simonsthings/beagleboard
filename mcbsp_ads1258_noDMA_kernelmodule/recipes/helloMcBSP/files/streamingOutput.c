@@ -265,11 +265,11 @@ int simon_omap_mcbsp_xmit_buffers(unsigned int id,
 {
 	struct omap_mcbsp *mcbsp;
 //	int dma_tx_ch;
-	int src_port = 0;
-	int dest_port = 0;
+//	int src_port = 0;
+//	int dest_port = 0;
 	int deviceRequestlineForDmaChannelsync = 0;
 	int status=0;
-	int mychain_id = 0;
+//	int mychain_id = 0;
 	struct omap_dma_channel_params *dmaparams1;
 	struct omap_dma_channel_params *dmaparams2;
 	struct omap_dma_channel_params *dmaparams3;
@@ -325,6 +325,64 @@ int simon_omap_mcbsp_xmit_buffers(unsigned int id,
 
 
 
+	dmaparams2->data_type=OMAP_DMA_DATA_TYPE_S32;		/* data type 8,16,32 */
+	dmaparams2->elem_count=(length>>1);		/* number of elements in a frame */
+	dmaparams2->frame_count=1;	/* number of frames in a element */
+
+	dmaparams2->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams2->src_amode=OMAP_DMA_AMODE_POST_INC;		/* constant, post increment, indexed,double indexed */
+	dmaparams2->src_start=buffer2;		/* source address : physical */
+	dmaparams2->src_ei=0;		/* source element index */
+	dmaparams2->src_fi=0;		/* source frame index */
+
+	dmaparams2->dst_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams2->dst_amode=OMAP_DMA_AMODE_CONSTANT;		/* constant, post increment, indexed,double indexed */
+	dmaparams2->dst_start=mcbsp->phys_base + OMAP_MCBSP_REG_DXR;		/* source address : physical */
+	dmaparams2->dst_ei=0;		/* source element index */
+	dmaparams2->dst_fi=0;		/* source frame index */
+
+	dmaparams2->trigger=deviceRequestlineForDmaChannelsync;		/* trigger attached if the channel is synchronized */
+	dmaparams2->sync_mode=OMAP_DMA_SYNC_ELEMENT;		/* sycn on element, frame , block or packet */
+	dmaparams2->src_or_dst_synch=0;	/* source synch(1) or destination synch(0) */
+
+	dmaparams2->ie=0;			/* interrupt enabled */
+
+	dmaparams2->read_prio=0;/* read priority */
+	dmaparams2->write_prio=0;/* write priority */
+
+	dmaparams2->burst_mode=OMAP_DMA_DATA_BURST_DIS; /* Burst mode 4/8/16 words */
+
+
+
+	dmaparams3->data_type=OMAP_DMA_DATA_TYPE_S32;		/* data type 8,16,32 */
+	dmaparams3->elem_count=(length>>1);		/* number of elements in a frame */
+	dmaparams3->frame_count=1;	/* number of frames in a element */
+
+	dmaparams3->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams3->src_amode=OMAP_DMA_AMODE_POST_INC;		/* constant, post increment, indexed,double indexed */
+	dmaparams3->src_start=buffer3;		/* source address : physical */
+	dmaparams3->src_ei=0;		/* source element index */
+	dmaparams3->src_fi=0;		/* source frame index */
+
+	dmaparams3->dst_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams3->dst_amode=OMAP_DMA_AMODE_CONSTANT;		/* constant, post increment, indexed,double indexed */
+	dmaparams3->dst_start=mcbsp->phys_base + OMAP_MCBSP_REG_DXR;		/* source address : physical */
+	dmaparams3->dst_ei=0;		/* source element index */
+	dmaparams3->dst_fi=0;		/* source frame index */
+
+	dmaparams3->trigger=deviceRequestlineForDmaChannelsync;		/* trigger attached if the channel is synchronized */
+	dmaparams3->sync_mode=OMAP_DMA_SYNC_ELEMENT;		/* sycn on element, frame , block or packet */
+	dmaparams3->src_or_dst_synch=0;	/* source synch(1) or destination synch(0) */
+
+	dmaparams3->ie=0;			/* interrupt enabled */
+
+	dmaparams3->read_prio=0;/* read priority */
+	dmaparams3->write_prio=0;/* write priority */
+
+	dmaparams3->burst_mode=OMAP_DMA_DATA_BURST_DIS; /* Burst mode 4/8/16 words */
+
+
+
 /*	status = omap_request_dma_chain(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
 				  "McBSP DMA chaining TX test!", // just some string for the log files
 				  simon_omap_mcbsp_tx_dma_end_callback, // the callback function that will be called ewhen the DMA transfer has finished.
@@ -340,7 +398,7 @@ int simon_omap_mcbsp_xmit_buffers(unsigned int id,
 	dev_alert(mcbsp->dev, "Requested McBSP%d TX DMA on the chain with ID %d\n", mcbsp->id, mychain_id);
 */
 	status = omap_request_dma(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
-				"McBSP TX DMA test!",
+				"McBSP TX test DMA for buffer 1 !",
 				simon_omap_mcbsp_tx_dma_buf1_callback,
 				&buffer1,
 				&buf1_dmachannel);
@@ -352,6 +410,32 @@ int simon_omap_mcbsp_xmit_buffers(unsigned int id,
 	dev_alert(mcbsp->dev, "Requested McBSP%d TX DMA channel %d\n", mcbsp->id, buf1_dmachannel);
 
 
+	status = omap_request_dma(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
+				"McBSP TX test DMA for buffer 2 !",
+				simon_omap_mcbsp_tx_dma_buf2_callback,
+				&buffer2,
+				&buf2_dmachannel);
+	if (status)
+	{
+		dev_err(mcbsp->dev, " Unable to request DMA channel for McBSP%d TX.\n",mcbsp->id);
+		return -EAGAIN;
+	}
+	dev_alert(mcbsp->dev, "Requested McBSP%d TX DMA channel %d\n", mcbsp->id, buf2_dmachannel);
+
+
+	status = omap_request_dma(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
+				"McBSP TX test DMA for buffer 3 !",
+				simon_omap_mcbsp_tx_dma_buf3_callback,
+				&buffer3,
+				&buf3_dmachannel);
+	if (status)
+	{
+		dev_err(mcbsp->dev, " Unable to request DMA channel for McBSP%d TX.\n",mcbsp->id);
+		return -EAGAIN;
+	}
+	dev_alert(mcbsp->dev, "Requested McBSP%d TX DMA channel %d\n", mcbsp->id, buf3_dmachannel);
+
+
 	/* Not used anymore because I think it was only used to tell the
 	 * specific dma callback function which dma channel to deactivate.
 	 * The mcbsp structure was given as "data" to the omap_request_dma function
@@ -361,8 +445,7 @@ int simon_omap_mcbsp_xmit_buffers(unsigned int id,
 	 * I hope this (use in DMA callback) really was the only use of this structure field? */
 	//mcbsp->dma_tx_lch = dma_tx_ch;
 
-	dev_alert(mcbsp->dev, "Starting McBSP%d TX DMA on the chain with ID %d\n", mcbsp->id, mychain_id);
-
+//	dev_alert(mcbsp->dev, "Starting McBSP%d TX DMA on the chain with ID %d\n", mcbsp->id, mychain_id);
 
 	/**
 	 * "init_completion: - Initialize a dynamically allocated completion
@@ -372,9 +455,13 @@ int simon_omap_mcbsp_xmit_buffers(unsigned int id,
 
 
 	omap_set_dma_params(buf1_dmachannel, dmaparams1);
+	omap_set_dma_params(buf2_dmachannel, dmaparams2);
+	omap_set_dma_params(buf3_dmachannel, dmaparams3);
 
-	/* Linking! Currently: Loop. And it works! See screen-output.txt! */
-	omap_dma_link_lch(buf1_dmachannel, buf1_dmachannel);
+	/* Linking! Cycle through the 3 buffers, making a ring DMA transfer! See screen-output.txt! */
+	omap_dma_link_lch(buf1_dmachannel, buf2_dmachannel);
+	omap_dma_link_lch(buf2_dmachannel, buf3_dmachannel);
+	omap_dma_link_lch(buf3_dmachannel, buf1_dmachannel);
 
 	omap_start_dma(buf1_dmachannel);
 //	wait_for_completion(&mcbsp->tx_dma_completion);
