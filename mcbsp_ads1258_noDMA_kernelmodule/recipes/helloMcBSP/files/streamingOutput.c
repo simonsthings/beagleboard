@@ -28,9 +28,9 @@ int outval3 = 0x5E7E7E7A;
 module_param(outval3, int, 0);
 MODULE_PARM_DESC(outval3, "The third value to output in a stream.");
 
-int outval4 = 0x5181818A;
-module_param(outval4, int, 0);
-MODULE_PARM_DESC(outval4, "The fourth value to output in a stream.");
+//int outval4 = 0x5181818A;
+//module_param(outval4, int, 0);
+//MODULE_PARM_DESC(outval4, "The fourth value to output in a stream.");
 
 int wordlength = 32;
 module_param(wordlength, int, 32);
@@ -154,13 +154,40 @@ static void simon_omap_mcbsp_rx_dma_callback(int lch, u16 ch_status, void *data)
 	complete(&mcbsp_dma_rx->rx_dma_completion);
 }
 
-/*
- * Simple DMA based buffer rx/tx routines.
- * Nothing fancy, just a single buffer tx/rx through DMA.
- * The DMA resources are released once the transfer is done.
- * For anything fancier, you should use your own customized DMA
- * routines and callbacks.
- */
+
+static void simon_omap_mcbsp_tx_dma_buf1_callback(int lch, u16 ch_status, void *data)
+{
+	/* <*data> is NULL when initialised with omap_request_dma_chain function 
+	 * instead of omap_request_dma. So don't use it! */
+	//output something:
+	printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 1 with status %d!\n",lch,ch_status);
+}
+
+static void simon_omap_mcbsp_tx_dma_buf2_callback(int lch, u16 ch_status, void *data)
+{
+	/* <*data> is NULL when initialised with omap_request_dma_chain function 
+	 * instead of omap_request_dma. So don't use it! */
+	//output something:
+	printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 2 with status %d!\n",lch,ch_status);
+}
+
+static void simon_omap_mcbsp_tx_dma_buf3_callback(int lch, u16 ch_status, void *data)
+{
+	/* <*data> is NULL when initialised with omap_request_dma_chain function 
+	 * instead of omap_request_dma. So don't use it! */
+	//output something:
+	printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 3 with status %d!\n",lch,ch_status);
+}
+
+static void simon_omap_mcbsp_tx_dma_end_callback(int lch, u16 ch_status, void *data)
+{
+	/* <*data> is NULL when initialised with omap_request_dma_chain function 
+	 * instead of omap_request_dma. So don't use it! */
+	//output something:
+	printk(KERN_ALERT "DMA Channel %d has completed its transfer of the last buffer with status %d!\n",lch,ch_status);
+}
+
+/*old*/
 int simon_omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer,
 				unsigned int length)
 {
@@ -169,18 +196,16 @@ int simon_omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer,
 	int src_port = 0;
 	int dest_port = 0;
 	int sync_dev = 0;
+	int status=0;
 
-//	if (!omap_mcbsp_check_valid_id(id)) {
-//		printk(KERN_ERR "%s: Invalid id (%d)\n", __func__, id + 1);
-//		return -ENODEV;
-//	}
-//	mcbsp = id_to_mcbsp_ptr(id);
 	getMcBSPDevice(mcbspID,&mcbsp);
 
-	if (omap_request_dma(mcbsp->dma_tx_sync, "McBSP TX",
+	status = omap_request_dma(mcbsp->dma_tx_sync, "McBSP TX",
 				simon_omap_mcbsp_tx_dma_callback,
 				mcbsp,
-				&dma_tx_ch)) {
+				&dma_tx_ch);
+	if (status)
+	{
 		dev_err(mcbsp->dev, " Unable to request DMA channel for "
 				"McBSP%d TX. Trying IRQ based TX\n",
 				mcbsp->id);
@@ -225,6 +250,139 @@ int simon_omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer,
 }
 //EXPORT_SYMBOL(omap_mcbsp_xmit_buffer);
 
+/*
+ * Simple DMA based buffer rx/tx routines.
+ * Nothing fancy, just a single buffer tx/rx through DMA.
+ * The DMA resources are released once the transfer is done.
+ * For anything fancier, you should use your own customized DMA
+ * routines and callbacks.
+ */
+int simon_omap_mcbsp_xmit_buffers(unsigned int id, 
+	dma_addr_t buffer1, 
+	dma_addr_t buffer2, 
+	dma_addr_t buffer3, 
+	unsigned int length)
+{
+	struct omap_mcbsp *mcbsp;
+//	int dma_tx_ch;
+	int src_port = 0;
+	int dest_port = 0;
+	int deviceRequestlineForDmaChannelsync = 0;
+	int status=0;
+	int mychain_id = 0;
+	struct omap_dma_channel_params *dmaparams1;
+	struct omap_dma_channel_params *dmaparams2;
+	struct omap_dma_channel_params *dmaparams3;
+	int buf1_dmachannel;
+	int buf2_dmachannel;
+	int buf3_dmachannel;
+
+	dmaparams1 = kzalloc(sizeof(struct omap_dma_channel_params), GFP_KERNEL);
+	if (!dmaparams1) {
+		return -ENOMEM;
+	}
+	dmaparams2 = kzalloc(sizeof(struct omap_dma_channel_params), GFP_KERNEL);
+	if (!dmaparams2) {
+		return -ENOMEM;
+	}
+	dmaparams3 = kzalloc(sizeof(struct omap_dma_channel_params), GFP_KERNEL);
+	if (!dmaparams3) {
+		return -ENOMEM;
+	}
+
+	// get mcbsp data structure:
+	getMcBSPDevice(mcbspID,&mcbsp);
+
+	deviceRequestlineForDmaChannelsync = mcbsp->dma_tx_sync;
+
+
+	dmaparams1->data_type=OMAP_DMA_DATA_TYPE_S32;		/* data type 8,16,32 */
+	dmaparams1->elem_count=(length>>1);		/* number of elements in a frame */
+	dmaparams1->frame_count=1;	/* number of frames in a element */
+
+	dmaparams1->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams1->src_amode=OMAP_DMA_AMODE_POST_INC;		/* constant, post increment, indexed,double indexed */
+	dmaparams1->src_start=buffer1;		/* source address : physical */
+	dmaparams1->src_ei=0;		/* source element index */
+	dmaparams1->src_fi=0;		/* source frame index */
+
+	dmaparams1->dst_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams1->dst_amode=OMAP_DMA_AMODE_CONSTANT;		/* constant, post increment, indexed,double indexed */
+	dmaparams1->dst_start=mcbsp->phys_base + OMAP_MCBSP_REG_DXR;		/* source address : physical */
+	dmaparams1->dst_ei=0;		/* source element index */
+	dmaparams1->dst_fi=0;		/* source frame index */
+
+	dmaparams1->trigger=deviceRequestlineForDmaChannelsync;		/* trigger attached if the channel is synchronized */
+	dmaparams1->sync_mode=OMAP_DMA_SYNC_ELEMENT;		/* sycn on element, frame , block or packet */
+	dmaparams1->src_or_dst_synch=0;	/* source synch(1) or destination synch(0) */
+
+	dmaparams1->ie=0;			/* interrupt enabled */
+
+	dmaparams1->read_prio=0;/* read priority */
+	dmaparams1->write_prio=0;/* write priority */
+
+	dmaparams1->burst_mode=OMAP_DMA_DATA_BURST_DIS; /* Burst mode 4/8/16 words */
+
+
+
+/*	status = omap_request_dma_chain(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
+				  "McBSP DMA chaining TX test!", // just some string for the log files
+				  simon_omap_mcbsp_tx_dma_end_callback, // the callback function that will be called ewhen the DMA transfer has finished.
+				  &mychain_id, // future handle for the chain
+				  3, // number of channels this chain shall consist of
+				  OMAP_DMA_STATIC_CHAIN, // the chain will not change during transfer (not quite sure about the benefitts of a dynamic chain yet)
+				  *dmaparams1); // default params such as destinations...
+	if (status)
+	{
+		dev_err(mcbsp->dev, " Unable to request DMA channels for chain in McBSP%d TX.\n",mcbsp->id);
+		return -EAGAIN;
+	}
+	dev_alert(mcbsp->dev, "Requested McBSP%d TX DMA on the chain with ID %d\n", mcbsp->id, mychain_id);
+*/
+	status = omap_request_dma(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
+				"McBSP TX DMA test!",
+				simon_omap_mcbsp_tx_dma_buf1_callback,
+				&buffer1,
+				&buf1_dmachannel);
+	if (status)
+	{
+		dev_err(mcbsp->dev, " Unable to request DMA channel for McBSP%d TX.\n",mcbsp->id);
+		return -EAGAIN;
+	}
+	dev_alert(mcbsp->dev, "Requested McBSP%d TX DMA channel %d\n", mcbsp->id, buf1_dmachannel);
+
+
+	/* Not used anymore because I think it was only used to tell the
+	 * specific dma callback function which dma channel to deactivate.
+	 * The mcbsp structure was given as "data" to the omap_request_dma function
+	 * and simply stored the channel and mcbsp id.
+	 * But as we now use a DMA chain, we can't (and don't really want to) use the 
+	 * mcbsp structure for this. So the mcbsp structure doesn't need to be informed.
+	 * I hope this (use in DMA callback) really was the only use of this structure field? */
+	//mcbsp->dma_tx_lch = dma_tx_ch;
+
+	dev_alert(mcbsp->dev, "Starting McBSP%d TX DMA on the chain with ID %d\n", mcbsp->id, mychain_id);
+
+
+	/**
+	 * "init_completion: - Initialize a dynamically allocated completion
+ 	 * This inline function will initialize a dynamically created completion
+ 	 * structure." Probably needed for wait_for_completion. (e.g..._timeout) */
+	//init_completion(&mcbsp->tx_dma_completion);
+
+
+	omap_set_dma_params(buf1_dmachannel, dmaparams1);
+
+	/* Linking! Currently: Loop. And it works! See screen-output.txt! */
+	omap_dma_link_lch(buf1_dmachannel, buf1_dmachannel);
+
+	omap_start_dma(buf1_dmachannel);
+//	wait_for_completion(&mcbsp->tx_dma_completion);
+
+	return 0;
+}
+//EXPORT_SYMBOL(simon_omap_mcbsp_xmit_buffers);
+
 
 int hello_init(void)
 {
@@ -240,17 +398,17 @@ int hello_init(void)
 
 	struct omap_mcbsp *mcbsp;
 
-	int bufbufsize = 128 * 7; // number of array elements
+	int bufbufsize = 128 * 0.25; // number of array elements
 	int bytesPerVal = 4; // number of bytes per array element (32bit = 4 bytes, 16bit = 2 bytes)
 	u32* bufbuf1; // the buffer
 	u32* bufbuf2; // the buffer
 	u32* bufbuf3; // the buffer
-	u32* bufbuf4; // the buffer
+//	u32* bufbuf4; // the buffer
 
 	dma_addr_t bufbufdmaaddr1;
 	dma_addr_t bufbufdmaaddr2;
 	dma_addr_t bufbufdmaaddr3;
-	dma_addr_t bufbufdmaaddr4;
+//	dma_addr_t bufbufdmaaddr4;
 
 	bufbuf1 = dma_alloc_coherent(NULL, bufbufsize * bytesPerVal /*each u32 value has 4 bytes*/, &bufbufdmaaddr1, GFP_KERNEL);
 	if (bufbuf1 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
@@ -258,25 +416,29 @@ int hello_init(void)
 	if (bufbuf2 == NULL) {pr_err("Unable to allocate DMA buffer 2\n");return -ENOMEM;}
 	bufbuf3 = dma_alloc_coherent(NULL, bufbufsize * bytesPerVal /*each u32 value has 4 bytes*/, &bufbufdmaaddr3, GFP_KERNEL);
 	if (bufbuf3 == NULL) {pr_err("Unable to allocate DMA buffer 3\n");return -ENOMEM;}
-	bufbuf4 = dma_alloc_coherent(NULL, bufbufsize * bytesPerVal /*each u32 value has 4 bytes*/, &bufbufdmaaddr4, GFP_KERNEL);
-	if (bufbuf4 == NULL) {pr_err("Unable to allocate DMA buffer 4\n");return -ENOMEM;}
+//	bufbuf4 = dma_alloc_coherent(NULL, bufbufsize * bytesPerVal /*each u32 value has 4 bytes*/, &bufbufdmaaddr4, GFP_KERNEL);
+//	if (bufbuf4 == NULL) {pr_err("Unable to allocate DMA buffer 4\n");return -ENOMEM;}
 
-	for (i = 0 ; i<bufbufsize; i++)
+	for (i = 0 ; i<bufbufsize-1; i++)
 	{
 		bufbuf1[i] = outval1;
 	}
-	for (i = 0 ; i<bufbufsize; i++)
+	bufbuf1[bufbufsize-1] = 0x5818181a;
+	for (i = 0 ; i<bufbufsize-1; i++)
 	{
 		bufbuf2[i] = outval2;
 	}
-	for (i = 0 ; i<bufbufsize; i++)
+	bufbuf2[bufbufsize-1] = 0x5818181a;
+	for (i = 0 ; i<bufbufsize-1; i++)
 	{
 		bufbuf3[i] = outval3;
 	}
-	for (i = 0 ; i<bufbufsize; i++)
-	{
-		bufbuf4[i] = outval4;
-	}
+	bufbuf3[bufbufsize-1] = 0x5818181a;
+//	for (i = 0 ; i<bufbufsize-1; i++)
+//	{
+//		bufbuf4[i] = outval4;
+//	}
+//	bufbuf4[bufbufsize-1] = 0x5818181a;
 
 	printk(KERN_ALERT "Hello DMA-McBSP-send world!\n");
 
@@ -333,7 +495,14 @@ int hello_init(void)
 
 		/* DMA */
 		printk(KERN_ALERT "Now writing data to McBSP %d via DMA! \n", (mcbspID+1));
-		status = simon_omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr1, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
+
+
+		//status = simon_omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr1, bufbufsize * bytesPerVal / 2 /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
+		status = simon_omap_mcbsp_xmit_buffers(mcbspID, bufbufdmaaddr1, bufbufdmaaddr2, bufbufdmaaddr3, bufbufsize * bytesPerVal / 2 /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
+		
+		// just count peas for a very long time:
+		for (i=0;i<100;i++){printk(KERN_ALERT ".");}
+/*
 		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
 		printk(KERN_ALERT "The first 40 of %d values of the transferbuffer bufbuf after transmission are: \n",bufbufsize);
@@ -349,7 +518,7 @@ int hello_init(void)
 			}
 		}
 		printk(KERN_ALERT " end. \n");
-
+*/
 
 		//printk(KERN_ALERT "Now reading data from McBSP %d via DMA! \n", (mcbspID+1));
 		//status = simon_omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
@@ -370,7 +539,8 @@ int hello_init(void)
 		printk(KERN_ALERT " end. \n");
 */
 	}
-	else printk(KERN_ALERT "Not attempting to continue because requesting failed.\n");
+	else 
+	   printk(KERN_ALERT "Not attempting to continue because requesting failed.\n");
 
 
 

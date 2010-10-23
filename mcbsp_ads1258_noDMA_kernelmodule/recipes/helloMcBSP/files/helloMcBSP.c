@@ -512,7 +512,7 @@ int hello_init(void)
 		/* DMA */
 		printk(KERN_ALERT "Now writing data to McBSP %d via DMA! \n", (mcbspID+1));
 #ifdef KERNEL31
-		status = simon_omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
+		status = simon_omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal / 2 /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
 #else
 		status = siomap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* elem_count in dma.c */, OMAP_DMA_DATA_TYPE_S32); 
 #endif
@@ -536,7 +536,7 @@ int hello_init(void)
 		printk(KERN_ALERT "Now reading data from McBSP %d via DMA! \n", (mcbspID+1));
 
 #ifdef KERNEL31
-		status = simon_omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
+		status = simon_omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal / 2 /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
 #else
 		status = siomap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* = elem_count in arch/arm/plat-omap/dma.c */, OMAP_DMA_DATA_TYPE_S32); 
 #endif
