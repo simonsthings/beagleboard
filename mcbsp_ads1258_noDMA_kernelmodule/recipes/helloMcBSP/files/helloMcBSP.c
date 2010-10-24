@@ -51,8 +51,8 @@ static struct omap_mcbsp_reg_cfg simon_regs = {
         .xcr2  = 0,
         .xcr1  = XFRLEN1(0) | XWDLEN1(OMAP_MCBSP_WORD_32),
         .srgr1 = FWID(31) | CLKGDV(50),
-        .srgr2 = /*GSYNC |*/ 0/*CLKSM*/ | CLKSP  | FPER(250),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
-        .pcr0  = FSXM | FSRM | CLKXM | CLKRM | FSXP | FSRP | CLKXP | CLKRP,
+        .srgr2 = GSYNC | 0/*CLKSM*/ | CLKSP  | FPER(250),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
+        .pcr0  = FSXM | 0/*FSRM*/ | CLKXM | CLKRM | FSXP | FSRP | CLKXP | CLKRP,
         //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
 	.xccr = DXENDLY(1) | XDMAEN ,//| XDISABLE,
 	.rccr = RFULL_CYCLE | RDMAEN,// | RDISABLE,
@@ -510,15 +510,15 @@ int hello_init(void)
 		//printk(KERN_ALERT "Wrote to McBSP %d via IRQ! Return status: %d \n", (mcbspID+1), status);
 
 		/* DMA */
-		printk(KERN_ALERT "Now writing data to McBSP %d via DMA! \n", (mcbspID+1));
+//		printk(KERN_ALERT "Now writing data to McBSP %d via DMA! \n", (mcbspID+1));
 #ifdef KERNEL31
-		status = simon_omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal / 2 /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
+//		status = simon_omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal / 2 /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
 #else
-		status = siomap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* elem_count in dma.c */, OMAP_DMA_DATA_TYPE_S32); 
+//		status = siomap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr, bufbufsize * bytesPerVal /* elem_count in dma.c */, OMAP_DMA_DATA_TYPE_S32); 
 #endif
-		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
+//		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
-		printk(KERN_ALERT "The first 40 of %d values of the transferbuffer bufbuf after transmission are: \n",bufbufsize);
+/*		printk(KERN_ALERT "The first 40 of %d values of the transferbuffer bufbuf after transmission are: \n",bufbufsize);
 		sprintf(printtemp, "trans: \n");
 		for (i = 0 ; i<min(bufbufsize,40); i++)
 		{
@@ -531,7 +531,7 @@ int hello_init(void)
 			}
 		}
 		printk(KERN_ALERT " end. \n");
-
+*/
 
 		printk(KERN_ALERT "Now reading data from McBSP %d via DMA! \n", (mcbspID+1));
 

@@ -36,6 +36,7 @@ int wordlength = 32;
 module_param(wordlength, int, 32);
 MODULE_PARM_DESC(wordlength, "The word length in bits that the serial port should send in. Use 8,16 or 32 bits please.");
 
+int finishDMAcycle = 0;
 
 /* ACTIVE SETTINGS:*/
 static struct omap_mcbsp_reg_cfg simon_regs = {
@@ -45,7 +46,7 @@ static struct omap_mcbsp_reg_cfg simon_regs = {
         .rcr1  = RFRLEN1(0) | RWDLEN1(OMAP_MCBSP_WORD_32),  // frame is 1 word. word is 32 bits.
         .xcr2  = 0,
         .xcr1  = XFRLEN1(0) | XWDLEN1(OMAP_MCBSP_WORD_32),
-        .srgr1 = FWID(31) | CLKGDV(50),
+        .srgr1 = FWID(0) | CLKGDV(50),   // FWID is now just one bit long instead of 32, to simulate the ADS1258.DRDY signal.
         .srgr2 = /*GSYNC |*/ 0/*CLKSM*/ | CLKSP  | FPER(250),// | FSGM, // see pages 129 to 131 of sprufd1.pdf
         .pcr0  = FSXM | FSRM | CLKXM | CLKRM | FSXP | FSRP | CLKXP | CLKRP,
         //.pcr0 = CLKXP | CLKRP,        /* mcbsp: slave */
@@ -154,13 +155,22 @@ static void simon_omap_mcbsp_rx_dma_callback(int lch, u16 ch_status, void *data)
 	complete(&mcbsp_dma_rx->rx_dma_completion);
 }
 
+static void simon_omap_mcbsp_tx_dma_end_callback(int lch, u16 ch_status, void *data)
+{
+	/* <*data> is NULL when initialised with omap_request_dma_chain function 
+	 * instead of omap_request_dma. So don't use it! */
+
+	
+
+	printk(KERN_ALERT "The DMA Channels have completed their transfers as was requested. Last transfer's status is %d!\n",ch_status);
+}
 
 static void simon_omap_mcbsp_tx_dma_buf1_callback(int lch, u16 ch_status, void *data)
 {
 	/* <*data> is NULL when initialised with omap_request_dma_chain function 
 	 * instead of omap_request_dma. So don't use it! */
 	//output something:
-	printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 1 with status %d!\n",lch,ch_status);
+	//printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 1 with status %d!\n",lch,ch_status);
 }
 
 static void simon_omap_mcbsp_tx_dma_buf2_callback(int lch, u16 ch_status, void *data)
@@ -168,7 +178,7 @@ static void simon_omap_mcbsp_tx_dma_buf2_callback(int lch, u16 ch_status, void *
 	/* <*data> is NULL when initialised with omap_request_dma_chain function 
 	 * instead of omap_request_dma. So don't use it! */
 	//output something:
-	printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 2 with status %d!\n",lch,ch_status);
+	//printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 2 with status %d!\n",lch,ch_status);
 }
 
 static void simon_omap_mcbsp_tx_dma_buf3_callback(int lch, u16 ch_status, void *data)
@@ -176,16 +186,16 @@ static void simon_omap_mcbsp_tx_dma_buf3_callback(int lch, u16 ch_status, void *
 	/* <*data> is NULL when initialised with omap_request_dma_chain function 
 	 * instead of omap_request_dma. So don't use it! */
 	//output something:
-	printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 3 with status %d!\n",lch,ch_status);
+	//printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 3 with status %d!\n",lch,ch_status);
+
+	if (finishDMAcycle) 
+	{
+		printk(KERN_ALERT "A request to end the DMA transmission was received! Doing one last round...\n");
+		omap_set_dma_callback(lch,simon_omap_mcbsp_tx_dma_end_callback,data);
+		omap_stop_dma(lch);
+	}
 }
 
-static void simon_omap_mcbsp_tx_dma_end_callback(int lch, u16 ch_status, void *data)
-{
-	/* <*data> is NULL when initialised with omap_request_dma_chain function 
-	 * instead of omap_request_dma. So don't use it! */
-	//output something:
-	printk(KERN_ALERT "DMA Channel %d has completed its transfer of the last buffer with status %d!\n",lch,ch_status);
-}
 
 /*old*/
 int simon_omap_mcbsp_xmit_buffer(unsigned int id, dma_addr_t buffer,
@@ -481,11 +491,11 @@ int hello_init(void)
 	u32 mybuffer = 0x5CCC333A; // 01011100110011000011001100111010
 	u32 mybuffer2 = 0x53CA; // 0101 00111100 1010
 	int i;
-	char printtemp[500];
+//	char printtemp[500];
 
 	struct omap_mcbsp *mcbsp;
 
-	int bufbufsize = 128 * 0.25; // number of array elements
+	int bufbufsize = 64; //128 * 0.25; // number of array elements
 	int bytesPerVal = 4; // number of bytes per array element (32bit = 4 bytes, 16bit = 2 bytes)
 	u32* bufbuf1; // the buffer
 	u32* bufbuf2; // the buffer
@@ -506,21 +516,21 @@ int hello_init(void)
 //	bufbuf4 = dma_alloc_coherent(NULL, bufbufsize * bytesPerVal /*each u32 value has 4 bytes*/, &bufbufdmaaddr4, GFP_KERNEL);
 //	if (bufbuf4 == NULL) {pr_err("Unable to allocate DMA buffer 4\n");return -ENOMEM;}
 
-	for (i = 0 ; i<bufbufsize-1; i++)
+	for (i = 0 ; i<bufbufsize; i++)
 	{
-		bufbuf1[i] = outval1;
+		bufbuf1[i] = 0xbf0A0000 | (i+1); // buf A  //outval1;
 	}
-	bufbuf1[bufbufsize-1] = 0x5818181a;
-	for (i = 0 ; i<bufbufsize-1; i++)
+//	bufbuf1[bufbufsize-1] = 0x5818181a;
+	for (i = 0 ; i<bufbufsize; i++)
 	{
-		bufbuf2[i] = outval2;
+		bufbuf2[i] = 0xbf0B0000 | (i+1); // buf B  //outval2;
 	}
-	bufbuf2[bufbufsize-1] = 0x5818181a;
-	for (i = 0 ; i<bufbufsize-1; i++)
+//	bufbuf2[bufbufsize-1] = 0x5818181a;
+	for (i = 0 ; i<bufbufsize; i++)
 	{
-		bufbuf3[i] = outval3;
+		bufbuf3[i] = 0xbf0C0000 | (i+1); // buf C  //outval3;
 	}
-	bufbuf3[bufbufsize-1] = 0x5818181a;
+//	bufbuf3[bufbufsize-1] = 0x5818181a;
 //	for (i = 0 ; i<bufbufsize-1; i++)
 //	{
 //		bufbuf4[i] = outval4;
@@ -588,7 +598,7 @@ int hello_init(void)
 		status = simon_omap_mcbsp_xmit_buffers(mcbspID, bufbufdmaaddr1, bufbufdmaaddr2, bufbufdmaaddr3, bufbufsize * bytesPerVal / 2 /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
 		
 		// just count peas for a very long time:
-		for (i=0;i<100;i++){printk(KERN_ALERT ".");}
+		for (i=0;i<10;i++){printk(KERN_ALERT ".");}
 /*
 		printk(KERN_ALERT "Wrote to McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
@@ -636,6 +646,14 @@ int hello_init(void)
 
 void hello_exit(void)
 {
+	int i;
+
+	printk(KERN_ALERT "Stopping DMAs...");
+	finishDMAcycle = 1;
+	// just count peas for a very long time:
+	for (i=0;i<10;i++){printk(KERN_ALERT ".");}
+	printk(KERN_ALERT "DMAs hopefully stopped?...");
+
 	printk(KERN_ALERT "Stopping McBSP %d...", (mcbspID+1));
 	omap_mcbsp_stop(mcbspID);	// kernel 2.6.31 and below have only one argument here!
 	printk(KERN_ALERT "Freeing McBSP %d...", (mcbspID+1));
