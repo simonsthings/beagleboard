@@ -24,6 +24,7 @@ ifneq ($(KERNELRELEASE),)
 obj-m := helloMcBSP.o
 obj-m += gpioSet.o
 obj-m += streamingOutput.o
+obj-m += adsInput.o
 else
 PWD := $(shell pwd)
 
