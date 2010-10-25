@@ -37,6 +37,9 @@ module_param(wordlength, int, 32);
 MODULE_PARM_DESC(wordlength, "The word length in bits that the serial port should send in. Use 8,16 or 32 bits please.");
 
 int finishDMAcycle = 0;
+int cyclecounter = 0;
+#define MAXCYCLES 50
+u32 fullbuf[64*MAXCYCLES];
 
 /* ACTIVE SETTINGS:*/
 static struct omap_mcbsp_reg_cfg simon_regs = {
@@ -169,10 +172,57 @@ static void simon_omap_mcbsp_rx_dma_end_callback(int lch, u16 ch_status, void *d
 
 static void simon_omap_mcbsp_rx_dma_buf1_callback(int lch, u16 ch_status, void *data)
 {
+	char printtemp[500];
+	struct omap_mcbsp *mcbsp_dma_rx;
+	//int status=3; // dummy var
+	int i;
+	int bufbufsize = 64; //128 * 0.25; // number of array elements
+	//int bytesPerVal = 4; // number of bytes per array element (32bit = 4 bytes, 16bit = 2 bytes)
+	u32* bufbuf1 = *((u32**)data);
+	
+
 	/* <*data> is NULL when initialised with omap_request_dma_chain function 
 	 * instead of omap_request_dma. So don't use it! */
 	//output something:
-	printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 1 with status %d!\n",lch,ch_status);
+	//printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 1 with status %d!\n",lch,ch_status);
+
+
+	// get mcbsp data structure:
+	getMcBSPDevice(mcbspID,&mcbsp_dma_rx);
+
+	for (i = 0 ; i<bufbufsize; i++)
+	{
+		fullbuf[i + cyclecounter * bufbufsize] = bufbuf1[i];
+	}
+
+	cyclecounter++;
+
+	if (cyclecounter >= MAXCYCLES)
+	{
+		dev_info(mcbsp_dma_rx->dev, "RX DMA callback : 0x%x\n",OMAP_MCBSP_READ(mcbsp_dma_rx->io_base, SPCR2));
+
+		/* We can free the channels */
+		omap_free_dma(mcbsp_dma_rx->dma_rx_lch);
+		mcbsp_dma_rx->dma_rx_lch = -1;
+
+		complete(&mcbsp_dma_rx->rx_dma_completion);
+
+		printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufbuf after reception (in callback!) are: \n",bufbufsize);
+		sprintf(printtemp, "receive: \n   ");
+		for (i = 0 ; i<min(bufbufsize,1000000); i++)
+		{
+			sprintf(printtemp, "%s 0x%x,", printtemp,bufbuf1[i]);
+
+			if ((i%16) == 15)
+			{
+				printk(KERN_ALERT "%s \n",printtemp);
+				sprintf(printtemp, "   ");
+			}
+		}
+		printk(KERN_ALERT " end. \n");
+
+	}
+
 }
 
 static void simon_omap_mcbsp_rx_dma_buf2_callback(int lch, u16 ch_status, void *data)
@@ -421,23 +471,75 @@ int simon_omap_mcbsp_recv_buffers(unsigned int id,
 //EXPORT_SYMBOL(simon_omap_mcbsp_xmit_buffers);
 
 
-int simon_omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer,
+int simon_omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer1, u32* bufbuf1,
 				unsigned int length)
 {
 	struct omap_mcbsp *mcbsp;
-	int dma_rx_ch;
+	//int dma_rx_ch;
 	int src_port = 0;
 	int dest_port = 0;
 	int sync_dev = 0;
+	int status = 3; // dummy value
+	int deviceRequestlineForDmaChannelsync = 0;
+	char printtemp[500];
+	int bufbufsize = 64; //128 * 0.25; // number of array elements
+	int i;
 
-//	if (!omap_mcbsp_check_valid_id(id)) {
-//		printk(KERN_ERR "%s: Invalid id (%d)\n", __func__, id + 1);
-//		return -ENODEV;
-//	}
-//	mcbsp = id_to_mcbsp_ptr(id);
+	struct omap_dma_channel_params *dmaparams1;
+	int buf1_dmachannel;
+
+	dmaparams1 = kzalloc(sizeof(struct omap_dma_channel_params), GFP_KERNEL);
+	if (!dmaparams1) {
+		return -ENOMEM;
+	}
+
 	getMcBSPDevice(mcbspID,&mcbsp);
 
-	if (omap_request_dma(mcbsp->dma_rx_sync, "McBSP RX",
+	deviceRequestlineForDmaChannelsync = mcbsp->dma_rx_sync; // RX
+
+
+	dmaparams1->data_type=OMAP_DMA_DATA_TYPE_S32;		/* data type 8,16,32 */
+	dmaparams1->elem_count=(length>>1);		/* number of elements in a frame */
+	dmaparams1->frame_count=1;	/* number of frames in a element */
+
+	dmaparams1->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams1->src_amode=OMAP_DMA_AMODE_CONSTANT;		/* constant, post increment, indexed,double indexed */
+	dmaparams1->src_start=mcbsp->phys_base + OMAP_MCBSP_REG_DXR;		/* source address : physical */
+	dmaparams1->src_ei=0;		/* source element index */
+	dmaparams1->src_fi=0;		/* source frame index */
+
+	dmaparams1->dst_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams1->dst_amode=OMAP_DMA_AMODE_POST_INC;		/* constant, post increment, indexed,double indexed */
+	dmaparams1->dst_start=buffer1;		/* source address : physical */
+	dmaparams1->dst_ei=0;		/* source element index */
+	dmaparams1->dst_fi=0;		/* source frame index */
+
+	dmaparams1->trigger=deviceRequestlineForDmaChannelsync;		/* trigger attached if the channel is synchronized */
+	dmaparams1->sync_mode=OMAP_DMA_SYNC_ELEMENT;		/* sycn on element, frame , block or packet */
+	dmaparams1->src_or_dst_synch=1;	/* source synch(1) or destination synch(0) */
+
+	dmaparams1->ie=0;			/* interrupt enabled */
+
+	dmaparams1->read_prio=0;/* read priority */
+	dmaparams1->write_prio=0;/* write priority */
+
+	dmaparams1->burst_mode=OMAP_DMA_DATA_BURST_DIS; /* Burst mode 4/8/16 words */
+
+	/* chainable: */
+	status = omap_request_dma(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
+				"McBSP RX test DMA for buffer 1 !",
+				simon_omap_mcbsp_rx_dma_buf1_callback,
+				&bufbuf1,
+				&buf1_dmachannel);
+	if (status)
+	{
+		dev_err(mcbsp->dev, " Unable to request DMA channel for McBSP%d RX.\n",mcbsp->id);
+		return -EAGAIN;
+	}
+	dev_alert(mcbsp->dev, "Requested McBSP%d RX DMA channel %d\n", mcbsp->id, buf1_dmachannel);
+
+	/* single: */
+/*	if (omap_request_dma(mcbsp->dma_rx_sync, "McBSP RX",
 				simon_omap_mcbsp_rx_dma_callback,
 				mcbsp,
 				&dma_rx_ch)) {
@@ -446,40 +548,90 @@ int simon_omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer,
 				mcbsp->id);
 		return -EAGAIN;
 	}
-	mcbsp->dma_rx_lch = dma_rx_ch;
+*/	mcbsp->dma_rx_lch = buf1_dmachannel;
 
-	dev_err(mcbsp->dev, "McBSP%d RX DMA on channel %d\n", mcbsp->id,
-		dma_rx_ch);
+	dev_info(mcbsp->dev, "McBSP%d RX DMA on channel %d\n", mcbsp->id,buf1_dmachannel);
 
 	init_completion(&mcbsp->rx_dma_completion);
 
-	if (cpu_class_is_omap1()) {
+/*	if (cpu_class_is_omap1()) {
 		src_port = OMAP_DMA_PORT_TIPB;
 		dest_port = OMAP_DMA_PORT_EMIFF;
-	}
+	}*/
 	if (cpu_class_is_omap2())
 		sync_dev = mcbsp->dma_rx_sync;
 
-	omap_set_dma_transfer_params(mcbsp->dma_rx_lch,
+	omap_set_dma_transfer_params(buf1_dmachannel,
 					OMAP_DMA_DATA_TYPE_S32,
 					length >> 1, 1,
 					OMAP_DMA_SYNC_ELEMENT,
-					sync_dev, 0);
+					sync_dev, dmaparams1->src_or_dst_synch);
 
-	omap_set_dma_src_params(mcbsp->dma_rx_lch,
+	omap_set_dma_src_params(buf1_dmachannel,
 				src_port,
 				OMAP_DMA_AMODE_CONSTANT,
 				mcbsp->phys_base + OMAP_MCBSP_REG_DRR,
 				0, 0);
 
-	omap_set_dma_dest_params(mcbsp->dma_rx_lch,
+	omap_set_dma_dest_params(buf1_dmachannel,
 					dest_port,
 					OMAP_DMA_AMODE_POST_INC,
-					buffer,
+					buffer1,
 					0, 0);
+
+
+		printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufbuf before reception (DMA setup function) are: \n",bufbufsize);
+		sprintf(printtemp, "receive: \n   ");
+		for (i = 0 ; i<min(bufbufsize,1000000); i++)
+		{
+			sprintf(printtemp, "%s 0x%x,", printtemp,bufbuf1[i]);
+
+			if ((i%16) == 15)
+			{
+				printk(KERN_ALERT "%s \n",printtemp);
+				sprintf(printtemp, "   ");
+			}
+		}
+		printk(KERN_ALERT " end. \n");
+
+	/* Linking: Loop! */
+	omap_dma_link_lch(buf1_dmachannel, buf1_dmachannel);
 
 	omap_start_dma(mcbsp->dma_rx_lch);
 	wait_for_completion(&mcbsp->rx_dma_completion);
+
+
+		printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufbuf after reception (DMA setup function) are: \n",bufbufsize);
+		sprintf(printtemp, "receive: \n   ");
+		for (i = 0 ; i<min(bufbufsize,1000000); i++)
+		{
+			sprintf(printtemp, "%s 0x%x,", printtemp,bufbuf1[i]);
+
+			if ((i%16) == 15)
+			{
+				printk(KERN_ALERT "%s \n",printtemp);
+				sprintf(printtemp, "   ");
+			}
+		}
+		printk(KERN_ALERT " end. \n");
+
+
+
+
+		printk(KERN_ALERT "The first millions of %d values of the transferbuffer fullbuf after reception (DMA setup function) are: \n",bufbufsize);
+		sprintf(printtemp, "receive: \n   ");
+		for (i = 0 ; i<(cyclecounter*bufbufsize); i++)
+		{
+			sprintf(printtemp, "%s 0x%x,", printtemp,fullbuf[i]);
+
+			if ((i%16) == 15)
+			{
+				printk(KERN_ALERT "%s \n",printtemp);
+				sprintf(printtemp, "   ");
+			}
+		}
+		printk(KERN_ALERT " end. \n");
+
 
 	return 0;
 }
@@ -589,7 +741,7 @@ int hello_init(void)
 
 
 		//status = simon_omap_mcbsp_xmit_buffer(mcbspID, bufbufdmaaddr1, bufbufsize * bytesPerVal / 2 /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
-		status = simon_omap_mcbsp_recv_buffers(mcbspID, bufbufdmaaddr1, bufbufdmaaddr2, bufbufdmaaddr3, bufbufsize * bytesPerVal / 2 /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
+	//status = simon_omap_mcbsp_recv_buffers(mcbspID, bufbufdmaaddr1, bufbufdmaaddr2, bufbufdmaaddr3, bufbufsize * bytesPerVal / 2 /*becomes elem_count in http://lxr.free-electrons.com/source/arch/arm/plat-omap/dma.c#L260 */); // the dma memory must have been allocated correctly. See above.
 		
 		// just count peas for a very long time:
 		for (i=0;i<10;i++){printk(KERN_ALERT ".");}
@@ -611,12 +763,12 @@ int hello_init(void)
 		printk(KERN_ALERT " end. \n");
 */
 
-//		printk(KERN_ALERT "Now reading data from McBSP %d via DMA! \n", (mcbspID+1));
-//		status = simon_omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr1, bufbufsize * bytesPerVal/2 /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
-//		printk(KERN_ALERT "Read from McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
+		printk(KERN_ALERT "Now reading data from McBSP %d via DMA! \n", (mcbspID+1));
+		status = simon_omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr1,bufbuf1, bufbufsize * bytesPerVal/2 /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
+		printk(KERN_ALERT "Read from McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
-/*		printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufbuf after reception are: \n",bufbufsize);
-		sprintf(printtemp, "receive: \n");
+		printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufbuf after reception (init function) are: \n",bufbufsize);
+		sprintf(printtemp, "receive: \n   ");
 		for (i = 0 ; i<min(bufbufsize,1000000); i++)
 		{
 			sprintf(printtemp, "%s 0x%x,", printtemp,bufbuf1[i]);
@@ -628,7 +780,7 @@ int hello_init(void)
 			}
 		}
 		printk(KERN_ALERT " end. \n");
-*/
+
 	}
 	else 
 	   printk(KERN_ALERT "Not attempting to continue because requesting failed.\n");
