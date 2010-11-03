@@ -9,6 +9,18 @@
 #include <mach/mcbsp.h>
 #include <mach/dma.h>
 
+/* For socket etc */
+#include <linux/net.h>
+#include <net/sock.h>
+#include <linux/tcp.h>
+#include <linux/in.h>
+#include <asm/uaccess.h>
+#include <linux/file.h>
+#include <linux/socket.h>
+#include <linux/smp_lock.h>
+#include <linux/slab.h>
+
+
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Simon Vogt <simonsunimail@gmail.com>");
 
@@ -637,6 +649,24 @@ int simon_omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer1, u32* bufbu
 }
 //EXPORT_SYMBOL(omap_mcbsp_recv_buffer);
 
+/* Inspired by http://www.linuxjournal.com/article/7660?page=0,2 */
+int network_test(void)
+{
+    struct sockaddr_in saddr, daddr;
+    struct socket *control= NULL;
+    struct socket *data = NULL;
+    struct socket *new_sock = NULL;
+
+    int r = -1;
+    char *response = kmalloc(256, GFP_KERNEL);
+    char *reply = kmalloc(256, GFP_KERNEL);
+
+
+
+
+
+    return 0;
+}
 
 
 int hello_init(void)
