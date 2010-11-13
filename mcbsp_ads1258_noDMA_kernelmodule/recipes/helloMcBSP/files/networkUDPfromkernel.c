@@ -32,9 +32,9 @@ int targetPort = 2002;
 module_param(targetPort, int, 0);
 MODULE_PARM_DESC(targetPort, "The target port. Default is 2002.");
 
-int framelengthUDP = 100;
-module_param(framelengthUDP, int, 0);
-MODULE_PARM_DESC(framelengthUDP, "The frame length for each UDP packet.");
+int packetlengthUDP = 1000;
+module_param(packetlengthUDP, int, 0);
+MODULE_PARM_DESC(packetlengthUDP, "The packet data length (excl. 28 bytes header) for each UDP packet.");
 
 //int wordlength = 32;
 //module_param(wordlength, int, 32);
@@ -124,22 +124,22 @@ int sendto(SOCKET socket_p, const char *buf, int len, int flags,
 /* Inspired by http://www.linuxjournal.com/article/7660?page=0,2 */
 int network_test_likeglibc(void)
 {
-    struct sockaddr_in servaddr, dataaddr;
+    struct sockaddr_in servaddr;
     struct sockaddr targetaddr;
     struct socket *control= NULL;
-    struct socket *data = NULL;
-    struct socket *new_sock = NULL;
+//    struct socket *data = NULL;
+//    struct socket *new_sock = NULL;
 
     int r = -1;
     char *buf = "Hello this is the BeagleBoard Kernel speaking!";
-    char *response = kmalloc(256, GFP_KERNEL);
-    char *reply = kmalloc(256, GFP_KERNEL);
+    //char *response = kmalloc(256, GFP_KERNEL);
+    //char *reply = kmalloc(256, GFP_KERNEL);
 
     printk("Opening a socket for sending '%s' over UDP...\n",buf);
 
     /* SOCKET */
     control = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    printk("The returned socket of socket() was: %x\n",&control);
+    printk("The returned socket of socket() was: %x\n",(unsigned int)&control);
 
     memset(&servaddr,0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
@@ -177,20 +177,20 @@ int network_test(void)
 {
 	#define BUFSIZE 200
 
-	struct sockaddr_in servaddr, dataaddr;
+	struct sockaddr_in servaddr;
 	struct sockaddr targetaddr;
 	struct socket *control= NULL;
-	struct socket *data = NULL;
-	struct socket *new_sock = NULL;
-//  struct msghdr *message;
+	//struct socket *data = NULL;
+	//struct socket *new_sock = NULL;
+	//struct msghdr *message;
 	struct msghdr msg;
 	struct iovec iov;
 
 	int r = -1;
 	char buf[BUFSIZE] = "Hello this is the BeagleBoard Kernel speaking!";
 	char __user *userbuf;
-	char *response = kmalloc(256, GFP_KERNEL);
-	char *reply = kmalloc(256, GFP_KERNEL);
+	//char *response = kmalloc(256, GFP_KERNEL);
+	//char *reply = kmalloc(256, GFP_KERNEL);
 
 	r = copy_to_user(&userbuf, buf, sizeof(*buf));
 	printk("Copying string to user space return status: %d\n",r);
@@ -209,22 +209,22 @@ int network_test(void)
 
 	printk("The socket.state is:    %x  (1=SS_UNCONNECTED in net.h)\n",control->state);
 	printk("The socket.type is:     %d  (2=SOCK_DGRAM in net.h)\n",control->type);
-	printk("The socket.flags is:    %d\n",control->flags);
-	printk("The socket.fasync_list: %x\n",control->fasync_list);
-	printk("The socket.wait is:     %x\n",control->wait);
-	printk("The socket.file is:     %x\n",control->file);
-	printk("The socket.sk is:       %x\n",control->sk);
-	printk("The socket.ops is:      %x\n",control->ops);
+	printk("The socket.flags is:    %lx \n",control->flags);
+	printk("The socket.fasync_list: %x\n",(unsigned int) (control->fasync_list));
+	//printk("The socket.wait is:     %x\n",(unsigned int) (control->wait));
+	printk("The socket.file is:     %x\n",(unsigned int) (control->file));
+	printk("The socket.sk is:       %x\n",(unsigned int) (control->sk));
+	printk("The socket.ops is:      %x\n",(unsigned int) (control->ops));
 
 	printk("Now (struct socket)control.(struct sock)sk.(struct sock_common)__sk_common.(struct proto)skc_prot fields: \n");
 	printk("The control->sk->sk_prot->name is:	%s\n",control->sk->sk_prot->name);
-	printk("The control->sk->sk_protocol is:	%s\n",control->sk->sk_protocol);
+	//printk("The control->sk->sk_protocol is:	%s\n",control->sk->sk_protocol);
 
 
 
 	printk("Now proto_ops fields (net.h + af_inet.c)\n");
 	printk("The socket.ops.family is:	%x\n",control->ops->family);
-	printk("The socket.ops.owner is:	%x\n",control->ops->owner);
+	//printk("The socket.ops.owner is:	%x\n",control->ops->owner);
 /*    printk("The socket.ops.release() is:	%x\n",control->ops->family);
 	printk("The socket.ops.bind() is:	%x\n",control->ops->family);
 	printk("The socket.ops.connect() is:	%x\n",control->ops->family);
@@ -331,7 +331,7 @@ int network_test(void)
 	return 0;
 }
 
-
+/* Inspired by http://forum.soft32.com/linux2/Linux-kernel-socket-programming-ftopict35718.html */
 int network_shuang(void)
 {
 	#define SIZE 100
@@ -345,24 +345,17 @@ int network_shuang(void)
 	struct msghdr msg_header; 
 	struct iovec msg_iov; 
 
-	unsigned char send_buf[100]="Hello this is the BeagleBoard Kernel speaking!\n"; 
+	unsigned char send_buf[]="Hello this is the BeagleBoard Kernel speaking!\n"; 
 
-/*	res.bytes[0] = 192; 
-	res.bytes[1] = 168; 
-	res.bytes[2] = 102; 
-	res.bytes[3] = 1; 
-*/
-	memset (send_buf, 'u', sizeof(send_buf)); 
+	//memset (send_buf, 'u', sizeof(send_buf)); 
+	//sprintf(send_buf, "Hello this is the BeagleBoard Kernel speaking!\n");
 
 	memset (&serv_addr, 0, sizeof (serv_addr)); 
 	serv_addr.sin_family = AF_INET; 
 	serv_addr.sin_addr.s_addr = 0x0137A8C0; //res.word|htonl(0); 
 	serv_addr.sin_port = htons (PORT); 
 
-
-	printk ("<1>Hello, world\n"); 
-	printk ("The process is %s (pid %i)\n", (char *) current->comm, 
-	current->pid); 
+	printk ("The process is %s (pid %i)\n", (char *) current->comm, current->pid); 
 	printk ("s_addr = %u\n", serv_addr.sin_addr.s_addr); 
 
 	if (sock_create(AF_INET, SOCK_DGRAM, 0,&sock)<0) 
@@ -371,7 +364,6 @@ int network_shuang(void)
 		return -1; 
 	} 
 
-	sprintf(send_buf, "Hello this is the BeagleBoard Kernel speaking!\n");
 
 //	sock->sk->allocation = GFP_NOIO; 
 	msg_iov.iov_base = send_buf; 
@@ -383,9 +375,14 @@ int network_shuang(void)
 	msg_header.msg_control = NULL; 
 	msg_header.msg_controllen = 0; 
 
+	/* get_fs() and set_fs(..) are extremely important! 
+	 * Without them, sockets won't work from kernel space! 
+	 * Search "The macro set_fs "... on http://www.linuxjournal.com/article/7660?page=0,2 */
 	oldmm = get_fs(); set_fs(KERNEL_DS);
 	r = sock_sendmsg(sock, &msg_header, sizeof(send_buf));
 	set_fs(oldmm);
+	
+	/* For error codes see: http://lxr.free-electrons.com/source/include/asm-generic/errno.h */ 
 	if (r < 0) printk("Request send Error: %d \n",r); 
 	else printk(" Message sent\n"); 
 
@@ -393,6 +390,11 @@ int network_shuang(void)
 
 }
 
+/* Other pages of interest: 
+http://en.wikipedia.org/wiki/Berkeley_sockets
+http://opengroup.org/onlinepubs/007908799/xns/syssocket.h.html (careful: includes are only valid in user space!)
+http://kerneltrap.org/node/7491
+*/
 int hello_init(void)
 {
 	int returnstatus=0;

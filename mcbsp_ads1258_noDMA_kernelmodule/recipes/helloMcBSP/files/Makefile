@@ -26,6 +26,7 @@ obj-m += gpioSet.o
 obj-m += streamingOutput.o
 obj-m += adsInput.o
 obj-m += networkUDPfromkernel.o
+obj-m += mcbspADS1258ToDBR.o
 else
 PWD := $(shell pwd)
 
