@@ -26,7 +26,9 @@ MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Simon Vogt <simonsunimail@gmail.com>");
 
 /* Number of elements (values) in each DMA buffer.*/
-#define DMABUFSIZE 64  //128 * 0.25; // number of array elements
+#define DMABUFSIZE 64  // number of 32bit array elements
+#define UDPBUFFACTOR 5 // how many DMA buffers should be sent in each UDP packet
+#define UDPBUFBYTES (DMABUFSIZE*4*UDPBUFFACTOR) // 1280 bytes = DMABUFSIZE * sizeof(int) * UDPBUFFACTOR 
 
 /* Parameters */
 int mcbspPort = 1; /*McBSP1 => id 0*/
@@ -37,7 +39,7 @@ int targetIP = 0xC0A83701; //192.168.55.1
 module_param(targetIP, int, 0);
 MODULE_PARM_DESC(targetIP, "The target UDP IP address. Default is 192.168.55.1, or 0xC0A83701 hex.");
 
-int targetPort = 2002;
+int targetPort = 49344;
 module_param(targetPort, int, 0);
 MODULE_PARM_DESC(targetPort, "The target port. Default is 2002.");
 
@@ -48,15 +50,15 @@ MODULE_PARM_DESC(packetlengthUDP, "The packet data length (excl. 28 bytes header
 /* Globals */
 int mcbspID = 0; /*McBSP1 => id 0*/
 
-/* UDP data buffer */
 int finishDMAcycle = 0;
-u32 packetUDPdata[DMABUFSIZE * 10];
-int packetdatapointer = 0; // stores the relative position at which the next write to the udp data array should occur.
 
-/* Network stuff: */
-struct socket network_socket; 
-struct msghdr network_message; 
-char network_databuffer[DMABUFSIZE*10];
+/* Network UDP stuff: */
+struct socket *network_socket; 
+struct sockaddr_in *network_servaddr; 
+struct msghdr *network_message; 
+struct iovec  *network_iov; 
+u32          *network_databuffer; //[DMABUFSIZE*5*sizeof(int)];
+int           network_datapointer = 0; // stores the relative position at which the next write to the udp data array should occur.
 
 /* old? */
 int cyclecounter = 0;
@@ -71,6 +73,8 @@ int buf1_dmachannel;
 int buf2_dmachannel;
 int buf3_dmachannel;
 
+/*** Function Stubs! ***/
+int send_network_message(struct msghdr *msg_header, char *databuffer,struct socket *sock);
 
 /* ACTIVE SETTINGS: See technical reference manual of OMAP3530 for these values. */
 static struct omap_mcbsp_reg_cfg simon_regs = {
@@ -185,34 +189,22 @@ static void simon_omap_mcbsp_rx_dma_buf1_callback(int lch, u16 ch_status, void *
 	int c; // tempstore cyclecounter
 	int runfinish = 0;
 	u32* bufferkernel;
-	int oldmm;
-
-/*	printk(KERN_ALERT "Entering buf1_callback!\n");
-	printk(KERN_ALERT "cyclecounter=%d\n",cyclecounter);
-	printk(KERN_ALERT "bufferkernel[0]=%u\n",bufferkernel[0]);
-	printk(KERN_ALERT "bufferkernel[1]=%u\n",bufferkernel[1]);
-*/
-	//output something:
-	//printk(KERN_ALERT "DMA Channel %d has completed its transfer of buffer 1 with status %d!\n",lch,ch_status);
-
+	//int oldmm;
 
 	if (data == NULL)
 	{
 		printk(KERN_ALERT " Skipping callback because data is NULL. Check initialisation order? \n");
 		return;
 	}
-/*	if (*data == NULL)
-	{
-		printk(KERN_ALERT " Skipping callback because *data is NULL. Check initialisation order? \n");
-		return;
-	}
-*/	bufferkernel = *((u32**)data);
+
+	bufferkernel = (u32*)data;
+
 	if (bufferkernel == NULL)
 	{
 		printk(KERN_ALERT " Skipping callback because bufferkernel is NULL. Check initialisation order? \n");
 		return;
 	}
-	if (*bufferkernel == NULL)
+	if (!*bufferkernel)
 	{
 		printk(KERN_ALERT " Skipping callback because *bufferkernel is NULL. Check initialisation order? \n");
 		return;
@@ -223,17 +215,21 @@ static void simon_omap_mcbsp_rx_dma_buf1_callback(int lch, u16 ch_status, void *
 
 	if (c > 1)
 	{
-		/* get_fs() and set_fs(..) are extremely important! 
-		 * Without them, sockets won't work from kernel space! 
-		 * Search "The macro set_fs "... on http://www.linuxjournal.com/article/7660?page=0,2 */
-		//oldmm = get_fs(); set_fs(KERNEL_DS);
-
 		for (i = 0 ; i<DMABUFSIZE; i++)
 		{
 			fullbuf[i + c * DMABUFSIZE] = bufferkernel[i];
 		}
 
-		//set_fs(oldmm);
+
+		send_network_message(network_message, (char*)bufferkernel, network_socket);
+
+/*		memcpy (network_databuffer+(DMABUFSIZE*(network_datapointer++)),bufferkernel,DMABUFSIZE);
+		if (network_datapointer == UDPBUFFACTOR)
+		{
+			
+		}
+*/
+
 	}
 
 	if (cyclecounter >= MAXCYCLES)
@@ -242,6 +238,11 @@ static void simon_omap_mcbsp_rx_dma_buf1_callback(int lch, u16 ch_status, void *
 		cyclecounter = 4; // needs to be 2 or equivalent.
 		//runfinish = 1;
 	}
+
+	
+	
+
+
 
 	if (finishDMAcycle == 1) 
 	{
@@ -254,7 +255,7 @@ static void simon_omap_mcbsp_rx_dma_buf1_callback(int lch, u16 ch_status, void *
 
 		// get mcbsp data structure:
 		getMcBSPDevice(mcbspID,&mcbsp_dma_rx);
-		if (mcbsp_dma_rx == NULL) {pr_err("Unable to access McBSP device structure!\n");return -ENOMEM;}
+		if (mcbsp_dma_rx == NULL) {pr_err("Unable to access McBSP device structure!\n");return;}
 
 		dev_info(mcbsp_dma_rx->dev, "RX DMA callback : 0x%x\n",OMAP_MCBSP_READ(mcbsp_dma_rx->io_base, SPCR2));
 
@@ -685,7 +686,7 @@ int simon_omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer1dma, u32* bu
 	status = omap_request_dma(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
 				"McBSP RX test DMA for buffer 1 !",
 				simon_omap_mcbsp_rx_dma_buf1_callback,
-				&buffer1kernel,
+				buffer1kernel,
 				&buf1_dmachannel);
 	if (status)
 	{
@@ -697,7 +698,7 @@ int simon_omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer1dma, u32* bu
 	status = omap_request_dma(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
 				"McBSP RX test DMA for buffer 2 !",
 				simon_omap_mcbsp_rx_dma_buf1_callback,
-				&buffer2kernel,
+				buffer2kernel,
 				&buf2_dmachannel);
 	if (status)
 	{
@@ -709,7 +710,7 @@ int simon_omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer1dma, u32* bu
 	status = omap_request_dma(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
 				"McBSP RX test DMA for buffer 3 !",
 				simon_omap_mcbsp_rx_dma_buf1_callback,
-				&buffer3kernel,
+				buffer3kernel,
 				&buf3_dmachannel);
 	if (status)
 	{
@@ -838,78 +839,148 @@ int simon_omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer1dma, u32* bu
 	printk(KERN_ALERT " end. \n");
 */
 
-	printk(KERN_ALERT " Doodling... \n");
+/*	printk(KERN_ALERT " Doodling... \n");
 	for (i=0;i<500;i++)
 	{
 		printk(KERN_ALERT ".");
 	}
 	printk(KERN_ALERT "\n");
 	printk(KERN_ALERT " end. \n");
+*/	
+	return 0;
+}
+
+int send_network_message(struct msghdr *message_pointer, char *databuffer,struct socket *sock)
+{
+	int r;
+	int oldmm;
+
+
+	if ( network_iov == NULL)
+	{
+		printk(KERN_ALERT " Skipping send_network_message because network_iov is NULL. Check initialisation order? \n");
+		return 1;
+	}
+	if ( network_message == NULL)
+	{
+		printk(KERN_ALERT " Skipping send_network_message because network_message is NULL. Check initialisation order? \n");
+		return 1;
+	}
+
+	(*network_iov).iov_base = databuffer;
+	(*network_iov).iov_len = UDPBUFBYTES;
+	(*network_message).msg_iov = network_iov;
+	(*network_message).msg_iovlen = sizeof(*network_iov);
+	(*network_message).msg_name = (struct sockaddr*) network_servaddr;
+	(*network_message).msg_namelen = sizeof(*network_servaddr);
+
+	if ( (*network_message).msg_iov == NULL)
+	{
+		printk(KERN_ALERT " Skipping send_network_message because network_message->msg_iov is NULL. Check initialisation order? \n");
+		return 1;
+	}
+	if ( (*network_message).msg_name == NULL)
+	{
+		printk(KERN_ALERT " Skipping send_network_message because network_message->msg_name is NULL. Check initialisation order? \n");
+		return 1;
+	}
+
+/*	if ( network_message->msg_iov->iov_base == NULL)
+	{
+		printk(KERN_ALERT " Skipping send_network_message because message_pointer->msg_iov->iov_base is NULL. Check initialisation order? \n");
+		return 1;
+	}
+*/
+	//message_pointer->msg_iov->iov_base = databuffer;
+
+//	struct msghdr msg_header = *message_pointer; 
+//	msg_header.msg_iov.iov_base = databuffer;
+
+	/* get_fs() and set_fs(..) are extremely important! 
+	 * Without them, sockets won't work from kernel space! 
+	 * Search "The macro set_fs "... on http://www.linuxjournal.com/article/7660?page=0,2 */
+	oldmm = get_fs(); set_fs(KERNEL_DS);
+	r = sock_sendmsg(sock, network_message, UDPBUFBYTES);
+	set_fs(oldmm);
 	
+	/* For error codes see: http://lxr.free-electrons.com/source/include/asm-generic/errno.h */ 
+	if (r < 0) printk("Request send Error: %d \n",r); 
+	//else printk(" Message sent\n"); 
+
 	return 0;
 }
 
 int prepare_network_message(struct msghdr *message_pointer, char *databuffer,struct socket *sock)
 {
-	#define SIZE 100
-	#define PORT 49344
-
 	//struct socket * sock; 
-	struct sockaddr_in serv_addr; 
 
-	struct msghdr msg_header = *message_pointer; 
-	struct iovec msg_iov; 
+//	struct msghdr local_network_message = *message_pointer; 
+//	struct iovec local_network_iov = *network_iov; 
+//	struct sockaddr_in local_network_servaddr = *network_servaddr; 
 
-	unsigned char send_buf[]="Hello this is the BeagleBoard Kernel speaking! Network communication is ready.\n"; 
+	//unsigned char *send_buf="Hello this is the BeagleBoard Kernel speaking! Network communication is ready.\n"; 
+	//memcpy(databuffer, send_buf, 80); 
+	//memset (databuffer, 'u', sizeof(send_buf)); 
+/*	sprintf(databuffer, "Hello this is the BeagleBoard Kernel speaking!\n");
+	printk(databuffer);
 
-	//memset (send_buf, 'u', sizeof(send_buf)); 
-	//sprintf(send_buf, "Hello this is the BeagleBoard Kernel speaking!\n");
-
-	memset (&serv_addr, 0, sizeof (serv_addr)); 
-	serv_addr.sin_family = AF_INET; 
-	serv_addr.sin_addr.s_addr = 0x0137A8C0; //res.word|htonl(0); 
-	serv_addr.sin_port = htons (PORT); 
+	memset (&local_network_servaddr, 0, sizeof (local_network_servaddr)); 
+	local_network_servaddr.sin_family = AF_INET;
+	local_network_servaddr.sin_addr.s_addr = 0x0137A8C0; //res.word|htonl(0); 
+	local_network_servaddr.sin_port = htons (targetPort); 
 
 	printk ("The process is %s (pid %i)\n", (char *) current->comm, current->pid); 
-	printk ("s_addr = %u\n", serv_addr.sin_addr.s_addr); 
+	printk ("s_addr = %u\n", local_network_servaddr.sin_addr.s_addr); 
 
 	if (sock_create(AF_INET, SOCK_DGRAM, 0,&sock)<0) 
 	{ 
 		printk(" Error Creating socket\n"); 
 		return -1; 
 	} 
+	local_network_iov.iov_base = databuffer;
+	local_network_iov.iov_len = UDPBUFBYTES; // sizeof(send_buf); 
+	local_network_message.msg_name = (struct sockaddr*) &local_network_servaddr; 
+	local_network_message.msg_namelen = sizeof (local_network_servaddr); 
+	local_network_message.msg_iov = &local_network_iov; 
+	local_network_message.msg_iovlen = sizeof(local_network_iov); 
+	local_network_message.msg_control = NULL; 
+	local_network_message.msg_controllen = 0; 
+*/
+
+	//*databuffer = *send_buf;
+
+	memset (network_servaddr, 0, sizeof (*network_servaddr)); 
+	(*network_servaddr).sin_family = AF_INET;
+	(*network_servaddr).sin_addr.s_addr = 0x0137A8C0; //res.word|htonl(0); 
+	(*network_servaddr).sin_port = htons (targetPort); 
+
+	printk ("The process is %s (pid %i)\n", (char *) current->comm, current->pid); 
+	printk ("s_addr = %u\n", (*network_servaddr).sin_addr.s_addr); 
+
+	if (sock_create(AF_INET, SOCK_DGRAM, 0, &network_socket)<0) 
+	{ 
+		printk(" Error Creating socket\n"); 
+		return -1; 
+	} 
+	(*network_iov).iov_base = databuffer;
+	(*network_iov).iov_len = UDPBUFBYTES; // sizeof(send_buf); 
+	(*network_message).msg_name = (struct sockaddr*) network_servaddr;
+	(*network_message).msg_namelen = sizeof (*network_servaddr); 
+	(*network_message).msg_iov = network_iov; 
+	(*network_message).msg_iovlen = sizeof(*network_iov); 
+	(*network_message).msg_control = NULL; 
+	(*network_message).msg_controllen = 0; 
 
 
-//	sock->sk->allocation = GFP_NOIO; 
-	msg_iov.iov_base = send_buf; 
-	msg_iov.iov_len = sizeof(send_buf); 
-	msg_header.msg_name = (struct sockaddr*) &serv_addr; 
-	msg_header.msg_namelen = sizeof (serv_addr); 
-	msg_header.msg_iov = &msg_iov; 
-	msg_header.msg_iovlen = sizeof(msg_iov); 
-	msg_header.msg_control = NULL; 
-	msg_header.msg_controllen = 0; 
+	sprintf(databuffer, "Hello this is the BeagleBoard Kernel speaking!\n");
+	printk(databuffer);
 
-	databuffer = send_buf;
+
+	send_network_message(network_message, databuffer, network_socket);
+
 	return 0;
 }
 
-int send_network_message(struct msghdr *msg_header, char *databuffer,struct socket *sock)
-{
-	int r;
-	int oldmm;
-
-	/* get_fs() and set_fs(..) are extremely important! 
-	 * Without them, sockets won't work from kernel space! 
-	 * Search "The macro set_fs "... on http://www.linuxjournal.com/article/7660?page=0,2 */
-	oldmm = get_fs(); set_fs(KERNEL_DS);
-	r = sock_sendmsg(sock, msg_header, sizeof(databuffer));
-	set_fs(oldmm);
-	
-	/* For error codes see: http://lxr.free-electrons.com/source/include/asm-generic/errno.h */ 
-	if (r < 0) printk("Request send Error: %d \n",r); 
-	//else printk(" Message sent\n"); 
-}
 
 int hello_init(void)
 {
@@ -926,8 +997,11 @@ int hello_init(void)
 	struct omap_mcbsp *mcbsp;
 
 	/* Network stuff: */
-	struct socket * sock; 
-	struct msghdr msg_header; 
+//	struct socket init_network_socket; 
+//	struct sockaddr_in init_serv_addr; 
+//	struct msghdr init_network_message; 
+//	struct iovec  init_network_iov; 
+
 
 
 	/* Number of bytes needed to store each value: */
@@ -966,9 +1040,28 @@ int hello_init(void)
 	//if (!message_pointer) {return -ENOMEM;}
 	//message_socket = kzalloc(sizeof(struct socket), GFP_KERNEL);
 	//if (!message_socket) {return -ENOMEM;}
-	prepare_network_message(&msg_header, network_databuffer,sock);
-	network_message = msg_header;
-	network_socket = *sock;
+
+	network_databuffer = kzalloc(UDPBUFBYTES, GFP_KERNEL);
+	if (!network_databuffer) {return -ENOMEM;}
+
+	network_socket = kzalloc(sizeof(struct socket), GFP_KERNEL);
+	if (!network_socket) {return -ENOMEM;}
+	network_servaddr = kzalloc(sizeof(struct sockaddr_in), GFP_KERNEL);
+	if (!network_servaddr) {return -ENOMEM;}
+	network_message = kzalloc(sizeof(struct msghdr), GFP_KERNEL);
+	if (!network_message) {return -ENOMEM;}
+	network_iov = kzalloc(sizeof(struct iovec), GFP_KERNEL);
+	if (!network_iov) {return -ENOMEM;}
+
+	prepare_network_message(network_message, (char*)network_databuffer,network_socket);
+//	network_message = msg_header;
+//	network_socket = sock;
+
+//	network_socket = init_network_socket; 
+//	serv_addr = 
+//	network_message = 
+//	network_iov = 
+
 
 
 	/* Setting IO type */
@@ -1025,7 +1118,7 @@ int hello_init(void)
 		status = simon_omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr1,bufbuf1, bufbufdmaaddr2,bufbuf2, bufbufdmaaddr3,bufbuf3, DMABUFSIZE * bytesPerVal/2 /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
 		printk(KERN_ALERT "Finished initiating continuous data read from McBSP %d via DMA! Return status: %d \n", (mcbspID+1), status);
 
-		printk(KERN_ALERT "The incoming data should now be being pumped out through UDP network packets to 192.168.55.1 port 2002.\n");
+		printk(KERN_ALERT "The incoming data should now be being pumped out through UDP network packets to IP 0x%x (e.g. 0xC0A83701 = 192.168.55.1) port %u.\n",targetIP,targetPort);
 
 	}
 	else 
@@ -1041,14 +1134,14 @@ void hello_exit(void)
 	struct omap_mcbsp *mcbsp;
 
 	/* For checking if the data corruption always only happens when not executing init or exit. */
-	printk(KERN_ALERT " Doodling... \n");
+/*	printk(KERN_ALERT " Doodling... \n");
 	for (i=0;i<500;i++)
 	{
 		printk(KERN_ALERT ".");
 	}
 	printk(KERN_ALERT "\n");
 	printk(KERN_ALERT " end. \n");
-
+*/
 	printk(KERN_ALERT "Telling DMA transfers to stop. (c=%d)\n",cyclecounter);
 	finishDMAcycle = 1; // only used with background transfers.
 	printk(KERN_ALERT "Waiting for transfers to end...\n");
