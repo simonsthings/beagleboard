@@ -59,6 +59,8 @@ struct msghdr *network_message;
 struct iovec  *network_iov; 
 u32          *network_databuffer; //[DMABUFSIZE*5*sizeof(int)];
 int           network_datapointer = 0; // stores the relative position at which the next write to the udp data array should occur.
+int leaveXout = 100;
+int leaveXoutCounter = 0;
 
 /* old? */
 int cyclecounter = 0;
@@ -217,11 +219,15 @@ static void simon_omap_mcbsp_rx_dma_buf1_callback(int lch, u16 ch_status, void *
 	{
 		for (i = 0 ; i<DMABUFSIZE; i++)
 		{
-			fullbuf[i + c * DMABUFSIZE] = bufferkernel[i];
+			//fullbuf[i + c * DMABUFSIZE] = bufferkernel[i];
 		}
 
-
-		send_network_message(network_message, (char*)bufferkernel, network_socket);
+		// willingly loose data until we have a separate thread or so for this:
+		//if (leaveXoutCounter++ >= leaveXout)
+		{
+			send_network_message(network_message, (char*)bufferkernel, network_socket);
+			//leaveXoutCounter=0;
+		}
 
 /*		memcpy (network_databuffer+(DMABUFSIZE*(network_datapointer++)),bufferkernel,DMABUFSIZE);
 		if (network_datapointer == UDPBUFFACTOR)
@@ -1062,6 +1068,27 @@ int hello_init(void)
 //	network_message = 
 //	network_iov = 
 
+
+	/* Do GPIO stuff */
+	// requesting:
+	reqstatus = gpio_request(134, "ADS1258EVM-clockselect");
+	printk(KERN_ALERT "Gpio 134 (ADS1258EVM-clockselect) was requested. Return status: %d\n",reqstatus);
+	reqstatus = gpio_request(135, "ADS1258EVM-nRESET");
+	printk(KERN_ALERT "Gpio 135 (ADS1258EVM-nRESET) was requested. Return status: %d\n",reqstatus);
+	reqstatus = gpio_request(136, "ADS1258EVM-nPWDN");
+	printk(KERN_ALERT "Gpio 136 (ADS1258EVM-nPWDN) was requested. Return status: %d\n",reqstatus);
+	reqstatus = gpio_request(183, "ADS1258EVM-analogPowerMode");
+	printk(KERN_ALERT "Gpio 183 (ADS1258EVM-analogPowerMode) was requested. Return status: %d\n",reqstatus);
+	// setting:
+	status = gpio_direction_output(134,1);
+	printk(KERN_ALERT "Setting gpio134 (ADS1258EVM-clockselect) as output, value 1=EXTERNAL clock from BB. Return status: %d\n",status);
+	status = gpio_direction_output(135,1);
+	printk(KERN_ALERT "Setting gpio135 (ADS1258EVM-nRESET) as output, value 1=no reset, so be active!. Return status: %d\n",status);
+	status = gpio_direction_output(136,1);
+	printk(KERN_ALERT "Setting gpio136 (ADS1258EVM-nPWDN) as output, value 1=no powerdown, so be active!. Return status: %d\n",status);
+	status = gpio_direction_output(183,1);
+	printk(KERN_ALERT "Setting gpio183 (ADS1258EVM-analogPowerMode) as output, value 1=unipolar. Return status: %d\n",status);
+	/* End of GPIO stuff */
 
 
 	/* Setting IO type */
