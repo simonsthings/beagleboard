@@ -5,6 +5,9 @@
 #include <linux/module.h>
 #include <linux/dma-mapping.h>
 #include <linux/gpio.h>
+#include <linux/time.h>
+//#include <linux/ktime.h>
+//#include <linux/utime.h>
 
 #include <mach/mcbsp.h>
 #include <mach/dma.h>
@@ -26,9 +29,10 @@ MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Simon Vogt <simonsunimail@gmail.com>");
 
 /* Number of elements (values) in each DMA buffer.*/
-#define DMABUFSIZE 64  // number of 32bit array elements
-#define UDPBUFFACTOR 5 // how many DMA buffers should be sent in each UDP packet
-#define UDPBUFBYTES (DMABUFSIZE*4*UDPBUFFACTOR) // 1280 bytes = DMABUFSIZE * sizeof(int) * UDPBUFFACTOR 
+#define DMABUFSIZE 50*16 /*16 channels*/  // number of 32bit array elements
+#define DMABUFBYTES (DMABUFSIZE*4) // each samples is a 32bit word, so 4 bytes.
+#define UDPBUFFACTOR 30 // how many DMA buffers should be stored temporally until the UDP packet has been sent. Treat this as DMABUFSIZE x UDPBUFFACTOR 2D-array.
+#define UDPBUFBYTES (DMABUFBYTES*UDPBUFFACTOR) // 1280 bytes = DMABUFSIZE * sizeof(int) * UDPBUFFACTOR 
 
 /* Parameters */
 int mcbspPort = 1; /*McBSP1 => id 0*/
@@ -41,7 +45,7 @@ MODULE_PARM_DESC(targetIP, "The target UDP IP address. Default is 192.168.55.1, 
 
 int targetPort = 49344;
 module_param(targetPort, int, 0);
-MODULE_PARM_DESC(targetPort, "The target port. Default is 2002.");
+MODULE_PARM_DESC(targetPort, "The target port. Default is 49344.");
 
 int packetlengthUDP = DMABUFSIZE * 10;
 module_param(packetlengthUDP, int, 0);
@@ -57,14 +61,14 @@ struct socket *network_socket;
 struct sockaddr_in *network_servaddr; 
 struct msghdr *network_message; 
 struct iovec  *network_iov; 
-u32          *network_databuffer; //[DMABUFSIZE*5*sizeof(int)];
-int           network_datapointer = 0; // stores the relative position at which the next write to the udp data array should occur.
+u32          *network_databuffer; // Treat this as DMABUFSIZE x UDPBUFFACTOR 2D-array of 32bit values.
+int           network_dataoffset = 0; // stores the relative position at which the next write to the udp data array should occur.
 int leaveXout = 100;
 int leaveXoutCounter = 0;
 
 /* old? */
 int cyclecounter = 0;
-#define MAXCYCLES 50
+#define MAXCYCLES 5
 u32 fullbuf[DMABUFSIZE*MAXCYCLES];
 
 /* Completion queues. Works similarly to 'synchronized' statement in java. */
@@ -74,6 +78,14 @@ struct completion mcbsp_rx_dma_completion;
 int buf1_dmachannel;
 int buf2_dmachannel;
 int buf3_dmachannel;
+	
+/* For measuring the packet transfer rate: */
+struct timespec lasttime;
+int snapshots = 20;
+double *snapshotpacketrate;
+int snapshotspacketcounter = 0;
+double actualpacketrate = 0;
+int callcounter = 0;
 
 /*** Function Stubs! ***/
 int send_network_message(struct msghdr *msg_header, char *databuffer,struct socket *sock);
@@ -166,6 +178,60 @@ static void simon_omap_mcbsp_dump_reg(u8 id)
 	dev_info(mcbsp->dev, "***********************\n");
 }
 
+static void computeCallbackRate(int lch)
+{
+	struct timespec *now;
+	struct timespec timesincelastpacket;
+	double secondsSinceLastPacket = 0;
+	long nanossincelastpacket = 0;
+	float onerate = 0;
+	int i;
+
+	now = kzalloc(sizeof(struct timespec), GFP_KERNEL);
+	if (!now) {return ;}
+
+	getnstimeofday(now);
+	//now = current_kernel_time();
+	timesincelastpacket = timespec_sub(*now,lasttime);
+	lasttime = *now;
+
+	nanossincelastpacket = nanossincelastpacket + timespec_to_ns(&timesincelastpacket);
+	printk("dmachan %d: nanossincelastcallback=%li\n",lch,nanossincelastpacket);
+
+	onerate = onerate + nanossincelastpacket;
+	onerate = (1000.0*1000.0*1000.0)/onerate;
+
+//	secondsSinceLastPacket = secondsSinceLastPacket + timesincelastpacket.tv_nsec;
+//	secondsSinceLastPacket += timesincelastpacket.tv_sec; // + (timesincelastpacket.tv_nsec / (1000 * 1000 * 1000));
+//	printk("secondsSinceLastPacket=%d\n",secondsSinceLastPacket);
+
+//	printk("secs=%ld\n",timesincelastpacket.tv_sec);
+//	printk("nanos=%ld\n",timesincelastpacket.tv_nsec);
+
+
+//	*(snapshotpacketrate+(int)5) = (double) nanos;
+//	printk("snap5=%lf",snapshotpacketrate[5]);
+
+//	snapshotpacketrate[snapshotspacketcounter++] = onerate;
+/*	if (snapshotspacketcounter == snapshots) 
+	{
+		snapshotspacketcounter = 0;
+		actualpacketrate = 0;
+		for (i = 0; i < snapshots;i++) // (double snap : snapshotpacketrate)
+		{
+			actualpacketrate = actualpacketrate + snapshotpacketrate[i];
+		}
+		actualpacketrate = actualpacketrate / snapshots;
+		printk("The transmit rate of the last %d packets has been %lf Hz",snapshots,actualpacketrate);
+	}
+*/
+	//static inline struct timespec timespec_sub(struct timespec lhs,struct timespec rhs)
+	//s64 timespec_to_ns(const struct timespec *ts)
+	//time_t mytime = time(0);
+	//printk("time: %s\n", asctime(localtime(&mytime)));
+
+}
+
 
 /* currently unused: */
 static void simon_omap_mcbsp_rx_dma_end_callback(int lch, u16 ch_status, void *data)
@@ -217,35 +283,49 @@ static void simon_omap_mcbsp_rx_dma_buf1_callback(int lch, u16 ch_status, void *
 
 	if (c > 1)
 	{
-		for (i = 0 ; i<DMABUFSIZE; i++)
-		{
-			//fullbuf[i + c * DMABUFSIZE] = bufferkernel[i];
-		}
+		//for (i = 0 ; i<DMABUFSIZE; i++)
+		//{
+		//	fullbuf[i + c * DMABUFSIZE] = bufferkernel[i];
+		//}
 
 		// willingly loose data until we have a separate thread or so for this:
 		//if (leaveXoutCounter++ >= leaveXout)
-		{
+		//{
 			send_network_message(network_message, (char*)bufferkernel, network_socket);
 			//leaveXoutCounter=0;
-		}
+			//computeCallbackRate();
 
-/*		memcpy (network_databuffer+(DMABUFSIZE*(network_datapointer++)),bufferkernel,DMABUFSIZE);
-		if (network_datapointer == UDPBUFFACTOR)
-		{
-			
-		}
-*/
+		//}
+
+		
+		// increase offset for next dma buffer:
+		network_dataoffset += DMABUFBYTES;
+		// reset offset if total size of network_databuffer has been reached:
+		if (network_dataoffset >= UDPBUFBYTES) network_dataoffset = 0;
+
+printk(KERN_ALERT "Begin memcopy...\n");
+		// fill the send buffer with the data from the DMA buffer. So that the dma buffer can now be reused again if the send doesn't take place in time!
+		memcpy (network_databuffer+network_dataoffset,bufferkernel,DMABUFBYTES);
+printk(KERN_ALERT "Finished memcopy. Begin send_network_message...\n");
+		send_network_message(network_message, (char*)(network_databuffer+network_dataoffset), network_socket);
+printk(KERN_ALERT "Finished send_network_message \n");
 
 	}
 
 	if (cyclecounter >= MAXCYCLES)
 	{
 		//printk(KERN_ALERT "Resetting cyclecounter!\n");
-		cyclecounter = 4; // needs to be 2 or equivalent.
+		cyclecounter = 2; // needs to be 2 or equivalent.
 		//runfinish = 1;
+
 	}
 
-	
+	callcounter++;
+	if (callcounter == 1)	
+	{
+		computeCallbackRate(lch);
+		callcounter = 0;
+	}
 	
 
 
@@ -273,9 +353,9 @@ static void simon_omap_mcbsp_rx_dma_buf1_callback(int lch, u16 ch_status, void *
 		//complete(&mcbsp_rx_dma_completion);
 
 
-		printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufferkernel after reception (in callback %d!) are: \n",DMABUFSIZE,c);
+		printk(KERN_ALERT "The first %d of %d values of the transferbuffer bufferkernel after reception (in callback %d!) are: \n",(20*16),DMABUFSIZE,c);
 		sprintf(printtemp, "receive: \n %d: ",c);
-		for (i = 0 ; i<min(DMABUFSIZE,1000000); i++)
+		for (i = 0 ; i<min(DMABUFSIZE,(20*16)); i++)
 		{
 			sprintf(printtemp, "%s 0x%x,", printtemp,bufferkernel[i]);
 
@@ -549,7 +629,7 @@ int simon_omap_mcbsp_recv_buffers(unsigned int id,
 
 	/* Display the complete data that has been received in those MAXCYCLES dma-transfers.
 	 * We could have continued the transfer, but as we are just storing the data in memory, we want to look at it sooner or later! */
-	printk(KERN_ALERT "The first millions of %d values of the transferbuffer fullbuf after reception (DMA setup function) are: \n",DMABUFSIZE);
+	printk(KERN_ALERT "The first %d of %d values of the transferbuffer fullbuf after reception (DMA setup function) are: \n",(20*16),DMABUFSIZE);
 	sprintf(printtemp, "receive: \n   ");
 	for (i = 0 ; i<(cyclecounter*DMABUFSIZE); i++)
 	{
@@ -780,9 +860,9 @@ int simon_omap_mcbsp_recv_buffer(unsigned int id, dma_addr_t buffer1dma, u32* bu
 */
 
 	/* Output initial buffer content: */
-	printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufbuf before reception (DMA setup function) are: \n",DMABUFSIZE);
+	printk(KERN_ALERT "The first %d of %d values of the transferbuffer bufbuf before reception (DMA setup function) are: \n",(20*16),DMABUFSIZE);
 	sprintf(printtemp, "receive: \n   ");
-	for (i = 0 ; i<min(DMABUFSIZE,1000000); i++)
+	for (i = 0 ; i<min(DMABUFSIZE,(20*16)); i++)
 	{
 		sprintf(printtemp, "%s 0x%x,", printtemp,buffer1kernel[i]);
 
@@ -874,7 +954,7 @@ int send_network_message(struct msghdr *message_pointer, char *databuffer,struct
 	}
 
 	(*network_iov).iov_base = databuffer;
-	(*network_iov).iov_len = UDPBUFBYTES;
+	(*network_iov).iov_len = DMABUFBYTES;
 	(*network_message).msg_iov = network_iov;
 	(*network_message).msg_iovlen = sizeof(*network_iov);
 	(*network_message).msg_name = (struct sockaddr*) network_servaddr;
@@ -906,7 +986,7 @@ int send_network_message(struct msghdr *message_pointer, char *databuffer,struct
 	 * Without them, sockets won't work from kernel space! 
 	 * Search "The macro set_fs "... on http://www.linuxjournal.com/article/7660?page=0,2 */
 	oldmm = get_fs(); set_fs(KERNEL_DS);
-	r = sock_sendmsg(sock, network_message, UDPBUFBYTES);
+	r = sock_sendmsg(sock, network_message, DMABUFBYTES);
 	set_fs(oldmm);
 	
 	/* For error codes see: http://lxr.free-electrons.com/source/include/asm-generic/errno.h */ 
@@ -969,7 +1049,7 @@ int prepare_network_message(struct msghdr *message_pointer, char *databuffer,str
 		return -1; 
 	} 
 	(*network_iov).iov_base = databuffer;
-	(*network_iov).iov_len = UDPBUFBYTES; // sizeof(send_buf); 
+	(*network_iov).iov_len = DMABUFBYTES; // each packet shall contain exactly the results of one dma transfer! (Even though databuffer is much larger)
 	(*network_message).msg_name = (struct sockaddr*) network_servaddr;
 	(*network_message).msg_namelen = sizeof (*network_servaddr); 
 	(*network_message).msg_iov = network_iov; 
@@ -1023,11 +1103,11 @@ int hello_init(void)
 	dma_addr_t bufbufdmaaddr3;
 
 	/* Allocate memory space for the three buffers and assign the 6 pointers: */
-	bufbuf1 = dma_alloc_coherent(NULL, DMABUFSIZE * bytesPerVal /*each u32 value has 4 bytes*/, &bufbufdmaaddr1, GFP_KERNEL);
+	bufbuf1 = dma_alloc_coherent(NULL, DMABUFBYTES, &bufbufdmaaddr1, GFP_KERNEL);
 	if (bufbuf1 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
-	bufbuf2 = dma_alloc_coherent(NULL, DMABUFSIZE * bytesPerVal /*each u32 value has 4 bytes*/, &bufbufdmaaddr2, GFP_KERNEL);
+	bufbuf2 = dma_alloc_coherent(NULL, DMABUFBYTES, &bufbufdmaaddr2, GFP_KERNEL);
 	if (bufbuf2 == NULL) {pr_err("Unable to allocate DMA buffer 2\n");return -ENOMEM;}
-	bufbuf3 = dma_alloc_coherent(NULL, DMABUFSIZE * bytesPerVal /*each u32 value has 4 bytes*/, &bufbufdmaaddr3, GFP_KERNEL);
+	bufbuf3 = dma_alloc_coherent(NULL, DMABUFBYTES, &bufbufdmaaddr3, GFP_KERNEL);
 	if (bufbuf3 == NULL) {pr_err("Unable to allocate DMA buffer 3\n");return -ENOMEM;}
 
 	/* Write dummy values. These should be overwritten later! */
@@ -1049,6 +1129,7 @@ int hello_init(void)
 
 	network_databuffer = kzalloc(UDPBUFBYTES, GFP_KERNEL);
 	if (!network_databuffer) {return -ENOMEM;}
+	network_dataoffset = UDPBUFBYTES;
 
 	network_socket = kzalloc(sizeof(struct socket), GFP_KERNEL);
 	if (!network_socket) {return -ENOMEM;}
@@ -1068,6 +1149,8 @@ int hello_init(void)
 //	network_message = 
 //	network_iov = 
 
+	snapshotpacketrate = kzalloc(snapshots, GFP_KERNEL);
+	if (!snapshotpacketrate) {return -ENOMEM;}
 
 	/* Do GPIO stuff */
 	// requesting:
@@ -1081,7 +1164,7 @@ int hello_init(void)
 	printk(KERN_ALERT "Gpio 183 (ADS1258EVM-analogPowerMode) was requested. Return status: %d\n",reqstatus);
 	// setting:
 	status = gpio_direction_output(134,1);
-	printk(KERN_ALERT "Setting gpio134 (ADS1258EVM-clockselect) as output, value 1=EXTERNAL clock from BB. Return status: %d\n",status);
+	printk(KERN_ALERT "Setting gpio134 (ADS1258EVM-clockselect) as output, value 0=INTERNAL clock via EVM quarz (1=EXTERNAL clock from BB). Return status: %d\n",status);
 	status = gpio_direction_output(135,1);
 	printk(KERN_ALERT "Setting gpio135 (ADS1258EVM-nRESET) as output, value 1=no reset, so be active!. Return status: %d\n",status);
 	status = gpio_direction_output(136,1);
@@ -1179,16 +1262,16 @@ void hello_exit(void)
 	printk(KERN_ALERT "DMAs have now been stopped.");
 
 	/* We can free the channels */
-	//omap_free_dma(buf3_dmachannel);
-	//omap_free_dma(buf2_dmachannel);
-	//omap_free_dma(buf1_dmachannel);
+	omap_free_dma(buf3_dmachannel);
+	omap_free_dma(buf2_dmachannel);
+	omap_free_dma(buf1_dmachannel);
 
 
 	/* Display the complete data that has been received in those MAXCYCLES dma-transfers.
 	 * We could have continued the transfer, but as we are just storing the data in memory, we want to look at it sooner or later! */
-	printk(KERN_ALERT "The first millions of %d values of the transferbuffer fullbuf (c=%d) after reception (exit function) are: \n",(MAXCYCLES*DMABUFSIZE),cyclecounter );
+	printk(KERN_ALERT "The first %d of %d values of the transferbuffer fullbuf (c=%d) after reception (exit function) are: \n",(20*16),(MAXCYCLES*DMABUFSIZE),cyclecounter );
 	sprintf(printtemp, "receive: \n   ");
-	for (i = 0 ; i<(MAXCYCLES*DMABUFSIZE); i++)
+	for (i = 0 ; i<min(MAXCYCLES*DMABUFSIZE,(20*16)); i++)
 	{
 		sprintf(printtemp, "%s 0x%x,", printtemp,fullbuf[i]);
 

@@ -589,6 +589,31 @@ int hello_init(void)
 	memset(bufbuf3, 0xbf1C1111, bufbufsize * bytesPerVal );
 
 
+
+
+	/* Do GPIO stuff */
+	// requesting:
+	reqstatus = gpio_request(134, "ADS1258EVM-clockselect");
+	printk(KERN_ALERT "Gpio 134 (ADS1258EVM-clockselect) was requested. Return status: %d\n",reqstatus);
+	reqstatus = gpio_request(135, "ADS1258EVM-nRESET");
+	printk(KERN_ALERT "Gpio 135 (ADS1258EVM-nRESET) was requested. Return status: %d\n",reqstatus);
+	reqstatus = gpio_request(136, "ADS1258EVM-nPWDN");
+	printk(KERN_ALERT "Gpio 136 (ADS1258EVM-nPWDN) was requested. Return status: %d\n",reqstatus);
+	reqstatus = gpio_request(183, "ADS1258EVM-analogPowerMode");
+	printk(KERN_ALERT "Gpio 183 (ADS1258EVM-analogPowerMode) was requested. Return status: %d\n",reqstatus);
+	// setting:
+	status = gpio_direction_output(134,1);
+	printk(KERN_ALERT "Setting gpio134 (ADS1258EVM-clockselect) as output, value 1=EXTERNAL clock from BB. Return status: %d\n",status);
+	status = gpio_direction_output(135,1);
+	printk(KERN_ALERT "Setting gpio135 (ADS1258EVM-nRESET) as output, value 1=no reset, so be active!. Return status: %d\n",status);
+	status = gpio_direction_output(136,1);
+	printk(KERN_ALERT "Setting gpio136 (ADS1258EVM-nPWDN) as output, value 1=no powerdown, so be active!. Return status: %d\n",status);
+	status = gpio_direction_output(183,1);
+	printk(KERN_ALERT "Setting gpio183 (ADS1258EVM-analogPowerMode) as output, value 1=unipolar. Return status: %d\n",status);
+	/* End of GPIO stuff */
+
+
+
 	printk(KERN_ALERT "Starting DMA-McBSP-receive!\n");
 
 	/* Setting IO type */
