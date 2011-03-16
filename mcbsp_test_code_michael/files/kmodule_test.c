@@ -12,10 +12,6 @@
 #include <mach/mux.h>
 
 
-
-
-
-#include <linux/module.h>
 #include <linux/init.h>
 #include <linux/device.h>
 #include <linux/platform_device.h>
@@ -26,11 +22,14 @@
 #include <linux/clk.h>
 #include <linux/delay.h>
 #include <linux/io.h>
-
-#include <plat/dma.h>
 #include <plat/mcbsp.h>
 
-void omap_mcbsp_write(void __iomem *io_base, u16 reg, u32 val)
+MODULE_LICENSE("Dual BSD/GPL");
+MODULE_AUTHOR("Michael Fink <DePeter1@gmx.net>");
+
+
+
+/*void omap_mcbsp_write(void __iomem *io_base, u16 reg, u32 val)
 {
 	if (cpu_class_is_omap1() || cpu_is_omap2420())
 		__raw_writew((u16)val, io_base + reg);
@@ -53,47 +52,48 @@ int omap_mcbsp_read(void __iomem *io_base, u16 reg)
 #define OMAP_MCBSP_WRITE(base, reg, val) \
 			omap_mcbsp_write(base, OMAP_MCBSP_REG_##reg, val)
 
-#define id_to_mcbsp_ptr(id)		mcbsp_ptr[id];
+//#define id_to_mcbsp_ptr(id)		mcbsp_ptr[id];
+#define mcbsp_base_reg (void __iomem *) OMAP34XX_MCBSP1_BASE 
+//0x48074000
+
 static void my_omap_mcbsp_dump_reg(u8 id)
 {
-	struct omap_mcbsp *mcbsp = id_to_mcbsp_ptr(OMAP_MCBSP1);
-
-	printk(KERN_ALERT "**** McBSP%d regs ****\n", mcbsp->id);
+	//printk(KERN_ALERT "**** McBSP%d regs ****\n", mcbsp_base_reg);
 	printk(KERN_ALERT "DRR2:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, DRR2));
+			OMAP_MCBSP_READ(mcbsp_base_reg, DRR2));
 	printk(KERN_ALERT "DRR1:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, DRR1));
+			OMAP_MCBSP_READ(mcbsp_base_reg, DRR1));
 	printk(KERN_ALERT "DXR2:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, DXR2));
+			OMAP_MCBSP_READ(mcbsp_base_reg, DXR2));
 	printk(KERN_ALERT "DXR1:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, DXR1));
+			OMAP_MCBSP_READ(mcbsp_base_reg, DXR1));
 	printk(KERN_ALERT "SPCR2: 0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, SPCR2));
+			OMAP_MCBSP_READ(mcbsp_base_reg, SPCR2));
 	printk(KERN_ALERT "SPCR1: 0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, SPCR1));
+			OMAP_MCBSP_READ(mcbsp_base_reg, SPCR1));
 	printk(KERN_ALERT "RCR2:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, RCR2));
+			OMAP_MCBSP_READ(mcbsp_base_reg, RCR2));
 	printk(KERN_ALERT "RCR1:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, RCR1));
+			OMAP_MCBSP_READ(mcbsp_base_reg, RCR1));
 	printk(KERN_ALERT "XCR2:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, XCR2));
+			OMAP_MCBSP_READ(mcbsp_base_reg, XCR2));
 	printk(KERN_ALERT "XCR1:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, XCR1));
+			OMAP_MCBSP_READ(mcbsp_base_reg, XCR1));
 	printk(KERN_ALERT "SRGR2: 0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, SRGR2));
+			OMAP_MCBSP_READ(mcbsp_base_reg, SRGR2));
 	printk(KERN_ALERT "SRGR1: 0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, SRGR1));
+			OMAP_MCBSP_READ(mcbsp_base_reg, SRGR1));
 	printk(KERN_ALERT "PCR0:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp->io_base, PCR0));
+			OMAP_MCBSP_READ(mcbsp_base_reg, PCR0));
 	printk(KERN_ALERT "***********************\n");
 }
 
-
+*/
 
 int init_module(void)
 {
 	u16 test_read;
-	struct omap_mcbsp *mcbsp;
+//	struct omap_mcbsp *mcbsp;
 //	getMcBSPDevice(mcbspID,&my_mcbsp);
 	struct omap_mcbsp_reg_cfg my_mcbsp_confic;   
 
@@ -103,22 +103,22 @@ int init_module(void)
 
 
 	
-		my_mcbsp_confic.spcr2 =   FRST | GRST | XINTM(0x0) |FRST; //serial-port control register RST?????
-		my_mcbsp_confic.spcr1 = RJUST(0x0)| DXENA|RINTM(0x0) | RRST;  //rst?? dxena
+		my_mcbsp_confic.spcr2 =  /* FRST | GRST |*/ XINTM(0x0) ; //serial-port control register RST?????
+		my_mcbsp_confic.spcr1 = RJUST(0x0)/*| DXENA*/ |RINTM(0x0) /*| RRST*/;  //rst?? dxena
 		
 		my_mcbsp_confic.rcr2 = 0 ; //RFRLEN2(OMAP_MCBSP_WORD_24) |RWDLEN2(OMAP_MCBSP_WORD_24) | RDATDLY(1);  //receive control register 
 		my_mcbsp_confic.rcr1 =  RFRLEN2(0) |RWDLEN2(OMAP_MCBSP_WORD_24);
 		
 		my_mcbsp_confic.xcr2 = 0 ; //XFRLEN2(OMAP_MCBSP_WORD_24) | XWDLEN2(OMAP_MCBSP_WORD_24) | XDATDLY(1);  //transmit control register 
-		my_mcbsp_confic.xcr1 = XFRLEN2(0) | XWDLEN2(OMAP_MCBSP_WORD_24);
+		my_mcbsp_confic.xcr1 = XFRLEN1(0) | XWDLEN1(OMAP_MCBSP_WORD_24);
 		
-		my_mcbsp_confic.srgr2 = CLKSM|FPER(24);// seite 3027 fper????? //srg-register, what ever that means
-		my_mcbsp_confic.srgr1 = FWID(5) | CLKGDV(20);   //FWID?????
+		my_mcbsp_confic.srgr2 = FPER(24);// seite 3027 fper????? //srg-register, what ever that means
+		my_mcbsp_confic.srgr1 = FWID(23) | CLKGDV(40);   //FWID?????
 		
 		my_mcbsp_confic.mcr2=0x0;  //multichan-register 
 		my_mcbsp_confic.mcr1=0x0;
 		
-		my_mcbsp_confic.pcr0 =  FSXM|CLKXM|FSXP|FSRP;//pin control register
+		my_mcbsp_confic.pcr0 =  FSXM|CLKXM|FSXP|FSRP|CLKRP;//pin control register
 		
 		my_mcbsp_confic.rcerc=0; //multichan-options... ignore? 
 		my_mcbsp_confic.rcerd=0;//multichan-options... ignore? 
@@ -137,35 +137,47 @@ int init_module(void)
 		my_mcbsp_confic.rccr = RFULL_CYCLE | RDMAEN; 
 		
 		
-		
-		omap_mcbsp_request(OMAP_MCBSP1);
-		omap_mcbsp_set_io_type(OMAP_MCBSP1, OMAP_MCBSP_POLL_IO); 
-		omap_mcbsp_config(OMAP_MCBSP1, &my_mcbsp_confic);
+		printk(KERN_ALERT "set-io-start...\n");
+		test_read = omap_mcbsp_set_io_type(OMAP_MCBSP1, OMAP_MCBSP_POLL_IO); 
+		printk(KERN_ALERT "set-io-started respnce: %d. \n", test_read);
 
-		omap_mcbsp_start(OMAP_MCBSP1,1,1);
+		printk(KERN_ALERT "request-start...\n");
+		test_read = omap_mcbsp_request(OMAP_MCBSP1);
+		printk(KERN_ALERT "reqeust-started responce: %d. \n", test_read);
 		
-		my_omap_mcbsp_dump_reg(OMAP_MCBSP1);
-//		mcbsp = id_to_mcbsp_ptr(id); 
-//		MCBSP_WRITE(mcbsp, DXR1, 0xAF0F);
+		if(test_read==0)
+		{
+		
+			printk(KERN_ALERT "runing config... \n");
+			/*test_read =*/ omap_mcbsp_config(OMAP_MCBSP1, &my_mcbsp_confic);
+			printk(KERN_ALERT "result-config: %d. \n", test_read);
+
+			printk(KERN_ALERT "mcbsp_start...\n");
+			/*test_read =*/ omap_mcbsp_start(OMAP_MCBSP1,1,1);
+			printk(KERN_ALERT "mcbsp_start: %d. \n", test_read);
+		
+	//		my_omap_mcbsp_dump_reg(OMAP_MCBSP1);
+	//		mcbsp = id_to_mcbsp_ptr(id); 
+	//		MCBSP_WRITE(mcbsp, DXR1, 0xAF0F);
 
 		
 		
-		
-		omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
-		printk(KERN_ALERT "reading %d. \n", test_read);
-		omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
-		printk(KERN_ALERT "reading %d. \n", test_read);
-		omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
-		printk(KERN_ALERT "reading %d. \n", test_read);
-		//for(;;)
-		//{
-		  omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
-		  printk(KERN_ALERT "reading %d. \n", test_read);
-		  
-		  omap_mcbsp_pollwrite(OMAP_MCBSP1, 0xAF);
-		//}
-		my_omap_mcbsp_dump_reg(OMAP_MCBSP1);
-		
+			printk(KERN_ALERT "Reading_start:\n");
+			omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
+			printk(KERN_ALERT "reading %d. \n", test_read);
+			omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
+			printk(KERN_ALERT "reading %d. \n", test_read);
+			omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
+			printk(KERN_ALERT "reading %d. \n", test_read);
+			//for(;;)
+			//{
+			  omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
+			  printk(KERN_ALERT "reading %d. \n", test_read);
+			  
+			  omap_mcbsp_pollwrite(OMAP_MCBSP1, 0xAF);
+			//}
+	//		my_omap_mcbsp_dump_reg(OMAP_MCBSP1);
+		}		
 		
 
 	return 0;
@@ -175,4 +187,8 @@ int init_module(void)
 void cleanup_module(void)
 {
 	printk("Module cleanup called\n");
+	omap_mcbsp_stop(OMAP_MCBSP1,1,1);
+	omap_mcbsp_free(OMAP_MCBSP1);
+	
+	
 }
