@@ -123,7 +123,7 @@ int init_module(void)
 		
 		my_mcbsp_confic.pcr0 =  FSXM|CLKXM|FSXP|FSRP|CLKRP;//pin control register
 		
-		my_mcbsp_confic.rcerc=0; //multichan-options... ignore? 
+		my_mcbsp_confic.rcerc=0;//multichan-options... ignore? 
 		my_mcbsp_confic.rcerd=0;//multichan-options... ignore? 
 		my_mcbsp_confic.xcerc=0;//multichan-options... ignore? 
 		my_mcbsp_confic.xcerd=0;//multichan-options... ignore? 
@@ -138,6 +138,9 @@ int init_module(void)
 		
 		my_mcbsp_confic.xccr = DXENDLY(1) | XDMAEN;
 		my_mcbsp_confic.rccr = RFULL_CYCLE | RDMAEN; 
+
+
+
 		
 		
 		printk(KERN_ALERT "set-io-start...\n");
@@ -194,6 +197,9 @@ int init_module(void)
 			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
 			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
 			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
+
+
+			__raw_writel(0xAA0F0F,ioremap( mcbsp_base_reg+8,4));
 
 		}		
 		
