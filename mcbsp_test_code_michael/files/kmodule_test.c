@@ -24,6 +24,8 @@
 #include <linux/io.h>
 #include <plat/mcbsp.h>
 
+#define mcbsp_base_reg OMAP34XX_MCBSP1_BASE 
+
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Michael Fink <DePeter1@gmx.net>");
 
@@ -53,7 +55,7 @@ int omap_mcbsp_read(void __iomem *io_base, u16 reg)
 			omap_mcbsp_write(base, OMAP_MCBSP_REG_##reg, val)
 
 //#define id_to_mcbsp_ptr(id)		mcbsp_ptr[id];
-#define mcbsp_base_reg (void __iomem *) OMAP34XX_MCBSP1_BASE 
+
 //0x48074000
 
 static void my_omap_mcbsp_dump_reg(u8 id)
@@ -87,12 +89,13 @@ static void my_omap_mcbsp_dump_reg(u8 id)
 			OMAP_MCBSP_READ(mcbsp_base_reg, PCR0));
 	printk(KERN_ALERT "***********************\n");
 }
-
 */
+
 
 int init_module(void)
 {
 	u16 test_read;
+	u32 test_read_32;
 //	struct omap_mcbsp *mcbsp;
 //	getMcBSPDevice(mcbspID,&my_mcbsp);
 	struct omap_mcbsp_reg_cfg my_mcbsp_confic;   
@@ -175,8 +178,23 @@ int init_module(void)
 			  printk(KERN_ALERT "reading %d. \n", test_read);
 			  
 			  omap_mcbsp_pollwrite(OMAP_MCBSP1, 0xAF);
+
+			//printk(KERN_ALERT "reading %d. \n", *OMAP34XX_MCBSP1_BASE ); //think about that...
 			//}
-	//		my_omap_mcbsp_dump_reg(OMAP_MCBSP1);
+			//my_omap_mcbsp_dump_reg(OMAP_MCBSP1);
+			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
+			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
+			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
+			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
+			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
+			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
+
 		}		
 		
 
