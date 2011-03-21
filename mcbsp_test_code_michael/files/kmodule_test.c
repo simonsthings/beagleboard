@@ -288,15 +288,14 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	/* 
 	 * Actually put the data into the buffer 
 	 */
-	while(length && counter <90)
+	while(length && counter <900)
 	{
-// 	  counter++;
+ 	  counter++;
+	  if(0b100&__raw_readl(ioremap( mcbsp_base_reg+0x14,4)))
+		    printk(KERN_ALERT "Buffer_full_error\n");
 	  while(!(0b10&__raw_readl(ioremap( mcbsp_base_reg+0x14,4))))  // 0x14 ersetzen durch spcr1-referenz
 	  {
-		  schedule_timeout(1);
-		  if(0b100&__raw_readl(ioremap( mcbsp_base_reg+0x14,4)))
-		    printk(KERN_ALERT "Buffer_full_error  ---> lost data\n");
-		    
+		  schedule_timeout(1);  
 	  }
 	  read_val =__raw_readl(ioremap( mcbsp_base_reg,4));
 	  //printk(KERN_ALERT "%x\n", read_val);
