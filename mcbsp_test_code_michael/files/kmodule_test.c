@@ -4,12 +4,21 @@
  * PUBLIC DOMAIN
  */
 
+//done some Guttenberg here:
+//http://tldp.org/LDP/lkmpg/2.6/html/lkmpg.html#AEN567
+//https://sourcecode.isip.uni-luebeck.de/viewvc/beagleboard/trunk/mcbsp_ads1258_noDMA_kernelmodule/recipes/
+
+
 #include <linux/module.h>
 #include <linux/kernel.h>
+#include <asm/uaccess.h>
+//#include "kmodule_test.h"
 
 #include <plat/mcbsp.h>
 #include <mach/mcbsp.h>
 #include <mach/mux.h>
+
+#include <linux/fs.h>
 
 
 #include <linux/init.h>
@@ -24,10 +33,41 @@
 #include <linux/io.h>
 #include <plat/mcbsp.h>
 
-#define mcbsp_base_reg OMAP34XX_MCBSP1_BASE 
+
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Michael Fink <DePeter1@gmx.net>");
+
+
+int init_module(void);
+void cleanup_module(void);
+static int device_open(struct inode *, struct file *);
+static int device_release(struct inode *, struct file *);
+static ssize_t device_read(struct file *, char *, size_t, loff_t *);
+static ssize_t device_write(struct file *, const char *, size_t, loff_t *);
+
+#define SUCCESS 0
+#define DEVICE_NAME "biosigdev"	/* Dev name as it appears in /proc/devices   */
+#define BUF_LEN 80		/* Max length of the message from the device */
+#define mcbsp_base_reg OMAP34XX_MCBSP1_BASE 
+
+
+
+/* 
+ * Global variables are declared as static, so are global within the file. 
+ */
+static int Major;		/* Major number assigned to our device driver */
+static int Device_Open = 0;	/* Is device open?  
+				 * Used to prevent multiple access to device */
+static char msg[BUF_LEN];	/* The msg the device will give when asked */
+static char *msg_Ptr;
+
+static struct file_operations fops = {
+	.read = device_read,
+	.write = device_write,
+	.open = device_open,
+	.release = device_release
+};
 
 
 
@@ -104,30 +144,24 @@ int init_module(void)
 			/*test_read =*/ omap_mcbsp_start(OMAP_MCBSP1,1,1);
 			printk(KERN_ALERT "mcbsp_start: %d. \n", test_read);
 		
-	//		my_omap_mcbsp_dump_reg(OMAP_MCBSP1);
-	//		mcbsp = id_to_mcbsp_ptr(id); 
-	//		MCBSP_WRITE(mcbsp, DXR1, 0xAF0F);
-
-		
-		
-			printk(KERN_ALERT "Reading_start:\n");
+	
+/*			printk(KERN_ALERT "Reading_start:\n");
 			omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
 			printk(KERN_ALERT "reading %d. \n", test_read);
 			omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
 			printk(KERN_ALERT "reading %d. \n", test_read);
 			omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
 			printk(KERN_ALERT "reading %d. \n", test_read);
-			//for(;;)
-			//{
-			  omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
-			  printk(KERN_ALERT "reading %d. \n", test_read);
-			  
-			  omap_mcbsp_pollwrite(OMAP_MCBSP1, 0xAF);
 
-			//printk(KERN_ALERT "reading %d. \n", *OMAP34XX_MCBSP1_BASE ); //think about that...
-			//}
-			//my_omap_mcbsp_dump_reg(OMAP_MCBSP1);
+			omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
+			printk(KERN_ALERT "reading %d. \n", test_read);
+			omap_mcbsp_pollwrite(OMAP_MCBSP1, 0xAF);
+*/
+			
+			//raw_reading...
 			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
+/*			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
 			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
 			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
 			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
@@ -137,13 +171,11 @@ int init_module(void)
 			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
 			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
 			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
-			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
-			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
-
+*/
 
 			//__raw_writel(0xAA0F0F,ioremap( mcbsp_base_reg+8,4));
 			
-			__set_current_state(TASK_INTERRUPTIBLE);
+/*raw_reading_loop.....			__set_current_state(TASK_INTERRUPTIBLE);
 
 			for(i = 0; i<1000; i++)
 			{
@@ -153,8 +185,22 @@ int init_module(void)
 				}
 				test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
 				printk(KERN_ALERT "%x\n", test_read_32);
+			}*/
+
+
+			Major = register_chrdev(0, DEVICE_NAME, &fops);
+
+			if (Major < 0) {
+			  printk(KERN_ALERT "Registering char device failed with %d\n", Major);
+			  return Major;
 			}
 
+			printk(KERN_INFO "I was assigned major number %d. To talk to\n", Major);
+			printk(KERN_INFO "the driver, create a dev file with\n");
+			printk(KERN_INFO "'mknod /dev/%s c %d 0'.\n", DEVICE_NAME, Major);
+			printk(KERN_INFO "Try various minor numbers. Try to cat and echo to\n");
+			printk(KERN_INFO "the device file.\n");
+			printk(KERN_INFO "Remove the device file and module when done.\n"); 
 		}		
 		
 
@@ -164,9 +210,111 @@ int init_module(void)
 
 void cleanup_module(void)
 {
+	
 	printk("Module cleanup called\n");
 	omap_mcbsp_stop(OMAP_MCBSP1,1,1);
 	omap_mcbsp_free(OMAP_MCBSP1);
-	
+	/* 
+	 * Unregister the device 
+	 */
+	unregister_chrdev(Major, DEVICE_NAME);
 	
 }
+
+
+
+/*
+ * Methods
+ */
+
+/* 
+ * Called when a process tries to open the device file, like
+ * "cat /dev/mycharfile"
+ */
+static int device_open(struct inode *inode, struct file *file)
+{
+	static int counter = 0;
+
+	if (Device_Open)
+		return -EBUSY;
+
+	Device_Open++;
+	sprintf(msg, "I already told you %d times Hello world!", counter++);
+	msg_Ptr = msg;
+	try_module_get(THIS_MODULE);
+
+	return SUCCESS;
+}
+
+/* 
+ * Called when a process closes the device file.
+ */
+static int device_release(struct inode *inode, struct file *file)
+{
+	Device_Open--;		/* We're now ready for our next caller */
+
+	/* 
+	 * Decrement the usage count, or else once you opened the file, you'll
+	 * never get get rid of the module. 
+	 */
+	module_put(THIS_MODULE);
+
+	return 0;
+}
+
+/* 
+ * Called when a process, which already opened the dev file, attempts to
+ * read from it.
+ */
+static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
+			   char *buffer,	/* buffer to fill with data */
+			   size_t length,	/* length of the buffer     */
+			   loff_t * offset)
+{
+	/*
+	 * Number of bytes actually written to the buffer 
+	 */
+	int bytes_read = 0;
+
+	/*
+	 * If we're at the end of the message, 
+	 * return 0 signifying end of file 
+	 */
+	if (*msg_Ptr == 0)
+		return 0;
+
+	/* 
+	 * Actually put the data into the buffer 
+	 */
+	while (length && *msg_Ptr) {
+
+		/* 
+		 * The buffer is in the user data segment, not the kernel 
+		 * segment so "*" assignment won't work.  We have to use 
+		 * put_user which copies data from the kernel data segment to
+		 * the user data segment. 
+		 */
+		put_user(*(msg_Ptr++), buffer++);
+		length--;
+		bytes_read++;
+		put_user(*(msg_Ptr), buffer++);
+		length--;
+		bytes_read++;
+	}
+
+	/* 
+	 * Most read functions return the number of bytes put into the buffer
+	 */
+	return bytes_read;
+}
+
+/*  
+ * Called when a process writes to dev file: echo "hi" > /dev/hello 
+ */
+static ssize_t
+device_write(struct file *filp, const char *buff, size_t len, loff_t * off)
+{
+	printk(KERN_ALERT "Sorry, this operation isn't supported.\n");
+	return -EINVAL;
+}
+
