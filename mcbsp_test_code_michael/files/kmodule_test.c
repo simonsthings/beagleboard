@@ -31,65 +31,6 @@ MODULE_AUTHOR("Michael Fink <DePeter1@gmx.net>");
 
 
 
-/*void omap_mcbsp_write(void __iomem *io_base, u16 reg, u32 val)
-{
-	if (cpu_class_is_omap1() || cpu_is_omap2420())
-		__raw_writew((u16)val, io_base + reg);
-	else
-		__raw_writel(val, io_base + reg);
-}
-
-int omap_mcbsp_read(void __iomem *io_base, u16 reg)
-{
-	if (cpu_class_is_omap1() || cpu_is_omap2420())
-		return __raw_readw(io_base + reg);
-	else
-		return __raw_readl(io_base + reg);
-}
-
-
-
-#define OMAP_MCBSP_READ(base, reg) \
-			omap_mcbsp_read(base, OMAP_MCBSP_REG_##reg)
-#define OMAP_MCBSP_WRITE(base, reg, val) \
-			omap_mcbsp_write(base, OMAP_MCBSP_REG_##reg, val)
-
-//#define id_to_mcbsp_ptr(id)		mcbsp_ptr[id];
-
-//0x48074000
-
-static void my_omap_mcbsp_dump_reg(u8 id)
-{
-	//printk(KERN_ALERT "**** McBSP%d regs ****\n", mcbsp_base_reg);
-	printk(KERN_ALERT "DRR2:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, DRR2));
-	printk(KERN_ALERT "DRR1:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, DRR1));
-	printk(KERN_ALERT "DXR2:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, DXR2));
-	printk(KERN_ALERT "DXR1:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, DXR1));
-	printk(KERN_ALERT "SPCR2: 0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, SPCR2));
-	printk(KERN_ALERT "SPCR1: 0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, SPCR1));
-	printk(KERN_ALERT "RCR2:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, RCR2));
-	printk(KERN_ALERT "RCR1:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, RCR1));
-	printk(KERN_ALERT "XCR2:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, XCR2));
-	printk(KERN_ALERT "XCR1:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, XCR1));
-	printk(KERN_ALERT "SRGR2: 0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, SRGR2));
-	printk(KERN_ALERT "SRGR1: 0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, SRGR1));
-	printk(KERN_ALERT "PCR0:  0x%04x\n",
-			OMAP_MCBSP_READ(mcbsp_base_reg, PCR0));
-	printk(KERN_ALERT "***********************\n");
-}
-*/
 
 
 int init_module(void)
@@ -99,6 +40,7 @@ int init_module(void)
 //	struct omap_mcbsp *mcbsp;
 //	getMcBSPDevice(mcbspID,&my_mcbsp);
 	struct omap_mcbsp_reg_cfg my_mcbsp_confic;   
+	u16 i;
 
 	test_read =0;
 
@@ -199,7 +141,19 @@ int init_module(void)
 			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
 
 
-			__raw_writel(0xAA0F0F,ioremap( mcbsp_base_reg+8,4));
+			//__raw_writel(0xAA0F0F,ioremap( mcbsp_base_reg+8,4));
+			
+			__set_current_state(TASK_INTERRUPTIBLE);
+
+			for(i = 0; i<1000; i++)
+			{
+				while(!(0b10&__raw_readl(ioremap( mcbsp_base_reg+0x14,4))))  // 0x14 ersetzen durch spcr1-referenz
+				{
+					schedule_timeout(100);
+				}
+				test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+				printk(KERN_ALERT "%x\n", test_read_32);
+			}
 
 		}		
 		
