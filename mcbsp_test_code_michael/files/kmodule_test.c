@@ -239,7 +239,7 @@ static int device_open(struct inode *inode, struct file *file)
 		return -EBUSY;
 
 	Device_Open++;
-	sprintf(msg, "I already told you %d times Hello world!", counter++);
+	sprintf(msg, "I already told you %d times Hello world!\n", counter++);
 	msg_Ptr = msg;
 	try_module_get(THIS_MODULE);
 
@@ -275,6 +275,8 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	 * Number of bytes actually written to the buffer 
 	 */
 	int bytes_read = 0;
+	u32 read_val = 0;
+	int counter =0;
 
 	/*
 	 * If we're at the end of the message, 
@@ -286,22 +288,39 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	/* 
 	 * Actually put the data into the buffer 
 	 */
-	while (length && *msg_Ptr) {
+	while(length && counter <90)
+	{
+// 	  counter++;
+	  while(!(0b10&__raw_readl(ioremap( mcbsp_base_reg+0x14,4))))  // 0x14 ersetzen durch spcr1-referenz
+	  {
+		  schedule_timeout(1);
+		  if(0b100&__raw_readl(ioremap( mcbsp_base_reg+0x14,4)))
+		    printk(KERN_ALERT "Buffer_full_error  ---> lost data\n");
+		    
+	  }
+	  read_val =__raw_readl(ioremap( mcbsp_base_reg,4));
+	  //printk(KERN_ALERT "%x\n", read_val);
 
-		/* 
-		 * The buffer is in the user data segment, not the kernel 
-		 * segment so "*" assignment won't work.  We have to use 
-		 * put_user which copies data from the kernel data segment to
-		 * the user data segment. 
-		 */
-		put_user(*(msg_Ptr++), buffer++);
-		length--;
-		bytes_read++;
-		put_user(*(msg_Ptr), buffer++);
-		length--;
-		bytes_read++;
+	  sprintf(msg, "%x \n", read_val);
+	  msg_Ptr = msg;
+	  try_module_get(THIS_MODULE);
+	  
+	  while (length && *msg_Ptr) 
+	  {
+
+		  /* 
+		  * The buffer is in the user data segment, not the kernel 
+		  * segment so "*" assignment won't work.  We have to use 
+		  * put_user which copies data from the kernel data segment to
+		  * the user data segment. 
+		  */
+
+		  put_user(*(msg_Ptr++), buffer++);
+		  length--;
+		  bytes_read++;
+
+	  }
 	}
-
 	/* 
 	 * Most read functions return the number of bytes put into the buffer
 	 */
