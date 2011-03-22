@@ -45,10 +45,12 @@ static int device_open(struct inode *, struct file *);
 static int device_release(struct inode *, struct file *);
 static ssize_t device_read(struct file *, char *, size_t, loff_t *);
 static ssize_t device_write(struct file *, const char *, size_t, loff_t *);
+void receive_function_fpga( u16 * data_puffer);
+u32 save_read();
 
 #define SUCCESS 0
 #define DEVICE_NAME "biosigdev"	/* Dev name as it appears in /proc/devices   */
-#define BUF_LEN 80		/* Max length of the message from the device */
+#define BUF_LEN 500		/* Max length of the message from the device */
 #define mcbsp_base_reg OMAP34XX_MCBSP1_BASE 
 
 
@@ -77,6 +79,7 @@ int init_module(void)
 {
 	u16 test_read;
 	u32 test_read_32;
+	u16 test_buffer[65];
 //	struct omap_mcbsp *mcbsp;
 //	getMcBSPDevice(mcbspID,&my_mcbsp);
 	struct omap_mcbsp_reg_cfg my_mcbsp_confic;   
@@ -173,7 +176,7 @@ int init_module(void)
 			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
 */
 
-			//__raw_writel(0xAA0F0F,ioremap( mcbsp_base_reg+8,4));
+			__raw_writel(0xefFFff,ioremap( mcbsp_base_reg+8,4));
 			
 /*raw_reading_loop.....			__set_current_state(TASK_INTERRUPTIBLE);
 
@@ -201,6 +204,9 @@ int init_module(void)
 			printk(KERN_INFO "Try various minor numbers. Try to cat and echo to\n");
 			printk(KERN_INFO "the device file.\n");
 			printk(KERN_INFO "Remove the device file and module when done.\n"); 
+			
+			
+			receive_function_fpga(test_buffer);
 		}		
 		
 
@@ -275,8 +281,9 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	 * Number of bytes actually written to the buffer 
 	 */
 	int bytes_read = 0;
-	u32 read_val = 0;
-	int counter =0;
+	u16 sample_count =0;
+	u16 i=0;
+	u16 test_buffer[65];
 
 	/*
 	 * If we're at the end of the message, 
@@ -288,19 +295,19 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	/* 
 	 * Actually put the data into the buffer 
 	 */
-	while(length && counter <900)
+	while(length && sample_count <10)
 	{
- 	  counter++;
-	  if(0b100&__raw_readl(ioremap( mcbsp_base_reg+0x14,4)))
-		    printk(KERN_ALERT "Buffer_full_error\n");
-	  while(!(0b10&__raw_readl(ioremap( mcbsp_base_reg+0x14,4))))  // 0x14 ersetzen durch spcr1-referenz
-	  {
-		  schedule_timeout(1);  
-	  }
-	  read_val =__raw_readl(ioremap( mcbsp_base_reg,4));
-	  //printk(KERN_ALERT "%x\n", read_val);
+ 	  sample_count++;
+	  receive_function_fpga(test_buffer);
+	  sprintf(msg, "\n");
 
-	  sprintf(msg, "%x \n", read_val);
+	  for(i=0;i<65;i++)
+	  {
+	    sprintf(msg + strlen(msg)-1, "%x,\n",test_buffer[i]);
+	    //printk(KERN_ALERT "%x\n",test_buffer[i] );
+	  }
+	  //sprintf(msg+ strlen(msg), "\n");  
+
 	  msg_Ptr = msg;
 	  try_module_get(THIS_MODULE);
 	  
@@ -336,3 +343,57 @@ device_write(struct file *filp, const char *buff, size_t len, loff_t * off)
 	return -EINVAL;
 }
 
+
+
+
+
+void receive_function_fpga( u16 * data_puffer)
+{
+  u32 read_val;
+
+  //find chan-1 and save it
+  do
+  {
+    read_val=save_read();
+  }while((((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5))!=0);
+  *(data_puffer+(((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5)))= ((0xffff00&read_val)>>8);
+  //printk(KERN_ALERT "chan: %d: %x =%x\n", ((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5),read_val,((0xffff00&read_val)>>8));
+  
+  //save all the rest and leave at chan-64
+  do
+  {
+    read_val=save_read();
+    if(read_val&0b10000)
+    {
+      read_val=read_val&0xffff1f;// crc weglöschen
+    }
+    *(data_puffer+(((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5)))= ((0xffff00&read_val)>>8); //in case of triggerport use |=
+    //printk(KERN_ALERT "chan: %d: %x =%x\n", ((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5),read_val,((0xffff00&read_val)>>8));
+  }while((((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5))!=63);
+
+  //read the triggerport for the last time. - ad | here to prevent datacorroption...
+  read_val=save_read();
+  read_val=read_val&0xffff1f;// crc weglöschen
+  *(data_puffer+(((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5)))= ((0xffff00&read_val)>>8);
+
+
+  //printk(KERN_ALERT "chan: %d: %x =%x\n", ((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5),read_val,((0xffff00&read_val)>>8));//(read_val & 0b11110)<<2 + (read_val & 0b11100000)>>4
+  *(data_puffer+(((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5)))= ((0xffff00&read_val)>>8);
+
+  
+  
+}
+
+
+u32 save_read()
+{
+  if(0b100&__raw_readl(ioremap( mcbsp_base_reg+0x14,4)))
+  printk(KERN_ALERT "Buffer_full_error\n");
+  while(!(0b10&__raw_readl(ioremap( mcbsp_base_reg+0x14,4))))  // 0x14 ersetzen durch spcr1-referenz  test for buffer empty
+  {
+    schedule_timeout(1);  
+    
+  }
+
+  return __raw_readl(ioremap( mcbsp_base_reg,4));
+}
