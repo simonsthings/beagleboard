@@ -79,7 +79,7 @@ int init_module(void)
 {
 	u16 test_read;
 	u32 test_read_32;
-	u16 test_buffer[65];
+	u16 test_buffer[100];
 //	struct omap_mcbsp *mcbsp;
 //	getMcBSPDevice(mcbspID,&my_mcbsp);
 	struct omap_mcbsp_reg_cfg my_mcbsp_confic;   
@@ -88,6 +88,17 @@ int init_module(void)
 	test_read =0;
 
 	printk("Module init called\n");
+
+
+
+/*	printk("Mux-Settings...\n");
+	OMAP3_MUX(MCBSP1_CLKR, OMAP_MUX_MODE0 | OMAP_PIN_INPUT);
+	OMAP3_MUX(MCBSP1_CLKX, OMAP_MUX_MODE0 | OMAP_PIN_OUTPUT);
+	OMAP3_MUX(MCBSP1_DR, OMAP_MUX_MODE0 | OMAP_PIN_INPUT);
+	OMAP3_MUX(MCBSP1_DX, OMAP_MUX_MODE0 | OMAP_PIN_INPUT);
+	OMAP3_MUX(MCBSP1_FSR, OMAP_MUX_MODE0 | OMAP_PIN_INPUT);
+	OMAP3_MUX(MCBSP1_FSX, OMAP_MUX_MODE0 | OMAP_PIN_INPUT);
+	printk("done with Mux-Settings...\n");*/
 
 
 	
@@ -281,10 +292,6 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	 * Number of bytes actually written to the buffer 
 	 */
 	int bytes_read = 0;
-	u16 sample_count =0;
-	u16 i=0;
-	u16 test_buffer[65];
-
 	/*
 	 * If we're at the end of the message, 
 	 * return 0 signifying end of file 
@@ -295,18 +302,7 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	/* 
 	 * Actually put the data into the buffer 
 	 */
-	while(length && sample_count <10)
-	{
- 	  sample_count++;
-	  receive_function_fpga(test_buffer);
-	  sprintf(msg, "\n");
 
-	  for(i=0;i<65;i++)
-	  {
-	    sprintf(msg + strlen(msg)-1, "%x,\n",test_buffer[i]);
-	    //printk(KERN_ALERT "%x\n",test_buffer[i] );
-	  }
-	  //sprintf(msg+ strlen(msg), "\n");  
 
 	  msg_Ptr = msg;
 	  try_module_get(THIS_MODULE);
@@ -325,7 +321,7 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 		  length--;
 		  bytes_read++;
 
-	  }
+	  
 	}
 	/* 
 	 * Most read functions return the number of bytes put into the buffer
@@ -350,50 +346,66 @@ device_write(struct file *filp, const char *buff, size_t len, loff_t * off)
 void receive_function_fpga( u16 * data_puffer)
 {
   u32 read_val;
+  u16 * data_puffer_ptr;
+  
+  u16 p_offset=0;
 
   //find chan-1 and save it
   do
   {
     read_val=save_read();
-  }while((((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5))!=0);
-  *(data_puffer+(((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5)))= ((0xffff00&read_val)>>8);
-  //printk(KERN_ALERT "chan: %d: %x =%x\n", ((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5),read_val,((0xffff00&read_val)>>8));
-  
-  //save all the rest and leave at chan-64
+  }while((read_val&0b11111110)!=0); //ersten kanal finden
+
   do
   {
-    read_val=save_read();
-    if(read_val&0b10000)
+    data_puffer_ptr = data_puffer+p_offset;
+    p_offset++;
+
+    
+    do
     {
-      read_val=read_val&0xffff1f;// crc weglöschen
-    }
-    *(data_puffer+(((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5)))= ((0xffff00&read_val)>>8); //in case of triggerport use |=
-    //printk(KERN_ALERT "chan: %d: %x =%x\n", ((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5),read_val,((0xffff00&read_val)>>8));
-  }while((((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5))!=63);
-
-  //read the triggerport for the last time. - ad | here to prevent datacorroption...
-  read_val=save_read();
-  read_val=read_val&0xffff1f;// crc weglöschen
-  *(data_puffer+(((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5)))= ((0xffff00&read_val)>>8);
-
-
-  //printk(KERN_ALERT "chan: %d: %x =%x\n", ((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5),read_val,((0xffff00&read_val)>>8));//(read_val & 0b11110)<<2 + (read_val & 0b11100000)>>4
-  *(data_puffer+(((read_val&0b11110)<<2)+((read_val & 0b11100000)>>5)))= ((0xffff00&read_val)>>8);
-
+      *data_puffer_ptr= (read_val&0xFFFF00)>>8;
+      data_puffer_ptr+=8;
+      read_val=save_read();
+      
+    }while((read_val&0b11111110)!=p_offset<<5&&data_puffer_ptr <=data_puffer+72); //zweiten kanal finden
+  }while(p_offset <=7);
   
-  
+  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
+  data_puffer+=8;
+  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
+  data_puffer+=8;
+  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
+  data_puffer+=8;
+  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
+  data_puffer+=8;
+  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
+  data_puffer+=8;
+  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
+  data_puffer+=8;
+  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
+  data_puffer+=8;
+  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
+  data_puffer+=8;
+  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
+  data_puffer+=8;     
 }
 
 
 u32 save_read()
 {
+
   if(0b100&__raw_readl(ioremap( mcbsp_base_reg+0x14,4)))
-  printk(KERN_ALERT "Buffer_full_error\n");
+    printk(KERN_ALERT "Buffer_full_error\n");
   while(!(0b10&__raw_readl(ioremap( mcbsp_base_reg+0x14,4))))  // 0x14 ersetzen durch spcr1-referenz  test for buffer empty
   {
-    schedule_timeout(1);  
+    printk(KERN_ALERT "Buffer_EMPTY_error\n");
+    //schedule_timeout(1);  
     
   }
 
+ 
+  
+  
   return __raw_readl(ioremap( mcbsp_base_reg,4));
 }
