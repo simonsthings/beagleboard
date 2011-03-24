@@ -45,8 +45,8 @@ static int device_open(struct inode *, struct file *);
 static int device_release(struct inode *, struct file *);
 static ssize_t device_read(struct file *, char *, size_t, loff_t *);
 static ssize_t device_write(struct file *, const char *, size_t, loff_t *);
-void receive_function_fpga( u16 * data_puffer);
-u32 save_read();
+void receive_function_fpga( u16 * data_puffer,bool* t_err);
+u32 save_read(bool* t_err);
 
 #define SUCCESS 0
 #define DEVICE_NAME "biosigdev"	/* Dev name as it appears in /proc/devices   */
@@ -79,11 +79,9 @@ int init_module(void)
 {
 	u16 test_read;
 	u32 test_read_32;
-	u16 test_buffer[100];
 //	struct omap_mcbsp *mcbsp;
 //	getMcBSPDevice(mcbspID,&my_mcbsp);
 	struct omap_mcbsp_reg_cfg my_mcbsp_confic;   
-	u16 i;
 
 	test_read =0;
 
@@ -217,7 +215,7 @@ int init_module(void)
 			printk(KERN_INFO "Remove the device file and module when done.\n"); 
 			
 			
-			receive_function_fpga(test_buffer);
+			//receive_function_fpga(test_buffer);
 		}		
 		
 
@@ -250,14 +248,13 @@ void cleanup_module(void)
  */
 static int device_open(struct inode *inode, struct file *file)
 {
-	static int counter = 0;
 
 	if (Device_Open)
 		return -EBUSY;
 
 	Device_Open++;
-	sprintf(msg, "I already told you %d times Hello world!\n", counter++);
-	msg_Ptr = msg;
+//	sprintf(msg, "I already told you %d times Hello world!\n", counter++);
+//	msg_Ptr = msg;
 	try_module_get(THIS_MODULE);
 
 	return SUCCESS;
@@ -288,6 +285,9 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 			   size_t length,	/* length of the buffer     */
 			   loff_t * offset)
 {
+	u16 test_buffer[72];
+	u16 i=0;
+	bool t_err= false;
 	/*
 	 * Number of bytes actually written to the buffer 
 	 */
@@ -296,33 +296,31 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	 * If we're at the end of the message, 
 	 * return 0 signifying end of file 
 	 */
-	if (*msg_Ptr == 0)
-		return 0;
 
 	/* 
 	 * Actually put the data into the buffer 
 	 */
 
-
-	  msg_Ptr = msg;
-	  try_module_get(THIS_MODULE);
+	    sprintf(msg, "\n");
+	    receive_function_fpga(test_buffer,&t_err);
+	    if(!t_err)
+	      for(i=0;i<72;i++)
+	      {
+		sprintf(msg + strlen(msg)-1, "%x,\n",test_buffer[i]);
+		//printk(KERN_ALERT "%x\n",test_buffer[i] );
+	      }
 	  
-	  while (length && *msg_Ptr) 
-	  {
-
-		  /* 
-		  * The buffer is in the user data segment, not the kernel 
-		  * segment so "*" assignment won't work.  We have to use 
-		  * put_user which copies data from the kernel data segment to
-		  * the user data segment. 
-		  */
-
-		  put_user(*(msg_Ptr++), buffer++);
-		  length--;
-		  bytes_read++;
-
 	  
-	}
+	  
+	    msg_Ptr = msg;
+	    try_module_get(THIS_MODULE);
+	    
+	    while (*msg_Ptr && length) 
+	    {
+		    put_user(*(msg_Ptr++), buffer++);
+		    length--;
+		    bytes_read++;	    
+	    }
 	/* 
 	 * Most read functions return the number of bytes put into the buffer
 	 */
@@ -343,7 +341,7 @@ device_write(struct file *filp, const char *buff, size_t len, loff_t * off)
 
 
 
-void receive_function_fpga( u16 * data_puffer)
+void receive_function_fpga( u16 * data_puffer, bool* t_err)
 {
   u32 read_val;
   u16 * data_puffer_ptr;
@@ -353,7 +351,7 @@ void receive_function_fpga( u16 * data_puffer)
   //find chan-1 and save it
   do
   {
-    read_val=save_read();
+    read_val=save_read(t_err);
   }while((read_val&0b11111110)!=0); //ersten kanal finden
 
   do
@@ -366,11 +364,11 @@ void receive_function_fpga( u16 * data_puffer)
     {
       *data_puffer_ptr= (read_val&0xFFFF00)>>8;
       data_puffer_ptr+=8;
-      read_val=save_read();
+      read_val=save_read(t_err);
       
     }while((read_val&0b11111110)!=p_offset<<5&&data_puffer_ptr <=data_puffer+72); //zweiten kanal finden
   }while(p_offset <=7);
-  
+/*  
   printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
   data_puffer+=8;
   printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
@@ -388,24 +386,21 @@ void receive_function_fpga( u16 * data_puffer)
   printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
   data_puffer+=8;
   printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
-  data_puffer+=8;     
+  data_puffer+=8;     */
 }
 
 
-u32 save_read()
+u32 save_read(bool* r_err)
 {
 
   if(0b100&__raw_readl(ioremap( mcbsp_base_reg+0x14,4)))
-    printk(KERN_ALERT "Buffer_full_error\n");
+    *r_err |= true;
   while(!(0b10&__raw_readl(ioremap( mcbsp_base_reg+0x14,4))))  // 0x14 ersetzen durch spcr1-referenz  test for buffer empty
   {
-    printk(KERN_ALERT "Buffer_EMPTY_error\n");
+    //printk(KERN_ALERT "EMPTY_err\n");
     //schedule_timeout(1);  
     
   }
-
- 
-  
   
   return __raw_readl(ioremap( mcbsp_base_reg,4));
 }
