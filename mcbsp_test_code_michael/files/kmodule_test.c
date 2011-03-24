@@ -185,7 +185,7 @@ int init_module(void)
 			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
 */
 
-			__raw_writel(0xefFFff,ioremap( mcbsp_base_reg+8,4));
+			__raw_writel(0x000000,ioremap( mcbsp_base_reg+8,4));
 			
 /*raw_reading_loop.....			__set_current_state(TASK_INTERRUPTIBLE);
 
