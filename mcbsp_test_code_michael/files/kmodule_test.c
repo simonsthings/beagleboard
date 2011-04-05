@@ -155,49 +155,16 @@ int init_module(void)
 			printk(KERN_ALERT "mcbsp_start...\n");
 			/*test_read =*/ omap_mcbsp_start(OMAP_MCBSP1,1,1);
 			printk(KERN_ALERT "mcbsp_start: %d. \n", test_read);
-		
-	
-/*			printk(KERN_ALERT "Reading_start:\n");
-			omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
-			printk(KERN_ALERT "reading %d. \n", test_read);
-			omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
-			printk(KERN_ALERT "reading %d. \n", test_read);
-			omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
-			printk(KERN_ALERT "reading %d. \n", test_read);
 
-			omap_mcbsp_pollread(OMAP_MCBSP1, &test_read);
-			printk(KERN_ALERT "reading %d. \n", test_read);
-			omap_mcbsp_pollwrite(OMAP_MCBSP1, 0xAF);
-*/
-			
 			//raw_reading...
 			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
 			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
-/*			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
-			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
-			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
-			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
-			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
-			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
-			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
-			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
-			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
-			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
-*/
+
 
 			__raw_writel(0x000000,ioremap( mcbsp_base_reg+8,4));
 			
-/*raw_reading_loop.....			__set_current_state(TASK_INTERRUPTIBLE);
+//		__set_current_state(TASK_INTERRUPTIBLE);
 
-			for(i = 0; i<1000; i++)
-			{
-				while(!(0b10&__raw_readl(ioremap( mcbsp_base_reg+0x14,4))))  // 0x14 ersetzen durch spcr1-referenz
-				{
-					schedule_timeout(100);
-				}
-				test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
-				printk(KERN_ALERT "%x\n", test_read_32);
-			}*/
 
 
 			Major = register_chrdev(0, DEVICE_NAME, &fops);
@@ -253,6 +220,7 @@ static int device_open(struct inode *inode, struct file *file)
 		return -EBUSY;
 
 	Device_Open++;
+	__raw_writel(0xF0FFFF,ioremap( mcbsp_base_reg+8,4));
 //	sprintf(msg, "I already told you %d times Hello world!\n", counter++);
 //	msg_Ptr = msg;
 	try_module_get(THIS_MODULE);
@@ -306,7 +274,7 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	    if(!t_err)
 	      for(i=0;i<72;i++)
 	      {
-		sprintf(msg + strlen(msg)-1, "%x,\n",test_buffer[i]);
+		sprintf(msg + strlen(msg)-1, "%d,\n",test_buffer[i]);
 		//printk(KERN_ALERT "%x\n",test_buffer[i] );
 	      }
 	  
@@ -392,7 +360,7 @@ void receive_function_fpga( u16 * data_puffer, bool* t_err)
 
 u32 save_read(bool* r_err)
 {
-
+  u32 temp;
   if(0b100&__raw_readl(ioremap( mcbsp_base_reg+0x14,4)))
     *r_err |= true;
   while(!(0b10&__raw_readl(ioremap( mcbsp_base_reg+0x14,4))))  // 0x14 ersetzen durch spcr1-referenz  test for buffer empty
@@ -401,6 +369,9 @@ u32 save_read(bool* r_err)
     //schedule_timeout(1);  
     
   }
+  if(0b100&__raw_readl(ioremap( mcbsp_base_reg+0x14,4))) //do twice to prevent erros in case of interruption via process-shwitcher....
+    *r_err |= true;
   
-  return __raw_readl(ioremap( mcbsp_base_reg,4));
+  temp= __raw_readl(ioremap( mcbsp_base_reg,4));
+  return temp;//&0xff|((0b11100000&temp)<<3)|((0b11110&temp)<<10);
 }
