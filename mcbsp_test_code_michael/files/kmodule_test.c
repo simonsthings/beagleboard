@@ -220,7 +220,7 @@ static int device_open(struct inode *inode, struct file *file)
 		return -EBUSY;
 
 	Device_Open++;
-	__raw_writel(0xF0FFFF,ioremap( mcbsp_base_reg+8,4));
+	__raw_writel(0xF4FFFF,ioremap( mcbsp_base_reg+8,4));
 //	sprintf(msg, "I already told you %d times Hello world!\n", counter++);
 //	msg_Ptr = msg;
 	try_module_get(THIS_MODULE);
