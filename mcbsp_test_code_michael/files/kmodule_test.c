@@ -31,9 +31,10 @@
 #include <linux/clk.h>
 #include <linux/delay.h>
 #include <linux/io.h>
-#include <plat/mcbsp.h>
 
 
+#include <linux/dma-mapping.h>
+#include <mach/dma.h>
 
 MODULE_LICENSE("Dual BSD/GPL");
 MODULE_AUTHOR("Michael Fink <DePeter1@gmx.net>");
@@ -48,10 +49,16 @@ static ssize_t device_write(struct file *, const char *, size_t, loff_t *);
 void receive_function_fpga( u16 * data_puffer,bool* t_err);
 u32 save_read(bool* t_err);
 
+int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_addr_t buffer2dma, u32* buffer2kernel, dma_addr_t buffer3dma, u32* buffer3kernel, unsigned int length);
+static void my_mcbsp_rx_dma_buf_callback(int lch, u16 ch_status, void *data);
+
 #define SUCCESS 0
 #define DEVICE_NAME "biosigdev"	/* Dev name as it appears in /proc/devices   */
 #define BUF_LEN 500		/* Max length of the message from the device */
-#define mcbsp_base_reg OMAP34XX_MCBSP1_BASE 
+#define mcbsp_base_reg OMAP34XX_MCBSP1_BASE
+#define DMASIZE 800
+#define DMABUFBYTES DMASIZE*4
+#define DMABUFSIZE DMASIZE
 
 
 
@@ -73,16 +80,31 @@ static struct file_operations fops = {
 
 
 
+int buf1_dmachannel;
+int buf2_dmachannel;
+int buf3_dmachannel;
+
 
 
 int init_module(void)
 {
 	u16 test_read;
 	u32 test_read_32;
-//	struct omap_mcbsp *mcbsp;
-//	getMcBSPDevice(mcbspID,&my_mcbsp);
+	//struct omap_mcbsp *mcbsp;
+	//getMcBSPDevice(mcbspID,&my_mcbsp);
 	struct omap_mcbsp_reg_cfg my_mcbsp_confic;   
 
+	
+	u32* dma_buf_kspace1; // the DMA buffer for DMA channel 1
+	u32* dma_buf_kspace2; // the DMA buffer for DMA channel 2
+	u32* dma_buf_kspace3; // the DMA buffer for DMA channel 3
+
+	/* The pointers to the same DMA buffers for use only by DMA controller: */
+	dma_addr_t dma_buf_dma_space1;
+	dma_addr_t dma_buf_dma_space2;
+	dma_addr_t dma_buf_dma_space3;
+	
+	
 	test_read =0;
 
 	printk("Module init called\n");
@@ -100,6 +122,7 @@ int init_module(void)
 
 
 	
+
 		my_mcbsp_confic.spcr2 =  /* FRST | GRST |*/ XINTM(0x0) ; //serial-port control register RST?????
 		my_mcbsp_confic.spcr1 = RJUST(0x0)/*| DXENA*/ |RINTM(0x0) /*| RRST*/;  //rst?? dxena
 		
@@ -131,7 +154,7 @@ int init_module(void)
 		my_mcbsp_confic.xcerh=0;//multichan-options... ignore? 
 		
 		my_mcbsp_confic.xccr = DXENDLY(1) | XDMAEN;
-		my_mcbsp_confic.rccr = RFULL_CYCLE | RDMAEN; 
+		my_mcbsp_confic.rccr = RFULL_CYCLE /*| RDMAEN*/; 
 
 
 
@@ -182,7 +205,30 @@ int init_module(void)
 			printk(KERN_INFO "Remove the device file and module when done.\n"); 
 			
 			
+
+			
+			
+			/* The pointers to DMA buffers for local use: */
+
+
+			/* Allocate memory space for the three buffers and assign the 6 pointers: */
+			dma_buf_kspace1 = dma_alloc_coherent(NULL, DMABUFBYTES, &dma_buf_dma_space1, GFP_KERNEL);
+			if (dma_buf_kspace1 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
+			dma_buf_kspace2 = dma_alloc_coherent(NULL, DMABUFBYTES, &dma_buf_dma_space2, GFP_KERNEL);
+			if (dma_buf_kspace2 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
+			dma_buf_kspace3 = dma_alloc_coherent(NULL, DMABUFBYTES, &dma_buf_dma_space3, GFP_KERNEL);
+			if (dma_buf_kspace3 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
+			
+
+			printk(KERN_INFO "Calling DMA_init\n"); 
+			dma_init(0/*id*/, dma_buf_dma_space1, dma_buf_kspace1,dma_buf_dma_space2, dma_buf_kspace2, dma_buf_dma_space3, dma_buf_kspace3, DMABUFBYTES/2 ); //why /2?
+			
+			
+			//status = simon_omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr1,bufbuf1, bufbufdmaaddr2,bufbuf2, bufbufdmaaddr3,bufbuf3, DMABUFSIZE * bytesPerVal/2 /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
 			//receive_function_fpga(test_buffer);
+			printk(KERN_INFO "DMA_BUF: %d, %d, %d\n",dma_buf_kspace1[0],dma_buf_kspace1[1],dma_buf_kspace1[2]); 
+			printk(KERN_INFO "Setting DMA_Thrs\n"); 
+			__raw_writel(0xF,ioremap( mcbsp_base_reg+0x94,4));
 		}		
 		
 
@@ -228,6 +274,9 @@ static int device_open(struct inode *inode, struct file *file)
 	return SUCCESS;
 }
 
+
+
+
 /* 
  * Called when a process closes the device file.
  */
@@ -243,6 +292,9 @@ static int device_release(struct inode *inode, struct file *file)
 
 	return 0;
 }
+
+
+
 
 /* 
  * Called when a process, which already opened the dev file, attempts to
@@ -295,6 +347,9 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	return bytes_read;
 }
 
+
+
+
 /*  
  * Called when a process writes to dev file: echo "hi" > /dev/hello 
  */
@@ -336,26 +391,317 @@ void receive_function_fpga( u16 * data_puffer, bool* t_err)
       
     }while((read_val&0b11111110)!=p_offset<<5&&data_puffer_ptr <=data_puffer+72); //zweiten kanal finden
   }while(p_offset <=7);
-/*  
-  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
-  data_puffer+=8;
-  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
-  data_puffer+=8;
-  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
-  data_puffer+=8;
-  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
-  data_puffer+=8;
-  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
-  data_puffer+=8;
-  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
-  data_puffer+=8;
-  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
-  data_puffer+=8;
-  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
-  data_puffer+=8;
-  printk(KERN_ALERT "TEST_val:%x,%x,%x,%x,%x,%x,%x,%x,\n",data_puffer[0],data_puffer[1],data_puffer[2],data_puffer[3],data_puffer[4],data_puffer[5],data_puffer[6],data_puffer[7]);
-  data_puffer+=8;     */
+
 }
+
+
+
+//mainly inspired by Simon!
+int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_addr_t buffer2dma, u32* buffer2kernel, dma_addr_t buffer3dma, u32* buffer3kernel, unsigned int length)
+{
+	//struct omap_mcbsp *mcbsp;
+	//int dma_rx_ch;
+//	int src_port = 0;
+//	int dest_port = 0;
+//	int sync_dev = 0;
+	int status = 3; // dummy value
+	int deviceRequestlineForDmaChannelsync = 0;
+	char printtemp[500];
+	int i;
+
+	struct omap_dma_channel_params *dmaparams1;
+	//int buf1_dmachannel;
+	struct omap_dma_channel_params *dmaparams2;
+	//int buf2_dmachannel;
+	struct omap_dma_channel_params *dmaparams3;
+	//int buf3_dmachannel;
+
+	dmaparams1 = kzalloc(sizeof(struct omap_dma_channel_params), GFP_KERNEL);
+	if (!dmaparams1) {
+		return -ENOMEM;
+	}
+	dmaparams2 = kzalloc(sizeof(struct omap_dma_channel_params), GFP_KERNEL);
+	if (!dmaparams2) {
+		return -ENOMEM;
+	}
+	dmaparams3 = kzalloc(sizeof(struct omap_dma_channel_params), GFP_KERNEL);
+	if (!dmaparams3) {
+		return -ENOMEM;
+	}
+
+//	getMcBSPDevice(mcbspID,&mcbsp); TODO!!!!!
+	printk(KERN_INFO "Doing DMA_config\n"); 
+
+	deviceRequestlineForDmaChannelsync = OMAP24XX_DMA_MCBSP1_RX; // RX
+
+	dmaparams1->data_type=OMAP_DMA_DATA_TYPE_S32;		/* data type 8,16,32 */
+	dmaparams1->elem_count=(length>>1);		/* number of elements in a frame */
+	dmaparams1->frame_count=1;	/* number of frames in a element */
+
+	dmaparams1->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams1->src_amode=OMAP_DMA_AMODE_CONSTANT;		/* constant, post increment, indexed,double indexed */
+	dmaparams1->src_start=  (mcbsp_base_reg+0x14);		/* source address : physical */
+	dmaparams1->src_ei=0;		/* source element index */
+	dmaparams1->src_fi=0;		/* source frame index */
+
+	dmaparams1->dst_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams1->dst_amode=OMAP_DMA_AMODE_POST_INC;		/* constant, post increment, indexed,double indexed */
+	dmaparams1->dst_start=buffer1dma;		/* source address : physical */
+	dmaparams1->dst_ei=0;		/* source element index */
+	dmaparams1->dst_fi=0;		/* source frame index */
+
+	dmaparams1->trigger=deviceRequestlineForDmaChannelsync;		/* trigger attached if the channel is synchronized */
+	dmaparams1->sync_mode=OMAP_DMA_SYNC_ELEMENT;		/* sycn on element, frame , block or packet */
+	dmaparams1->src_or_dst_synch=1;	/* source synch(1) or destination synch(0) */
+
+	dmaparams1->ie=0;			/* interrupt enabled */
+
+	dmaparams1->read_prio=0;/* read priority */
+	dmaparams1->write_prio=0;/* write priority */
+
+	dmaparams1->burst_mode=OMAP_DMA_DATA_BURST_DIS; /* Burst mode 4/8/16 words */
+
+
+	dmaparams2->data_type=OMAP_DMA_DATA_TYPE_S32;		/* data type 8,16,32 */
+	dmaparams2->elem_count=(length>>1);		/* number of elements in a frame */
+	dmaparams2->frame_count=1;	/* number of frames in a element */
+
+	dmaparams2->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams2->src_amode=OMAP_DMA_AMODE_CONSTANT;		/* constant, post increment, indexed,double indexed */
+	dmaparams2->src_start= (mcbsp_base_reg+0x14);		/* source address : physical */
+	dmaparams2->src_ei=0;		/* source element index */
+	dmaparams2->src_fi=0;		/* source frame index */
+
+	dmaparams2->dst_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams2->dst_amode=OMAP_DMA_AMODE_POST_INC;		/* constant, post increment, indexed,double indexed */
+	dmaparams2->dst_start=buffer2dma;		/* source address : physical */
+	dmaparams2->dst_ei=0;		/* source element index */
+	dmaparams2->dst_fi=0;		/* source frame index */
+
+	dmaparams2->trigger=deviceRequestlineForDmaChannelsync;		/* trigger attached if the channel is synchronized */
+	dmaparams2->sync_mode=OMAP_DMA_SYNC_ELEMENT;		/* sycn on element, frame , block or packet */
+	dmaparams2->src_or_dst_synch=1;	/* source synch(1) or destination synch(0) */
+
+	dmaparams2->ie=0;			/* interrupt enabled */
+
+	dmaparams2->read_prio=0;/* read priority */
+	dmaparams2->write_prio=0;/* write priority */
+
+	dmaparams2->burst_mode=OMAP_DMA_DATA_BURST_DIS; /* Burst mode 4/8/16 words */
+
+
+	dmaparams3->data_type=OMAP_DMA_DATA_TYPE_S32;		/* data type 8,16,32 */
+	dmaparams3->elem_count=(length>>1);		/* number of elements in a frame */
+	dmaparams3->frame_count=1;	/* number of frames in a element */
+
+	dmaparams3->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams3->src_amode=OMAP_DMA_AMODE_CONSTANT;		/* constant, post increment, indexed,double indexed */
+	dmaparams3->src_start= (mcbsp_base_reg+0x14);		/* source address : physical */
+	dmaparams3->src_ei=0;		/* source element index */
+	dmaparams3->src_fi=0;		/* source frame index */
+
+	dmaparams3->dst_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
+	dmaparams3->dst_amode=OMAP_DMA_AMODE_POST_INC;		/* constant, post increment, indexed,double indexed */
+	dmaparams3->dst_start=buffer3dma;		/* source address : physical */
+	dmaparams3->dst_ei=0;		/* source element index */
+	dmaparams3->dst_fi=0;		/* source frame index */
+
+	dmaparams3->trigger=deviceRequestlineForDmaChannelsync;		/* trigger attached if the channel is synchronized */
+	dmaparams3->sync_mode=OMAP_DMA_SYNC_ELEMENT;		/* sycn on element, frame , block or packet */
+	dmaparams3->src_or_dst_synch=1;	/* source synch(1) or destination synch(0) */
+
+	dmaparams3->ie=0;			/* interrupt enabled */
+
+	dmaparams3->read_prio=0;/* read priority */
+	dmaparams3->write_prio=0;/* write priority */
+
+	dmaparams3->burst_mode=OMAP_DMA_DATA_BURST_DIS; /* Burst mode 4/8/16 words */
+
+  
+	printk(KERN_INFO "Doing DMA_request\n"); 
+	/* chainable: */
+	status = omap_request_dma(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
+				"McBSP RX test DMA for buffer 1 !",
+				my_mcbsp_rx_dma_buf_callback,
+				buffer1kernel,
+				&buf1_dmachannel);
+	printk(KERN_INFO "Done DMA_request!\n"); 
+	if (status)
+	{
+		printk(KERN_ALERT  " Unable to request DMA channel for McBSP%d RX.\n",1);
+		return -EAGAIN;
+	}
+	printk(KERN_ALERT  "Requested McBSP%d RX DMA channel %d\n",1, buf1_dmachannel);
+
+	status = omap_request_dma(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
+				"McBSP RX test DMA for buffer 2 !",
+				my_mcbsp_rx_dma_buf_callback,
+				buffer2kernel,
+				&buf2_dmachannel);
+	if (status)
+	{
+		printk(KERN_ALERT " Unable to request DMA channel for McBSP%d RX.\n",1);
+		return -EAGAIN;
+	}
+	printk(KERN_ALERT  "Requested McBSP%d RX DMA channel %d\n",1, buf2_dmachannel);
+
+	status = omap_request_dma(deviceRequestlineForDmaChannelsync, // The DMA request line to use; e.g. "OMAP24XX_DMA_MCBSP1_TX" for McBSP1 of (also) OMAP3530
+				"McBSP RX test DMA for buffer 3 !",
+				my_mcbsp_rx_dma_buf_callback,
+				buffer3kernel,
+				&buf3_dmachannel);
+	if (status)
+	{
+		printk(KERN_ALERT  " Unable to request DMA channel for McBSP%d RX.\n",1);
+		return -EAGAIN;
+	}
+	printk(KERN_ALERT  "Requested McBSP%d RX DMA channel %d\n",1, buf3_dmachannel);
+
+	// initialise the inter-thread waiting funtionality:
+	//init_completion(&mcbsp->rx_dma_completion); 
+	//init_completion(&mcbsp_rx_dma_completion);
+
+
+
+	//sync_dev = mcbsp->dma_rx_sync;
+
+	//omap_set_dma_params(buf1_dmachannel, dmaparams1);
+
+	/* Set up each DMA channel with it's parameters! */
+	omap_set_dma_params(buf1_dmachannel, dmaparams1);
+	omap_set_dma_params(buf2_dmachannel, dmaparams2);
+	omap_set_dma_params(buf3_dmachannel, dmaparams3);
+
+
+	/* Output initial buffer content: */
+	printk(KERN_ALERT "The first %d of %d values of the transferbuffer bufbuf before reception (DMA setup function) are: \n",(20*16),DMABUFSIZE);
+	sprintf(printtemp, "receive: \n   ");
+	for (i = 0 ; i<min(DMABUFSIZE,(20*16)); i++)
+	{
+		sprintf(printtemp, "%s 0x%x,", printtemp,buffer1kernel[i]);
+
+		if ((i%16) == 15)
+		{
+			printk(KERN_ALERT "%s \n",printtemp);
+			sprintf(printtemp, "   ");
+		}
+	}
+	printk(KERN_ALERT " end. \n");
+
+	/* Linking: Loop! */
+	/* Set up this DMA channel to be linked to itself, thereby forming a one-buffer loop.
+	 * Production should use at least two buffers so that one can be filled while the other is
+	 * being read from. I just deactivated this (see e.g. simon_omap_mcbsp_recv_buffers() ) for testing. */
+	//omap_dma_link_lch(buf1_dmachannel, buf1_dmachannel);
+
+	/* Linking! Cycle through the 3 buffers, making a ring DMA transfer! See screen-output.txt! */
+	omap_dma_link_lch(buf1_dmachannel, buf1_dmachannel);
+	//omap_dma_link_lch(buf2_dmachannel, buf3_dmachannel);
+	//omap_dma_link_lch(buf3_dmachannel, buf1_dmachannel);
+
+
+	/* Begin the DMA transfers! The first 128 bytes may be wrong as the fifo buffer within the mcbsp port first has to be emptied. */
+	omap_start_dma(buf1_dmachannel);
+
+	/* Now wait until the DMA callback function has been called MAXCYCLES times. */
+//	wait_for_completion(&mcbsp->rx_dma_completion);
+	printk(KERN_ALERT "Not waiting for transfers to end. Continuing init function now!\n");
+
+	/* Display a snapshot of the transfer buffer buffer1kernel after the transfer: */
+/*	printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufbuf after reception (DMA setup function) are: \n",DMABUFSIZE);
+	sprintf(printtemp, "receive: \n   ");
+	for (i = 0 ; i<min(DMABUFSIZE,1000000); i++)
+	{
+		sprintf(printtemp, "%s 0x%x,", printtemp,buffer1kernel[i]);
+
+		if ((i%16) == 15)
+		{
+			printk(KERN_ALERT "%s \n",printtemp);
+			sprintf(printtemp, "   ");
+		}
+	}
+	printk(KERN_ALERT " end. \n");
+*/
+	/* Display the complete data that has been received in those MAXCYCLES dma-transfers.
+	 * We could have continued the transfer, but as we are just storing the data in memory, we want to look at it sooner or later! */
+/*	printk(KERN_ALERT "The first millions of %d values of the transferbuffer fullbuf (c=%d) after reception (DMA setup function) are: \n",(MAXCYCLES*DMABUFSIZE),cyclecounter);
+	sprintf(printtemp, "receive: \n   ");
+	for (i = 0 ; i<(MAXCYCLES*DMABUFSIZE); i++)
+	{
+		sprintf(printtemp, "%s 0x%x,", printtemp,fullbuf[i]);
+
+		if ((i%16) == 15)
+		{
+			printk(KERN_ALERT "%s \n",printtemp);
+			sprintf(printtemp, "   ");
+		}
+	}
+	printk(KERN_ALERT " end. \n");
+*/
+
+/*	printk(KERN_ALERT " Doodling... \n");
+	for (i=0;i<500;i++)
+	{
+		printk(KERN_ALERT ".");
+	}
+	printk(KERN_ALERT "\n");
+	printk(KERN_ALERT " end. \n");
+*/	
+
+	__raw_writel(0xF4FFFF,ioremap( mcbsp_base_reg+8,4));  //start FPGA!!!
+	printk(KERN_ALERT "Started FPGA\n");
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+static void my_mcbsp_rx_dma_buf_callback(int lch, u16 ch_status, void *data)
+{
+	char printtemp[500];
+	struct omap_mcbsp *mcbsp_dma_rx;
+	//int status=3; // dummy var
+	int i;
+	int c; // tempstore cyclecounter
+	int runfinish = 0;
+	u32* bufferkernel;
+	//int oldmm;
+	printk(KERN_ALERT "Callback_called");
+	if (data == NULL)
+	{
+		printk(KERN_ALERT " Skipping callback because data is NULL. Check initialisation order? \n");
+		return;
+	}
+
+	bufferkernel = (u32*)data;
+
+	if (bufferkernel == NULL)
+	{
+		printk(KERN_ALERT " Skipping callback because bufferkernel is NULL. Check initialisation order? \n");
+		return;
+	}
+	if (!*bufferkernel)
+	{
+		printk(KERN_ALERT " Skipping callback because *bufferkernel is NULL. Check initialisation order? \n");
+		return;
+	}
+
+	// ### do something with data here!!
+
+	printk(KERN_ALERT "%d, %d \n", bufferkernel[0],bufferkernel[2]);
+	
+
+}
+
+
+
+
 
 
 u32 save_read(bool* r_err)
