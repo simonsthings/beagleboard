@@ -138,7 +138,7 @@ int init_module(void)
 		my_mcbsp_confic.mcr2=0x0;  //multichan-register 
 		my_mcbsp_confic.mcr1=0x0;
 		
-		my_mcbsp_confic.pcr0 =  FSXM|CLKXM|FSXP|FSRP|CLKRP|CLKXP;//pin control register
+		my_mcbsp_confic.pcr0 =  /*FSXM|*/CLKXM|FSXP|FSRP|CLKRP|CLKXP;//pin control register
 		
 		my_mcbsp_confic.rcerc=0; //multichan-options... ignore? 
 		my_mcbsp_confic.rcerd=0;//multichan-options... ignore? 
