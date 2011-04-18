@@ -184,7 +184,7 @@ int init_module(void)
 			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
 
 
-			__raw_writel(0x000000,ioremap( mcbsp_base_reg+8,4));
+			//__raw_writel(0x000000,ioremap( mcbsp_base_reg+8,4));
 			
 //		__set_current_state(TASK_INTERRUPTIBLE);
 
@@ -219,16 +219,24 @@ int init_module(void)
 			dma_buf_kspace3 = dma_alloc_coherent(NULL, DMABUFBYTES, &dma_buf_dma_space3, GFP_KERNEL);
 			if (dma_buf_kspace3 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
 			
-
+			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);			
+			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);			
+			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
+			
+			
+			
 			printk(KERN_INFO "Calling DMA_init\n"); 
 			dma_init(0/*id*/, dma_buf_dma_space1, dma_buf_kspace1,dma_buf_dma_space2, dma_buf_kspace2, dma_buf_dma_space3, dma_buf_kspace3, DMABUFBYTES/2 ); //why /2?
-			
+			printk(KERN_INFO "DMA is running?\n"); 
 			
 			//status = simon_omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr1,bufbuf1, bufbufdmaaddr2,bufbuf2, bufbufdmaaddr3,bufbuf3, DMABUFSIZE * bytesPerVal/2 /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
 			//receive_function_fpga(test_buffer);
-			printk(KERN_INFO "DMA_BUF: %d, %d, %d\n",dma_buf_kspace1[0],dma_buf_kspace1[1],dma_buf_kspace1[2]); 
-			printk(KERN_INFO "Setting DMA_Thrs\n"); 
-			__raw_writel(0xF,ioremap( mcbsp_base_reg+0x94,4));
+			//printk(KERN_INFO "DMA_BUF: %d, %d, %d\n",dma_buf_kspace1[0],dma_buf_kspace1[1],dma_buf_kspace1[2]); 
+			//printk(KERN_INFO "Setting DMA_Thrs\n"); 
+			//__raw_writel(0xF,ioremap( mcbsp_base_reg+0x94,4));
 		}		
 		
 
@@ -440,7 +448,7 @@ int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_add
 
 	dmaparams1->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
 	dmaparams1->src_amode=OMAP_DMA_AMODE_CONSTANT;		/* constant, post increment, indexed,double indexed */
-	dmaparams1->src_start=  (mcbsp_base_reg+0x14);		/* source address : physical */
+	dmaparams1->src_start=  (mcbsp_base_reg);		/* source address : physical */
 	dmaparams1->src_ei=0;		/* source element index */
 	dmaparams1->src_fi=0;		/* source frame index */
 
@@ -468,7 +476,7 @@ int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_add
 
 	dmaparams2->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
 	dmaparams2->src_amode=OMAP_DMA_AMODE_CONSTANT;		/* constant, post increment, indexed,double indexed */
-	dmaparams2->src_start= (mcbsp_base_reg+0x14);		/* source address : physical */
+	dmaparams2->src_start= (mcbsp_base_reg);		/* source address : physical */
 	dmaparams2->src_ei=0;		/* source element index */
 	dmaparams2->src_fi=0;		/* source frame index */
 
@@ -496,7 +504,7 @@ int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_add
 
 	dmaparams3->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
 	dmaparams3->src_amode=OMAP_DMA_AMODE_CONSTANT;		/* constant, post increment, indexed,double indexed */
-	dmaparams3->src_start= (mcbsp_base_reg+0x14);		/* source address : physical */
+	dmaparams3->src_start= (mcbsp_base_reg);		/* source address : physical */
 	dmaparams3->src_ei=0;		/* source element index */
 	dmaparams3->src_fi=0;		/* source frame index */
 
@@ -595,9 +603,9 @@ int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_add
 	//omap_dma_link_lch(buf1_dmachannel, buf1_dmachannel);
 
 	/* Linking! Cycle through the 3 buffers, making a ring DMA transfer! See screen-output.txt! */
-	omap_dma_link_lch(buf1_dmachannel, buf1_dmachannel);
-	//omap_dma_link_lch(buf2_dmachannel, buf3_dmachannel);
-	//omap_dma_link_lch(buf3_dmachannel, buf1_dmachannel);
+	omap_dma_link_lch(buf1_dmachannel, buf2_dmachannel);
+	omap_dma_link_lch(buf2_dmachannel, buf3_dmachannel);
+	omap_dma_link_lch(buf3_dmachannel, buf1_dmachannel);
 
 
 	/* Begin the DMA transfers! The first 128 bytes may be wrong as the fifo buffer within the mcbsp port first has to be emptied. */
@@ -670,9 +678,9 @@ static void my_mcbsp_rx_dma_buf_callback(int lch, u16 ch_status, void *data)
 	int i;
 	int c; // tempstore cyclecounter
 	int runfinish = 0;
+	static u8 down_scale =0;
 	u32* bufferkernel;
 	//int oldmm;
-	printk(KERN_ALERT "Callback_called");
 	if (data == NULL)
 	{
 		printk(KERN_ALERT " Skipping callback because data is NULL. Check initialisation order? \n");
@@ -694,8 +702,11 @@ static void my_mcbsp_rx_dma_buf_callback(int lch, u16 ch_status, void *data)
 
 	// ### do something with data here!!
 
-	printk(KERN_ALERT "%d, %d \n", bufferkernel[0],bufferkernel[2]);
-	
+	//printk(KERN_ALERT "%x,%x,%x,%x", bufferkernel[0],bufferkernel[1],bufferkernel[2],bufferkernel[3]);
+	//printk(KERN_ALERT "a");
+	down_scale++;
+	if(!down_scale)
+	  printk(KERN_ALERT "%x,%x,%x,%x", bufferkernel[0],bufferkernel[1],bufferkernel[2],bufferkernel[3]);
 
 }
 
