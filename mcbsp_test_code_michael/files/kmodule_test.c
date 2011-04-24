@@ -111,14 +111,6 @@ int init_module(void)
 
 
 
-/*	printk("Mux-Settings...\n");
-	OMAP3_MUX(MCBSP1_CLKR, OMAP_MUX_MODE0 | OMAP_PIN_INPUT);
-	OMAP3_MUX(MCBSP1_CLKX, OMAP_MUX_MODE0 | OMAP_PIN_OUTPUT);
-	OMAP3_MUX(MCBSP1_DR, OMAP_MUX_MODE0 | OMAP_PIN_INPUT);
-	OMAP3_MUX(MCBSP1_DX, OMAP_MUX_MODE0 | OMAP_PIN_INPUT);
-	OMAP3_MUX(MCBSP1_FSR, OMAP_MUX_MODE0 | OMAP_PIN_INPUT);
-	OMAP3_MUX(MCBSP1_FSX, OMAP_MUX_MODE0 | OMAP_PIN_INPUT);
-	printk("done with Mux-Settings...\n");*/
 
 
 	
@@ -566,35 +558,14 @@ int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_add
 	printk(KERN_ALERT  "Requested McBSP%d RX DMA channel %d\n",1, buf3_dmachannel);
 
 	// initialise the inter-thread waiting funtionality:
-	//init_completion(&mcbsp->rx_dma_completion); 
-	//init_completion(&mcbsp_rx_dma_completion);
 
 
-
-	//sync_dev = mcbsp->dma_rx_sync;
-
-	//omap_set_dma_params(buf1_dmachannel, dmaparams1);
 
 	/* Set up each DMA channel with it's parameters! */
 	omap_set_dma_params(buf1_dmachannel, dmaparams1);
 	omap_set_dma_params(buf2_dmachannel, dmaparams2);
 	omap_set_dma_params(buf3_dmachannel, dmaparams3);
 
-
-	/* Output initial buffer content: */
-	printk(KERN_ALERT "The first %d of %d values of the transferbuffer bufbuf before reception (DMA setup function) are: \n",(20*16),DMABUFSIZE);
-	sprintf(printtemp, "receive: \n   ");
-	for (i = 0 ; i<min(DMABUFSIZE,(20*16)); i++)
-	{
-		sprintf(printtemp, "%s 0x%x,", printtemp,buffer1kernel[i]);
-
-		if ((i%16) == 15)
-		{
-			printk(KERN_ALERT "%s \n",printtemp);
-			sprintf(printtemp, "   ");
-		}
-	}
-	printk(KERN_ALERT " end. \n");
 
 	/* Linking: Loop! */
 	/* Set up this DMA channel to be linked to itself, thereby forming a one-buffer loop.
@@ -615,55 +586,12 @@ int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_add
 //	wait_for_completion(&mcbsp->rx_dma_completion);
 	printk(KERN_ALERT "Not waiting for transfers to end. Continuing init function now!\n");
 
-	/* Display a snapshot of the transfer buffer buffer1kernel after the transfer: */
-/*	printk(KERN_ALERT "The first millions of %d values of the transferbuffer bufbuf after reception (DMA setup function) are: \n",DMABUFSIZE);
-	sprintf(printtemp, "receive: \n   ");
-	for (i = 0 ; i<min(DMABUFSIZE,1000000); i++)
-	{
-		sprintf(printtemp, "%s 0x%x,", printtemp,buffer1kernel[i]);
 
-		if ((i%16) == 15)
-		{
-			printk(KERN_ALERT "%s \n",printtemp);
-			sprintf(printtemp, "   ");
-		}
-	}
-	printk(KERN_ALERT " end. \n");
-*/
-	/* Display the complete data that has been received in those MAXCYCLES dma-transfers.
-	 * We could have continued the transfer, but as we are just storing the data in memory, we want to look at it sooner or later! */
-/*	printk(KERN_ALERT "The first millions of %d values of the transferbuffer fullbuf (c=%d) after reception (DMA setup function) are: \n",(MAXCYCLES*DMABUFSIZE),cyclecounter);
-	sprintf(printtemp, "receive: \n   ");
-	for (i = 0 ; i<(MAXCYCLES*DMABUFSIZE); i++)
-	{
-		sprintf(printtemp, "%s 0x%x,", printtemp,fullbuf[i]);
-
-		if ((i%16) == 15)
-		{
-			printk(KERN_ALERT "%s \n",printtemp);
-			sprintf(printtemp, "   ");
-		}
-	}
-	printk(KERN_ALERT " end. \n");
-*/
-
-/*	printk(KERN_ALERT " Doodling... \n");
-	for (i=0;i<500;i++)
-	{
-		printk(KERN_ALERT ".");
-	}
-	printk(KERN_ALERT "\n");
-	printk(KERN_ALERT " end. \n");
-*/	
 
 	__raw_writel(0xF4FFFF,ioremap( mcbsp_base_reg+8,4));  //start FPGA!!!
 	printk(KERN_ALERT "Started FPGA\n");
 	return 0;
 }
-
-
-
-
 
 
 
@@ -702,11 +630,10 @@ static void my_mcbsp_rx_dma_buf_callback(int lch, u16 ch_status, void *data)
 
 	// ### do something with data here!!
 
-	//printk(KERN_ALERT "%x,%x,%x,%x", bufferkernel[0],bufferkernel[1],bufferkernel[2],bufferkernel[3]);
-	//printk(KERN_ALERT "a");
+
 	down_scale++;
 	if(!down_scale)
-	  printk(KERN_ALERT "%x,%x,%x,%x", bufferkernel[0],bufferkernel[1],bufferkernel[2],bufferkernel[3]);
+	  printk(KERN_ALERT "%d(%d):%x,%x,%x,%x",lch, ch_status, bufferkernel[0],bufferkernel[1],bufferkernel[2],bufferkernel[3]);
 
 }
 
