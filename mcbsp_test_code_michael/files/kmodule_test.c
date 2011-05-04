@@ -46,17 +46,22 @@ static int device_open(struct inode *, struct file *);
 static int device_release(struct inode *, struct file *);
 static ssize_t device_read(struct file *, char *, size_t, loff_t *);
 static ssize_t device_write(struct file *, const char *, size_t, loff_t *);
+
 void receive_function_fpga( u16 * data_puffer,bool* t_err);
-u32 save_read(bool* t_err);
+//u32 save_read(bool* t_err);
+u32 save_DMA_read(bool* t_err);
 
 int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_addr_t buffer2dma, u32* buffer2kernel, dma_addr_t buffer3dma, u32* buffer3kernel, unsigned int length);
 static void my_mcbsp_rx_dma_buf_callback(int lch, u16 ch_status, void *data);
 
+//char_dev-Defines
 #define SUCCESS 0
 #define DEVICE_NAME "biosigdev"	/* Dev name as it appears in /proc/devices   */
 #define BUF_LEN 500		/* Max length of the message from the device */
+
+//DMA-Defines
 #define mcbsp_base_reg OMAP34XX_MCBSP1_BASE
-#define DMASIZE 800
+#define DMASIZE 3000
 #define DMABUFBYTES DMASIZE*4
 #define DMABUFSIZE DMASIZE
 
@@ -84,10 +89,20 @@ int buf1_dmachannel;
 int buf2_dmachannel;
 int buf3_dmachannel;
 
+static bool overflow_err; //used to prevent log spamming...
+
+
+//pointers for comunication betwen callback function and read function
+volatile u32 * buffer_read_ptr;
+volatile u32 * buffer_wait1_ptr;
+volatile u32 * buffer_wait2_ptr;
+
 
 
 int init_module(void)
 {
+  
+
 	u16 test_read;
 	u32 test_read_32;
 	//struct omap_mcbsp *mcbsp;
@@ -104,132 +119,114 @@ int init_module(void)
 	dma_addr_t dma_buf_dma_space2;
 	dma_addr_t dma_buf_dma_space3;
 	
-	
-	test_read =0;
-
 	printk("Module init called\n");
+	buffer_read_ptr = NULL;
+	buffer_wait1_ptr = NULL;
+	buffer_wait2_ptr = NULL;
+	test_read =0;
+	bool overflow_err =0;
 
-
-
-
-
+  //set the configuration of MCBSP-Port
+	my_mcbsp_confic.spcr2 =  /* FRST | GRST |*/ XINTM(0x0) ; //serial-port control register RST?????
+	my_mcbsp_confic.spcr1 = RJUST(0x0)/*| DXENA*/ |RINTM(0x0) /*| RRST*/;  //rst?? dxena
 	
+	my_mcbsp_confic.rcr2 = 0 ; //RFRLEN2(OMAP_MCBSP_WORD_24) |RWDLEN2(OMAP_MCBSP_WORD_24) | RDATDLY(1);  //receive control register 
+	my_mcbsp_confic.rcr1 =  RFRLEN2(0) |RWDLEN2(OMAP_MCBSP_WORD_24);
+	
+	my_mcbsp_confic.xcr2 = 0 ; //XFRLEN2(OMAP_MCBSP_WORD_24) | XWDLEN2(OMAP_MCBSP_WORD_24) | XDATDLY(1);  //transmit control register 
+	my_mcbsp_confic.xcr1 = XFRLEN1(0) | XWDLEN1(OMAP_MCBSP_WORD_24);
+	
+	my_mcbsp_confic.srgr2 = FPER(24);// seite 3027 fper????? //srg-register, what ever that means
+	my_mcbsp_confic.srgr1 = FWID(23) | CLKGDV(40);   //FWID?????
+	
+	my_mcbsp_confic.mcr2=0x0;  //multichan-register 
+	my_mcbsp_confic.mcr1=0x0;
+	
+	my_mcbsp_confic.pcr0 =  FSXM|CLKXM|FSXP|FSRP|CLKRP|CLKXP;//pin control register
+	
+	my_mcbsp_confic.rcerc=0; //multichan-options... ignore? 
+	my_mcbsp_confic.rcerd=0;//multichan-options... ignore? 
+	my_mcbsp_confic.xcerc=0;//multichan-options... ignore? 
+	my_mcbsp_confic.xcerd=0;//multichan-options... ignore? 
+	my_mcbsp_confic.rcere=0;//multichan-options... ignore? 
+	my_mcbsp_confic.rcerf=0;//multichan-options... ignore? 
+	my_mcbsp_confic.xcere=0;//multichan-options... ignore? 
+	my_mcbsp_confic.xcerf=0;//multichan-options... ignore? 
+	my_mcbsp_confic.rcerg=0;//multichan-options... ignore? 
+	my_mcbsp_confic.rcerh=0;//multichan-options... ignore? 
+	my_mcbsp_confic.xcerg=0;//multichan-options... ignore? 
+	my_mcbsp_confic.xcerh=0;//multichan-options... ignore? 
+	
+	my_mcbsp_confic.xccr = DXENDLY(1) | XDMAEN;
+	my_mcbsp_confic.rccr = RFULL_CYCLE | RDMAEN; 
 
-		my_mcbsp_confic.spcr2 =  /* FRST | GRST |*/ XINTM(0x0) ; //serial-port control register RST?????
-		my_mcbsp_confic.spcr1 = RJUST(0x0)/*| DXENA*/ |RINTM(0x0) /*| RRST*/;  //rst?? dxena
+	printk(KERN_ALERT "set-io-start...\n");
+	test_read = omap_mcbsp_set_io_type(OMAP_MCBSP1, OMAP_MCBSP_POLL_IO); 
+	printk(KERN_ALERT "set-io-started responce: %d. \n", test_read);
+
+	printk(KERN_ALERT "request-start...\n");
+	test_read = omap_mcbsp_request(OMAP_MCBSP1);
+	printk(KERN_ALERT "reqeust-started responce: %d. \n", test_read);
+	
+	if(test_read==0)
+	{
+	
+		printk(KERN_ALERT "runing config... \n");
+		/*test_read =*/ omap_mcbsp_config(OMAP_MCBSP1, &my_mcbsp_confic);
+		printk(KERN_ALERT "result-config: %d. \n", test_read);
+
+		printk(KERN_ALERT "mcbsp_start...\n");
+		/*test_read =*/ omap_mcbsp_start(OMAP_MCBSP1,1,1);
+		printk(KERN_ALERT "mcbsp_start: %d. \n", test_read);
+
+		//raw_reading...
+		test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+		printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
+
+
+		//__raw_writel(0x000000,ioremap( mcbsp_base_reg+8,4));
 		
-		my_mcbsp_confic.rcr2 = 0 ; //RFRLEN2(OMAP_MCBSP_WORD_24) |RWDLEN2(OMAP_MCBSP_WORD_24) | RDATDLY(1);  //receive control register 
-		my_mcbsp_confic.rcr1 =  RFRLEN2(0) |RWDLEN2(OMAP_MCBSP_WORD_24);
-		
-		my_mcbsp_confic.xcr2 = 0 ; //XFRLEN2(OMAP_MCBSP_WORD_24) | XWDLEN2(OMAP_MCBSP_WORD_24) | XDATDLY(1);  //transmit control register 
-		my_mcbsp_confic.xcr1 = XFRLEN1(0) | XWDLEN1(OMAP_MCBSP_WORD_24);
-		
-		my_mcbsp_confic.srgr2 = FPER(24);// seite 3027 fper????? //srg-register, what ever that means
-		my_mcbsp_confic.srgr1 = FWID(23) | CLKGDV(40);   //FWID?????
-		
-		my_mcbsp_confic.mcr2=0x0;  //multichan-register 
-		my_mcbsp_confic.mcr1=0x0;
-		
-		my_mcbsp_confic.pcr0 =  FSXM|CLKXM|FSXP|FSRP|CLKRP|CLKXP;//pin control register
-		
-		my_mcbsp_confic.rcerc=0; //multichan-options... ignore? 
-		my_mcbsp_confic.rcerd=0;//multichan-options... ignore? 
-		my_mcbsp_confic.xcerc=0;//multichan-options... ignore? 
-		my_mcbsp_confic.xcerd=0;//multichan-options... ignore? 
-		my_mcbsp_confic.rcere=0;//multichan-options... ignore? 
-		my_mcbsp_confic.rcerf=0;//multichan-options... ignore? 
-		my_mcbsp_confic.xcere=0;//multichan-options... ignore? 
-		my_mcbsp_confic.xcerf=0;//multichan-options... ignore? 
-		my_mcbsp_confic.rcerg=0;//multichan-options... ignore? 
-		my_mcbsp_confic.rcerh=0;//multichan-options... ignore? 
-		my_mcbsp_confic.xcerg=0;//multichan-options... ignore? 
-		my_mcbsp_confic.xcerh=0;//multichan-options... ignore? 
-		
-		my_mcbsp_confic.xccr = DXENDLY(1) | XDMAEN;
-		my_mcbsp_confic.rccr = RFULL_CYCLE | RDMAEN; 
+  //		__set_current_state(TASK_INTERRUPTIBLE);
 
 
 
+		Major = register_chrdev(0, DEVICE_NAME, &fops);
+
+		if (Major < 0) {
+		  printk(KERN_ALERT "Registering char device failed with %d\n", Major);
+		  return Major;
+		}
+
+		printk(KERN_INFO "I was assigned major number %d. To talk to\n", Major);
+		printk(KERN_INFO "the driver, create a dev file with\n");
+		printk(KERN_INFO "'mknod /dev/%s c %d 0'.\n", DEVICE_NAME, Major);
+		printk(KERN_INFO "Try various minor numbers. Try to cat and echo to\n");
+		printk(KERN_INFO "the device file.\n");
+		printk(KERN_INFO "Remove the device file and module when done.\n"); 
 		
 		
-		printk(KERN_ALERT "set-io-start...\n");
-		test_read = omap_mcbsp_set_io_type(OMAP_MCBSP1, OMAP_MCBSP_POLL_IO); 
-		printk(KERN_ALERT "set-io-started respnce: %d. \n", test_read);
-
-		printk(KERN_ALERT "request-start...\n");
-		test_read = omap_mcbsp_request(OMAP_MCBSP1);
-		printk(KERN_ALERT "reqeust-started responce: %d. \n", test_read);
+		/* Allocate memory space for the three buffers and assign the 6 pointers: */
+		dma_buf_kspace1 = dma_alloc_coherent(NULL, DMABUFBYTES, &dma_buf_dma_space1, GFP_KERNEL);
+		if (dma_buf_kspace1 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
+		dma_buf_kspace2 = dma_alloc_coherent(NULL, DMABUFBYTES, &dma_buf_dma_space2, GFP_KERNEL);
+		if (dma_buf_kspace2 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
+		dma_buf_kspace3 = dma_alloc_coherent(NULL, DMABUFBYTES, &dma_buf_dma_space3, GFP_KERNEL);
+		if (dma_buf_kspace3 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
 		
-		if(test_read==0)
-		{
+		test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+		printk(KERN_ALERT "raw_reading %x. \n", test_read_32);			
+		test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+		printk(KERN_ALERT "raw_reading %x. \n", test_read_32);			
+		test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
+		printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
 		
-			printk(KERN_ALERT "runing config... \n");
-			/*test_read =*/ omap_mcbsp_config(OMAP_MCBSP1, &my_mcbsp_confic);
-			printk(KERN_ALERT "result-config: %d. \n", test_read);
-
-			printk(KERN_ALERT "mcbsp_start...\n");
-			/*test_read =*/ omap_mcbsp_start(OMAP_MCBSP1,1,1);
-			printk(KERN_ALERT "mcbsp_start: %d. \n", test_read);
-
-			//raw_reading...
-			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
-			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
-
-
-			//__raw_writel(0x000000,ioremap( mcbsp_base_reg+8,4));
-			
-//		__set_current_state(TASK_INTERRUPTIBLE);
-
-
-
-			Major = register_chrdev(0, DEVICE_NAME, &fops);
-
-			if (Major < 0) {
-			  printk(KERN_ALERT "Registering char device failed with %d\n", Major);
-			  return Major;
-			}
-
-			printk(KERN_INFO "I was assigned major number %d. To talk to\n", Major);
-			printk(KERN_INFO "the driver, create a dev file with\n");
-			printk(KERN_INFO "'mknod /dev/%s c %d 0'.\n", DEVICE_NAME, Major);
-			printk(KERN_INFO "Try various minor numbers. Try to cat and echo to\n");
-			printk(KERN_INFO "the device file.\n");
-			printk(KERN_INFO "Remove the device file and module when done.\n"); 
-			
-			
-
-			
-			
-			/* The pointers to DMA buffers for local use: */
-
-
-			/* Allocate memory space for the three buffers and assign the 6 pointers: */
-			dma_buf_kspace1 = dma_alloc_coherent(NULL, DMABUFBYTES, &dma_buf_dma_space1, GFP_KERNEL);
-			if (dma_buf_kspace1 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
-			dma_buf_kspace2 = dma_alloc_coherent(NULL, DMABUFBYTES, &dma_buf_dma_space2, GFP_KERNEL);
-			if (dma_buf_kspace2 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
-			dma_buf_kspace3 = dma_alloc_coherent(NULL, DMABUFBYTES, &dma_buf_dma_space3, GFP_KERNEL);
-			if (dma_buf_kspace3 == NULL) {pr_err("Unable to allocate DMA buffer 1\n");return -ENOMEM;}
-			
-			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
-			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);			
-			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
-			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);			
-			test_read_32 =__raw_readl(ioremap( mcbsp_base_reg,4));
-			printk(KERN_ALERT "raw_reading %x. \n", test_read_32);
-			
-			
-			
-			printk(KERN_INFO "Calling DMA_init\n"); 
-			dma_init(0/*id*/, dma_buf_dma_space1, dma_buf_kspace1,dma_buf_dma_space2, dma_buf_kspace2, dma_buf_dma_space3, dma_buf_kspace3, DMABUFBYTES/2 ); //why /2?
-			printk(KERN_INFO "DMA is running?\n"); 
-			
-			//status = simon_omap_mcbsp_recv_buffer(mcbspID, bufbufdmaaddr1,bufbuf1, bufbufdmaaddr2,bufbuf2, bufbufdmaaddr3,bufbuf3, DMABUFSIZE * bytesPerVal/2 /* = elem_count in arch/arm/plat-omap/dma.c */); // the dma memory must have been allocated correctly. See above.
-			//receive_function_fpga(test_buffer);
-			//printk(KERN_INFO "DMA_BUF: %d, %d, %d\n",dma_buf_kspace1[0],dma_buf_kspace1[1],dma_buf_kspace1[2]); 
-			//printk(KERN_INFO "Setting DMA_Thrs\n"); 
-			//__raw_writel(0xF,ioremap( mcbsp_base_reg+0x94,4));
-		}		
+		
+		
+		printk(KERN_INFO "Calling DMA_init\n"); 
+		dma_init(0/*id*/, dma_buf_dma_space1, dma_buf_kspace1,dma_buf_dma_space2, dma_buf_kspace2, dma_buf_dma_space3, dma_buf_kspace3, DMABUFBYTES/4 ); 
+		printk(KERN_INFO "DMA is running?\n"); 
+		
+	}		
 		
 
 	return 0;
@@ -326,7 +323,7 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	    if(!t_err)
 	      for(i=0;i<72;i++)
 	      {
-		sprintf(msg + strlen(msg)-1, "%d,\n",test_buffer[i]);
+		sprintf(msg + strlen(msg)-1, "%x,\n",test_buffer[i]);
 		//printk(KERN_ALERT "%x\n",test_buffer[i] );
 	      }
 	  
@@ -346,8 +343,6 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	 */
 	return bytes_read;
 }
-
-
 
 
 /*  
@@ -374,7 +369,7 @@ void receive_function_fpga( u16 * data_puffer, bool* t_err)
   //find chan-1 and save it
   do
   {
-    read_val=save_read(t_err);
+    read_val=save_DMA_read(t_err);
   }while((read_val&0b11111110)!=0); //ersten kanal finden
 
   do
@@ -387,7 +382,7 @@ void receive_function_fpga( u16 * data_puffer, bool* t_err)
     {
       *data_puffer_ptr= (read_val&0xFFFF00)>>8;
       data_puffer_ptr+=8;
-      read_val=save_read(t_err);
+      read_val=save_DMA_read(t_err);
       
     }while((read_val&0b11111110)!=p_offset<<5&&data_puffer_ptr <=data_puffer+72); //zweiten kanal finden
   }while(p_offset <=7);
@@ -429,13 +424,13 @@ int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_add
 		return -ENOMEM;
 	}
 
-//	getMcBSPDevice(mcbspID,&mcbsp); TODO!!!!!
+
 	printk(KERN_INFO "Doing DMA_config\n"); 
 
 	deviceRequestlineForDmaChannelsync = OMAP24XX_DMA_MCBSP1_RX; // RX
 
 	dmaparams1->data_type=OMAP_DMA_DATA_TYPE_S32;		/* data type 8,16,32 */
-	dmaparams1->elem_count=(length>>1);		/* number of elements in a frame */
+	dmaparams1->elem_count=length;		/* number of elements in a frame */
 	dmaparams1->frame_count=1;	/* number of frames in a element */
 
 	dmaparams1->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
@@ -463,7 +458,7 @@ int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_add
 
 
 	dmaparams2->data_type=OMAP_DMA_DATA_TYPE_S32;		/* data type 8,16,32 */
-	dmaparams2->elem_count=(length>>1);		/* number of elements in a frame */
+	dmaparams2->elem_count=length;		/* number of elements in a frame */
 	dmaparams2->frame_count=1;	/* number of frames in a element */
 
 	dmaparams2->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
@@ -491,7 +486,7 @@ int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_add
 
 
 	dmaparams3->data_type=OMAP_DMA_DATA_TYPE_S32;		/* data type 8,16,32 */
-	dmaparams3->elem_count=(length>>1);		/* number of elements in a frame */
+	dmaparams3->elem_count=length;		/* number of elements in a frame */
 	dmaparams3->frame_count=1;	/* number of frames in a element */
 
 	dmaparams3->src_port=0;		/* Only on OMAP1 REVISIT: Is this needed? */
@@ -600,14 +595,8 @@ int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_add
 
 static void my_mcbsp_rx_dma_buf_callback(int lch, u16 ch_status, void *data)
 {
-	char printtemp[500];
-	struct omap_mcbsp *mcbsp_dma_rx;
-	//int status=3; // dummy var
-	int i;
-	int c; // tempstore cyclecounter
-	int runfinish = 0;
-	static u8 down_scale =0;
-	u32* bufferkernel;
+	u32 *bufferkernel;
+	static bool overflow_err =0; //used to prevent log spamming...
 	//int oldmm;
 	if (data == NULL)
 	{
@@ -628,20 +617,57 @@ static void my_mcbsp_rx_dma_buf_callback(int lch, u16 ch_status, void *data)
 		return;
 	}
 
-	// ### do something with data here!!
-
-
-	down_scale++;
-	if(!down_scale)
-	  printk(KERN_ALERT "%d(%d):%x,%x,%x,%x",lch, ch_status, bufferkernel[0],bufferkernel[1],bufferkernel[2],bufferkernel[3]);
-
+	if(buffer_wait1_ptr == NULL)
+	{
+	  buffer_wait1_ptr = data;
+	  overflow_err =0;
+	}
+	else if(buffer_wait1_ptr != NULL && buffer_wait2_ptr == NULL)
+	{
+	  buffer_wait2_ptr = data;
+	  overflow_err =0;
+	}
+	else
+	{
+	  if(overflow_err==0)
+	  {
+	    printk(KERN_ALERT "Bufferoverflow\n");
+	    overflow_err =1;
+	  }
+	}
 }
 
 
 
+u32 save_DMA_read(bool* r_err)
+{
+ static u32 element_count =0;
+ u32 temp_read =0;
 
 
+ while(buffer_read_ptr == NULL)
+ {
+  if(buffer_wait1_ptr != NULL ||buffer_wait2_ptr != NULL)
+  {
+    buffer_read_ptr = buffer_wait1_ptr;
+    buffer_wait1_ptr = buffer_wait2_ptr;
+    buffer_wait2_ptr = NULL;
+  }
+    //element_count =0;
+ }
 
+ temp_read = buffer_read_ptr[element_count];
+ element_count++;
+ if(element_count>= DMASIZE)
+ {
+   element_count =0;
+   buffer_read_ptr =NULL;
+ }
+ return temp_read;
+ 
+}
+
+/*
 u32 save_read(bool* r_err)
 {
   u32 temp;
@@ -659,3 +685,4 @@ u32 save_read(bool* r_err)
   temp= __raw_readl(ioremap( mcbsp_base_reg,4));
   return temp;//&0xff|((0b11100000&temp)<<3)|((0b11110&temp)<<10);
 }
+*/
