@@ -88,8 +88,9 @@ static struct file_operations fops = {
 int buf1_dmachannel;
 int buf2_dmachannel;
 int buf3_dmachannel;
+bool overflow_err;
 
-static bool overflow_err; //used to prevent log spamming...
+
 
 
 //pointers for comunication betwen callback function and read function
@@ -124,7 +125,8 @@ int init_module(void)
 	buffer_wait1_ptr = NULL;
 	buffer_wait2_ptr = NULL;
 	test_read =0;
-	bool overflow_err =0;
+	overflow_err =0;
+	
 
   //set the configuration of MCBSP-Port
 	my_mcbsp_confic.spcr2 =  /* FRST | GRST |*/ XINTM(0x0) ; //serial-port control register RST?????
@@ -323,7 +325,7 @@ static ssize_t device_read(struct file *filp,	/* see include/linux/fs.h   */
 	    if(!t_err)
 	      for(i=0;i<72;i++)
 	      {
-		sprintf(msg + strlen(msg)-1, "%x,\n",test_buffer[i]);
+		sprintf(msg + strlen(msg)-1, "%d,\n",test_buffer[i]);
 		//printk(KERN_ALERT "%x\n",test_buffer[i] );
 	      }
 	  
@@ -366,7 +368,24 @@ void receive_function_fpga( u16 * data_puffer, bool* t_err)
   
   u16 p_offset=0;
 
+  data_puffer_ptr = data_puffer;
+  
   //find chan-1 and save it
+  
+  do
+  {
+    read_val=save_DMA_read(t_err);
+  }while((read_val&0b11111110)!=0); //ersten kanal finden  
+  *data_puffer_ptr= (read_val&0xFFFF00)>>8;
+  
+  for ( p_offset =1; p_offset <72; p_offset++)
+  {
+    data_puffer_ptr = data_puffer + p_offset;
+    *data_puffer_ptr= (save_DMA_read(t_err)&0xFFFF00)>>8;
+  }
+  
+  
+  /*
   do
   {
     read_val=save_DMA_read(t_err);
@@ -385,7 +404,7 @@ void receive_function_fpga( u16 * data_puffer, bool* t_err)
       read_val=save_DMA_read(t_err);
       
     }while((read_val&0b11111110)!=p_offset<<5&&data_puffer_ptr <=data_puffer+72); //zweiten kanal finden
-  }while(p_offset <=7);
+  }while(p_offset <=7);*/
 
 }
 
@@ -596,7 +615,7 @@ int dma_init(unsigned int id, dma_addr_t buffer1dma, u32* buffer1kernel, dma_add
 static void my_mcbsp_rx_dma_buf_callback(int lch, u16 ch_status, void *data)
 {
 	u32 *bufferkernel;
-	static bool overflow_err =0; //used to prevent log spamming...
+	//static bool overflow_err =0; //used to prevent log spamming...
 	//int oldmm;
 	if (data == NULL)
 	{
@@ -620,15 +639,18 @@ static void my_mcbsp_rx_dma_buf_callback(int lch, u16 ch_status, void *data)
 	if(buffer_wait1_ptr == NULL)
 	{
 	  buffer_wait1_ptr = data;
-	  overflow_err =0;
+	  //overflow_err =0;
 	}
 	else if(buffer_wait1_ptr != NULL && buffer_wait2_ptr == NULL)
 	{
 	  buffer_wait2_ptr = data;
-	  overflow_err =0;
+	  //overflow_err =0;
 	}
 	else
 	{
+	  buffer_read_ptr = NULL;
+	  buffer_wait1_ptr = NULL;
+	  buffer_wait2_ptr = NULL;
 	  if(overflow_err==0)
 	  {
 	    printk(KERN_ALERT "Bufferoverflow\n");
@@ -643,7 +665,7 @@ u32 save_DMA_read(bool* r_err)
 {
  static u32 element_count =0;
  u32 temp_read =0;
-
+ overflow_err =0;
 
  while(buffer_read_ptr == NULL)
  {
@@ -654,6 +676,7 @@ u32 save_DMA_read(bool* r_err)
     buffer_wait2_ptr = NULL;
   }
     //element_count =0;
+  schedule_timeout(10);
  }
 
  temp_read = buffer_read_ptr[element_count];
