@@ -1,7 +1,6 @@
 /*
  * Skeleton Linux Kernel Module
  *
- * PUBLIC DOMAIN
  */
 
 //done some Guttenberg here:
@@ -14,12 +13,12 @@
 #include <asm/uaccess.h>
 //#include "kmodule_test.h"
 
-#include <plat/mcbsp.h>
-#include <mach/mcbsp.h>
-#include <mach/mux.h>
+// The includes mcbsp.h, mux.h, dma.h and others moved from "mach" to "plat" with kernel 2.6.32 ...
+
+#include <plat/mcbsp.h> // was mach/mcbsp.h before kernel 2.6.32
+#include <plat/mux.h>   // was mach/mux.h before kernel 2.6.32
 
 #include <linux/fs.h>
-
 
 #include <linux/init.h>
 #include <linux/device.h>
@@ -32,12 +31,11 @@
 #include <linux/delay.h>
 #include <linux/io.h>
 
-
 #include <linux/dma-mapping.h>
-#include <mach/dma.h>
+#include <plat/dma.h> // was mach/dma.h before kernel 2.6.32
 
 MODULE_LICENSE("Dual BSD/GPL");
-MODULE_AUTHOR("Michael Fink <DePeter1@gmx.net>");
+MODULE_AUTHOR("Michael Fink <DePeter1@gmx.net>, and Simon Vogt <vogt@isip.uni-luebeck.de>");
 
 
 int init_module(void);
