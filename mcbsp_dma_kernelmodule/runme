@@ -1,0 +1,3 @@
+ . ~/.oe/environment
+bitbake -b ./kmodule-test_1.0.0.bb -f -c clean
+bitbake -b ./kmodule-test_1.0.0.bb -f -c compile
